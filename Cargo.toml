@@ -1,0 +1,11 @@
+[package]
+name = "gaiasky-catgen"
+version = "0.1.0"
+authors = ["langurmonkey <tsagrista@ari.uni-heidelberg.de>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+flate2 = "1.0.19"
+glob = "0.3.0"
