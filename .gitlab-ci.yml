@@ -1,0 +1,9 @@
+stages:
+  - build
+
+build-code-job:
+  stage: build
+  script:
+    - echo "Check rust version and build"
+    - rustc --version
+    - cargo build
