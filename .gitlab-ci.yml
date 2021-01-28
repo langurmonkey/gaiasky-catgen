@@ -1,9 +1,19 @@
+image: rust
+
 stages:
   - build
 
-build-code-job:
+build-project:
   stage: build
   script:
     - echo "Check rust version and build"
     - rustc --version
+    - cargo --version
     - cargo build
+    - rustup component add rustfmt
+    - cargo fmt -- --check
+    - rustup component add clippy
+    - cargo clippy -- -D warnings
+    - cargo install cargo-audit
+    - cargo audit
+
