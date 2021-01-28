@@ -15,6 +15,6 @@ build-project:
     - rustup component add clippy
       #- cargo clippy -- -D warnings
     - cargo clippy
-    - cargo install cargo-audit
-    - cargo audit
+      #- cargo install cargo-audit
+      #- cargo audit
 
