@@ -75,7 +75,7 @@ fn parse_line_csv(line: String) -> Particle {
     let tokens: Vec<&str> = line.split(',').collect();
 
     // hip
-    let hip: i32 = tokens.get(0).unwrap().to_string().parse::<i32>().unwrap();
+    let hip_id: i32 = tokens.get(0).unwrap().to_string().parse::<i32>().unwrap();
 
     // name
     let mut names: Vec<String> = Vec::new();
@@ -108,7 +108,7 @@ fn parse_line_csv(line: String) -> Particle {
         absmag: 1.0,
         col: 1.0,
         size: 1.0,
-        hip: hip,
+        hip: hip_id,
         id: 122,
         names: Some(names),
     };
@@ -121,7 +121,7 @@ fn parse_line_gz(line: String) -> Particle {
     let tokens: Vec<&str> = line.split(',').collect();
 
     // sourceid
-    let sid: i64 = tokens.get(0).unwrap().to_string().parse::<i64>().unwrap();
+    let source_id: i64 = tokens.get(0).unwrap().to_string().parse::<i64>().unwrap();
 
     let part = Particle {
         x: 1.0,
@@ -138,7 +138,7 @@ fn parse_line_gz(line: String) -> Particle {
         col: 1.0,
         size: 1.0,
         hip: -1,
-        id: sid,
+        id: source_id,
         names: None,
     };
     part
