@@ -19,7 +19,7 @@ pub fn load_dir(dir: &str) -> Result<Vec<Particle>, &str> {
         match entry {
             Ok(path) => {
                 print!("Processing: {:?}", path.display());
-                io::stdout().flush();
+                io::stdout().flush().expect("Error: Flush stdout");
                 load_file(path.to_str().expect("Error: Path not valid"), &mut list);
             }
             Err(e) => println!("Error: {:?}", e),
@@ -94,7 +94,7 @@ fn parse_line_csv(line: String) -> Particle {
 
     let cartesian = util::spherical_to_cartesian(ra.to_radians(), dec.to_radians(), dist);
 
-    let part = Particle {
+    Particle {
         x: cartesian.x,
         y: cartesian.y,
         z: cartesian.z,
@@ -111,8 +111,7 @@ fn parse_line_csv(line: String) -> Particle {
         hip: hip_id,
         id: 122,
         names: Some(names),
-    };
-    part
+    }
 }
 
 // Parses a line in eDR3 csv.gz format and returns a Particle
@@ -123,7 +122,7 @@ fn parse_line_gz(line: String) -> Particle {
     // sourceid
     let source_id: i64 = tokens.get(0).unwrap().to_string().parse::<i64>().unwrap();
 
-    let part = Particle {
+    Particle {
         x: 1.0,
         y: 1.0,
         z: 1.0,
@@ -140,6 +139,5 @@ fn parse_line_gz(line: String) -> Particle {
         hip: -1,
         id: source_id,
         names: None,
-    };
-    part
+    }
 }
