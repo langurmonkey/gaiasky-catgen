@@ -6,5 +6,10 @@ fn main() {
     let list = load::load_dir("data/*").expect("Error loading data");
 
     println!("{} particles loaded successfully", list.len());
-    //load::load_file("data/GaiaSource_000000-003111.csv.gz");
+
+    let n = std::cmp::min(50, list.len());
+    for i in 0..n {
+        let star = list.get(i).expect("Error: Star is weird");
+        println!("{}: [{},{},{}]", i, star.x, star.y, star.z);
+    }
 }

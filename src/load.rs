@@ -6,16 +6,23 @@ use data::Particle;
 use flate2::read::GzDecoder;
 use glob::glob;
 use io::Write;
-use std::fs::File;
 use std::io;
 use std::io::BufRead;
+use std::{f64::NAN, fs::File};
 
 // Parsecs to internal units
 const PC_TO_U: f64 = 3.08567758149137e16;
 
+const MAX_FILES: u32 = 1;
+const MAX_RECORDS: u32 = 40;
+
 pub fn load_dir(dir: &str) -> Result<Vec<Particle>, &str> {
     let mut list: Vec<Particle> = Vec::new();
+    let mut i = 0;
     for entry in glob(&(dir.to_owned())).expect("Error: Failed to read glob pattern") {
+        if i >= MAX_FILES {
+            return Ok(list);
+        }
         match entry {
             Ok(path) => {
                 print!("Processing: {:?}", path.display());
@@ -24,6 +31,7 @@ pub fn load_dir(dir: &str) -> Result<Vec<Particle>, &str> {
             }
             Err(e) => println!("Error: {:?}", e),
         }
+        i += 1;
     }
     Ok(list)
 }
@@ -47,6 +55,9 @@ pub fn load_file(file: &str, list: &mut Vec<Particle>) {
                 loaded += 1;
             }
             total += 1;
+            if loaded >= MAX_RECORDS {
+                break;
+            }
         }
         println!(" - loaded {}/{} objects", loaded, total - 1);
     } else if file.ends_with(".csv") || file.ends_with(".txt") {
@@ -63,6 +74,9 @@ pub fn load_file(file: &str, list: &mut Vec<Particle>) {
                 loaded += 1;
             }
             total += 1;
+            if loaded >= MAX_RECORDS {
+                break;
+            }
         }
 
         println!(" - loaded {}/{} objects", loaded, total - 1);
@@ -85,10 +99,9 @@ fn parse_line_csv(line: String) -> Particle {
     }
 
     // position
-    let ra: f64 = tokens.get(2).unwrap().to_string().parse::<f64>().unwrap();
-    let dec: f64 = tokens.get(3).unwrap().to_string().parse::<f64>().unwrap();
-    let plx: f64 = tokens.get(4).unwrap().to_string().parse::<f64>().unwrap();
-
+    let ra: f64 = parse_f64(tokens.get(2));
+    let dec: f64 = parse_f64(tokens.get(3));
+    let plx: f64 = parse_f64(tokens.get(4));
     let dist_pc: f64 = 1000.0 / plx;
     let dist: f64 = dist_pc * PC_TO_U;
 
@@ -122,10 +135,19 @@ fn parse_line_gz(line: String) -> Particle {
     // sourceid
     let source_id: i64 = tokens.get(0).unwrap().to_string().parse::<i64>().unwrap();
 
+    // position
+    let ra: f64 = parse_f64(tokens.get(1));
+    let dec: f64 = parse_f64(tokens.get(2));
+    let plx: f64 = parse_f64(tokens.get(3));
+    let dist_pc: f64 = 1000.0 / plx;
+    let dist: f64 = dist_pc * PC_TO_U;
+
+    let cartesian = util::spherical_to_cartesian(ra.to_radians(), dec.to_radians(), dist);
+
     Particle {
-        x: 1.0,
-        y: 1.0,
-        z: 1.0,
+        x: cartesian.x,
+        y: cartesian.y,
+        z: cartesian.z,
         pmx: 1.0,
         pmy: 1.0,
         pmz: 1.0,
@@ -140,4 +162,12 @@ fn parse_line_gz(line: String) -> Particle {
         id: source_id,
         names: None,
     }
+}
+
+fn parse_f64(val_str: Option<&&str>) -> f64 {
+    val_str
+        .unwrap()
+        .to_string()
+        .parse::<f64>()
+        .map_or(NAN, |v| v)
 }
