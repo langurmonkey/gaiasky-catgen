@@ -15,18 +15,22 @@ static ARG_PLLX_ERR_BRIGHT: f64 = 0.99;
 static ARG_MAG_CORRECTIONS: bool = true;
 
 fn main() {
-    let list_hip = load::load_dir("data/hip/*.csv").expect("Error loading HIP data");
-    println!("{} particles loaded successfully form HIP", list_hip.len());
-    // Load Gaia
-    let list_gaia = load::load_dir("data/gaia/*.gz").expect("Error loading Gaia data");
-    println!(
-        "{} particles loaded successfully form Gaia",
-        list_gaia.len()
-    );
+    //let list_hip = load::load_dir("data/hip/*.csv").expect("Error loading HIP data");
+    //println!("{} particles loaded successfully form HIP", list_hip.len());
+    //// Load Gaia
+    //let list_gaia = load::load_dir("data/gaia/*.gz").expect("Error loading Gaia data");
+    //println!(
+    //    "{} particles loaded successfully form Gaia",
+    //    list_gaia.len()
+    //);
 
-    let n = std::cmp::min(50, list_gaia.len());
-    for i in 0..n {
-        let star = list_gaia.get(i).expect("Error getting star from list");
-        println!("{}: [{},{},{}]", i, star.x, star.y, star.z);
-    }
+    //let n = std::cmp::min(50, list_gaia.len());
+    //for i in 0..n {
+    //    let star = list_gaia.get(i).expect("Error getting star from list");
+    //    println!("{}: [{},{},{}]", i, star.x, star.y, star.z);
+    //}
+    let rgba8888 = color::col_to_rgba8888(0.15, 0.398, 0.43, 0.8);
+    println!("{:b}", rgba8888);
+    let (r, g, b, a) = color::rgba8888_to_col(9385193);
+    println!("{},{},{},{}", r, g, b, a);
 }
