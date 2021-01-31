@@ -7,6 +7,9 @@ mod util;
 
 #[macro_use]
 extern crate lazy_static;
+extern crate argparse;
+
+use argparse::{ArgumentParser, Store, StoreTrue};
 
 static ARG_RUWE_CAP: f32 = 1.4;
 static ARG_DISTPC_CAP: f64 = -1.0;
@@ -15,6 +18,19 @@ static ARG_PLLX_ERR_BRIGHT: f64 = 0.99;
 static ARG_MAG_CORRECTIONS: bool = true;
 
 fn main() {
+    // Arguments
+    {
+        // this block limits scope of borrows by ap.refer() method
+        let mut ap = ArgumentParser::new();
+        ap.set_description("Generate LOD catalogs for Gaia Sky.");
+        ap.add_option(
+            &["-v", "--version"],
+            argparse::Print(env!("CARGO_PKG_VERSION").to_string()),
+            "Print version information",
+        );
+        ap.parse_args_or_exit();
+    }
+
     let list_hip = load::load_dir("data/hip/*.csv").expect("Error loading HIP data");
     println!("{} particles loaded successfully form HIP", list_hip.len());
     // Load Gaia
