@@ -7,12 +7,16 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 data.rs
-badd +1 main.rs
+badd +103 data.rs
+badd +140 main.rs
 badd +1 coord.rs
 badd +1 constants.rs
-badd +1 load.rs
-badd +0 util.rs
+badd +30 load.rs
+badd +88 util.rs
+badd +1 color.rs
+badd +14 math.rs
+badd +8 xmatch.rs
+badd +23 parse.rs
 argglobal
 %argdel
 $argadd data.rs
@@ -34,14 +38,36 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 28) / 56)
+let s:l = 140 - ((24 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
-lcd ~/Projects/gaiasky-catgen/src
-tabedit ~/Projects/gaiasky-catgen/src/coord.rs
+140
+normal! 015|
+tabedit xmatch.rs
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 25 - ((24 * winheight(0) + 27) / 55)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+25
+normal! 031|
+tabedit coord.rs
 set splitbelow splitright
 wincmd t
 set winminheight=0
@@ -64,8 +90,7 @@ exe s:l
 normal! zt
 1
 normal! 0
-lcd ~/Projects/gaiasky-catgen/src
-tabedit ~/Projects/gaiasky-catgen/src/constants.rs
+tabedit constants.rs
 set splitbelow splitright
 wincmd t
 set winminheight=0
@@ -88,8 +113,99 @@ exe s:l
 normal! zt
 1
 normal! 0
-lcd ~/Projects/gaiasky-catgen/src
-tabedit ~/Projects/gaiasky-catgen/src/load.rs
+tabedit load.rs
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 28 - ((18 * winheight(0) + 27) / 55)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+28
+normal! 061|
+tabedit parse.rs
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 23 - ((22 * winheight(0) + 27) / 55)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+23
+normal! 04|
+tabedit color.rs
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 40 - ((15 * winheight(0) + 27) / 55)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+40
+normal! 0
+tabedit data.rs
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 79 - ((18 * winheight(0) + 27) / 55)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+79
+normal! 010|
+tabedit util.rs
 set splitbelow splitright
 wincmd t
 set winminheight=0
@@ -112,8 +228,7 @@ exe s:l
 normal! zt
 1
 normal! 0
-lcd ~/Projects/gaiasky-catgen/src
-tabedit ~/Projects/gaiasky-catgen/src/data.rs
+tabedit math.rs
 set splitbelow splitright
 wincmd t
 set winminheight=0
@@ -130,37 +245,13 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 27) / 55)
+let s:l = 18 - ((17 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
-lcd ~/Projects/gaiasky-catgen/src
-tabedit ~/Projects/gaiasky-catgen/src/util.rs
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-argglobal
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 27) / 55)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-tabnext 6
+18
+normal! 05|
+tabnext 1
 set stal=1
 if exists('s:wipebuf') && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
