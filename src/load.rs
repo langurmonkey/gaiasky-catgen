@@ -13,10 +13,40 @@ use flate2::read::GzDecoder;
 use glob::glob;
 use io::Write;
 use na::base::Vector3;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::io;
 use std::io::BufRead;
 use std::{f32, f64, fs::File};
+
+pub struct Additional {
+    indices: HashMap<String, usize>,
+    values: data::LargeLongMap<Vec<f64>>,
+}
+
+impl Additional {
+    /**
+     * Loads a new batch of additional columns from the given file
+     **/
+    pub fn new(file: &&str) -> Additional {
+        Additional {
+            indices: HashMap::new(),
+            values: data::LargeLongMap::new(50),
+        }
+    }
+
+    pub fn has_col(&self, col: &String) -> bool {
+        self.indices.contains_key(col)
+    }
+
+    pub fn get(&mut self, col: String, source_id: i64) -> Option<f64> {
+        if self.has_col(&col) {
+            let index: usize = *self.indices.get(&col).expect("Error: could not get index");
+            Some(*self.values.get(source_id).unwrap().get(index).unwrap())
+        } else {
+            None
+        }
+    }
+}
 
 pub struct Loader<'a> {
     // Maximum number of files to load in a directory
@@ -27,6 +57,8 @@ pub struct Loader<'a> {
     pub args: &'a Args,
     // Must-load star ids
     pub must_load: Option<HashSet<i64>>,
+    // Additional columns
+    pub additional: Vec<Additional>,
 }
 
 impl<'a> Loader<'a> {

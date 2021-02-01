@@ -136,17 +136,27 @@ fn main() {
                 }
             }
         }
+        // Load additional, if any
+        let mut additional = Vec::new();
+        if !args.additional.is_empty() {
+            let tokens: Vec<&str> = args.additional.split(',').collect();
+            for token in tokens {
+                additional.push(load::Additional::new(&token));
+            }
+        }
 
-        // Loader
-        let loader = load::Loader {
+        //
+        // GAIA
+        //
+        let loader_gaia = load::Loader {
             max_files: 1,
             max_records: 5,
             args: &args,
             must_load: Some(must_load),
+            additional: additional,
         };
-
         // Load Gaia
-        let list_gaia = loader
+        let list_gaia = loader_gaia
             .load_dir(&args.input)
             .expect("Error loading Gaia data");
         println!(
@@ -154,9 +164,21 @@ fn main() {
             list_gaia.len()
         );
 
+        //
+        // HIPPARCOS
+        //
+        let loader_hip = load::Loader {
+            max_files: 1,
+            max_records: 5,
+            args: &args,
+            must_load: None,
+            additional: Vec::new(),
+        };
         // Load HIP
         if args.hip.len() > 0 {
-            let list_hip = loader.load_dir(&args.hip).expect("Error loading HIP data");
+            let list_hip = loader_hip
+                .load_dir(&args.hip)
+                .expect("Error loading HIP data");
             println!("{} particles loaded successfully form HIP", list_hip.len());
         }
 
