@@ -1,6 +1,7 @@
 extern crate flate2;
 extern crate nalgebra as na;
 
+use crate::color;
 use crate::constants;
 use crate::coord;
 use crate::data;
@@ -10,8 +11,8 @@ use flate2::read::GzDecoder;
 use glob::glob;
 use io::Write;
 use na::base::Vector3;
+use std::io;
 use std::io::BufRead;
-use std::{cmp, io};
 use std::{f32, f64, fs::File};
 
 // Maximum number of files to load in a directory
@@ -119,6 +120,9 @@ fn parse_line_csv(line: String) -> Option<Particle> {
         None,
         tokens.get(8),
         None,
+        None,
+        tokens.get(9),
+        None,
     )
 }
 
@@ -138,6 +142,9 @@ fn parse_line_gz(line: String) -> Option<Particle> {
         tokens.get(8),
         tokens.get(9),
         tokens.get(10),
+        tokens.get(11),
+        tokens.get(12),
+        None,
         tokens.get(13),
     )
 }
@@ -171,6 +178,9 @@ fn create_particle(
     spmdec: Option<&&str>,
     srv: Option<&&str>,
     sappmag: Option<&&str>,
+    sbp: Option<&&str>,
+    srp: Option<&&str>,
+    sbv: Option<&&str>,
     sruwe: Option<&&str>,
 ) -> Option<Particle> {
     // First, check if we accept it given the current constraints
@@ -253,6 +263,24 @@ fn create_particle(
     let size: f32 = 1.0e10_f64.powf(pseudo_l.powf(0.45) * size_fac) as f32;
 
     // Color
+    let ebr: f64 = 0.0;
+
+    let col_idx: f64;
+    let teff: f64;
+    if sbp.is_some() && srp.is_some() {
+        let bp: f64 = parse_f64(sbp);
+        let rp: f64 = parse_f64(srp);
+        col_idx = bp - rp - ebr;
+
+        teff = color::xp_to_teff(col_idx);
+    } else if sbv.is_some() {
+        col_idx = parse_f64(sbv);
+        teff = color::bv_to_teff_ballesteros(col_idx);
+    } else {
+        col_idx = 0.656;
+        teff = color::bv_to_teff_ballesteros(col_idx);
+    }
+    let (col_r, col_g, col_b) = color::teff_to_rgb(teff);
 
     // Source ID
     let source_id: i64 = parse_i64(ssource_id);

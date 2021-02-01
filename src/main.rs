@@ -1,7 +1,9 @@
+mod color;
 mod constants;
 mod coord;
 mod data;
 mod load;
+mod math;
 mod util;
 
 #[macro_use]
