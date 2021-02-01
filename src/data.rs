@@ -10,7 +10,7 @@ pub struct Particle {
     pub radvel: f32,
     pub appmag: f32,
     pub absmag: f32,
-    pub col: f32,
+    pub col: u32,
     pub size: f32,
     pub hip: i32,
     pub id: i64,
@@ -37,4 +37,22 @@ pub struct Octant {
     pub parent: Box<Octant>,
     pub children: Vec<Octant>,
     pub objs: Vec<Particle>,
+}
+
+pub struct Args {
+    pub input: String,
+    pub output: String,
+    pub hip: String,
+    pub max_part: i32,
+    pub ruwe_cap: f32,
+    pub distpc_cap: f64,
+    pub plx_err_faint: f64,
+    pub plx_err_bright: f64,
+    pub plx_zeropoint: f64,
+    pub mag_corrections: bool,
+    pub postprocess: bool,
+    pub child_count: i32,
+    pub parent_count: i32,
+    pub additional: String,
+    pub xmatch: String,
 }
