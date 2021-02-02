@@ -271,6 +271,8 @@ pub struct Loader<'a> {
     pub additional: Vec<Additional>,
     // Indices
     pub indices: HashMap<ColId, usize>,
+    // Coordinate conversion
+    pub coord: coord::Coord,
 }
 
 impl<'a> Loader<'a> {
@@ -475,7 +477,7 @@ impl<'a> Loader<'a> {
         // Apparent magnitudes
         let mut ag: f64 = 0.0;
         let pos_gal: Vector3<f64> = Vector3::new(pos.x, pos.y, pos.z);
-        coord::EQ_TO_GAL.transform_vector(&pos_gal);
+        self.coord.eq_gal.transform_vector(&pos_gal);
         let pos_gal_sph = util::cartesian_to_spherical(pos_gal.x, pos_gal.y, pos_gal.z);
         let b = pos_gal_sph.y;
         let magcorraux = dist_pc.min(150.0 / b.sin().abs());

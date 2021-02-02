@@ -8,8 +8,6 @@ mod parse;
 mod util;
 mod xmatch;
 
-#[macro_use]
-extern crate lazy_static;
 extern crate argparse;
 
 use data::Args;
@@ -171,6 +169,7 @@ fn main() {
             must_load: Some(must_load),
             additional: additional,
             indices: indices_gaia,
+            coord: coord::Coord::new(),
         };
         // Load Gaia
         let list_gaia = loader_gaia
@@ -203,6 +202,7 @@ fn main() {
             must_load: None,
             additional: Vec::new(),
             indices: indices_hip,
+            coord: coord::Coord::new(),
         };
         // Load HIP
         if args.hip.len() > 0 {
