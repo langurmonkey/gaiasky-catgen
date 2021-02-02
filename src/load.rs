@@ -10,6 +10,7 @@ use std::fmt::Formatter;
 use std::io;
 use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
+use std::str::FromStr;
 
 use flate2::read::GzDecoder;
 use glob::glob;
@@ -54,6 +55,79 @@ pub enum ColId {
     ebp_min_rp,
     ruwe,
     geodist,
+}
+
+impl ColId {
+    pub fn to_str(&self) -> &str {
+        match self {
+            ColId::source_id => "source_id",
+            ColId::hip => "hip",
+            ColId::names => "names",
+            ColId::ra => "ra",
+            ColId::dec => "dec",
+            ColId::plx => "plx",
+            ColId::ra_err => "ra_err",
+            ColId::dec_err => "dec_err",
+            ColId::plx_err => "plx_err",
+            ColId::pmra => "pmra",
+            ColId::pmdec => "pmdec",
+            ColId::radvel => "radvel",
+            ColId::radvel_err => "radvel_err",
+            ColId::gmag => "gmag",
+            ColId::bpmag => "bpmag",
+            ColId::rpmag => "rpmag",
+            ColId::bp_rp => "bp_rp",
+            ColId::col_idx => "col_idx",
+            ColId::ref_epoch => "ref_epoch",
+            ColId::ruwe => "ruwe",
+            ColId::teff => "teff",
+            ColId::ag => "ag",
+            ColId::ebp_min_rp => "ebp_min_rp",
+            _ => "*none*",
+        }
+    }
+    pub fn from_str(input: &str) -> Option<ColId> {
+        match input {
+            "source_id" => Some(ColId::source_id),
+            "sourceid" => Some(ColId::source_id),
+            "hip" => Some(ColId::hip),
+            "names" => Some(ColId::names),
+            "name" => Some(ColId::names),
+            "ra" => Some(ColId::ra),
+            "dec" => Some(ColId::dec),
+            "de" => Some(ColId::dec),
+            "plx" => Some(ColId::plx),
+            "pllx" => Some(ColId::plx),
+            "ra_err" => Some(ColId::ra_err),
+            "ra_e" => Some(ColId::ra_err),
+            "dec_err" => Some(ColId::dec_err),
+            "dec_e" => Some(ColId::dec_err),
+            "plx_err" => Some(ColId::plx_err),
+            "plx_e" => Some(ColId::plx_err),
+            "pmra" => Some(ColId::pmra),
+            "pmdec" => Some(ColId::pmdec),
+            "pmde" => Some(ColId::pmdec),
+            "radvel" => Some(ColId::radvel),
+            "rv" => Some(ColId::radvel),
+            "radvel_err" => Some(ColId::radvel_err),
+            "radvel_e" => Some(ColId::radvel_err),
+            "gmag" => Some(ColId::gmag),
+            "appmag" => Some(ColId::gmag),
+            "bpmag" => Some(ColId::bpmag),
+            "bp" => Some(ColId::bpmag),
+            "rpmag" => Some(ColId::rpmag),
+            "rp" => Some(ColId::rpmag),
+            "bp_rp" => Some(ColId::bp_rp),
+            "col_idx" => Some(ColId::col_idx),
+            "b_v" => Some(ColId::col_idx),
+            "ref_epoch" => Some(ColId::ref_epoch),
+            "teff" => Some(ColId::teff),
+            "ruwe" => Some(ColId::ruwe),
+            "ag" => Some(ColId::ag),
+            "ebp_min_rp" => Some(ColId::ebp_min_rp),
+            _ => None,
+        }
+    }
 }
 
 impl fmt::Debug for ColId {

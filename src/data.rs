@@ -57,6 +57,7 @@ pub struct Args {
     pub parent_count: i32,
     pub additional: String,
     pub xmatch: String,
+    pub columns: String,
 }
 
 /**

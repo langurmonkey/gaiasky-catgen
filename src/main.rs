@@ -16,6 +16,7 @@ use data::Args;
 
 use argparse::{ArgumentParser, Store, StoreFalse, StoreTrue};
 use std::collections::{HashMap, HashSet};
+use load::ColId;
 
 fn main() {
     // Arguments
@@ -35,6 +36,7 @@ fn main() {
         hip: "".to_string(),
         additional: "".to_string(),
         xmatch: "".to_string(),
+        columns: "source_id,ra,dec,plx,ra_err,dec_err,plx_err,pmra,pmdec,radvel,gmag,bpmag,rpmag,ruwe,ref_epoch".to_string(),
     };
     // Parse
     {
@@ -116,6 +118,11 @@ fn main() {
             Store,
             "RUWE threshold value. Filters out all stars with RUWE greater than this value. If present, --plxerrfaint and --plxerrbright are ignored.",
         );
+        ap.refer(&mut args.columns).add_option(
+            &["--columns"],
+            Store,
+            "Comma-separated list of column names, in order, of the Gaia catalog",
+        );
         ap.parse_args_or_exit();
     }
 
@@ -150,21 +157,13 @@ fn main() {
         // GAIA
         //
         let mut indices_gaia = HashMap::new();
-        indices_gaia.insert(load::ColId::source_id, 0);
-        indices_gaia.insert(load::ColId::ra, 1);
-        indices_gaia.insert(load::ColId::dec, 2);
-        indices_gaia.insert(load::ColId::plx, 3);
-        indices_gaia.insert(load::ColId::ra_err, 4);
-        indices_gaia.insert(load::ColId::dec_err, 5);
-        indices_gaia.insert(load::ColId::plx_err, 6);
-        indices_gaia.insert(load::ColId::pmra, 7);
-        indices_gaia.insert(load::ColId::pmdec, 8);
-        indices_gaia.insert(load::ColId::radvel, 9);
-        indices_gaia.insert(load::ColId::gmag, 10);
-        indices_gaia.insert(load::ColId::bpmag, 11);
-        indices_gaia.insert(load::ColId::rpmag, 12);
-        indices_gaia.insert(load::ColId::ruwe, 13);
-        indices_gaia.insert(load::ColId::ref_epoch, 14);
+        let cols: Vec<&str> = args.columns.split(',').collect();
+        for i in 0..cols.len() {
+            indices_gaia.insert(ColId::from_str(cols.get(i).unwrap()).unwrap(), i);
+        }
+        //for cid in indices_gaia.keys() {
+        //    println!("{} : {}", cid.to_str(), indices_gaia.get(cid).unwrap());
+        //}
         let loader_gaia = load::Loader {
             max_files: 1,
             max_records: 5,
@@ -186,17 +185,17 @@ fn main() {
         // HIPPARCOS
         //
         let mut indices_hip = HashMap::new();
-        indices_hip.insert(load::ColId::hip, 0);
-        indices_hip.insert(load::ColId::source_id, 0);
-        indices_hip.insert(load::ColId::names, 1);
-        indices_hip.insert(load::ColId::ra, 2);
-        indices_hip.insert(load::ColId::dec, 3);
-        indices_hip.insert(load::ColId::plx, 4);
-        indices_hip.insert(load::ColId::plx_err, 5);
-        indices_hip.insert(load::ColId::pmra, 6);
-        indices_hip.insert(load::ColId::pmdec, 7);
-        indices_hip.insert(load::ColId::gmag, 8);
-        indices_hip.insert(load::ColId::col_idx, 9);
+        indices_hip.insert(ColId::hip, 0);
+        indices_hip.insert(ColId::source_id, 0);
+        indices_hip.insert(ColId::names, 1);
+        indices_hip.insert(ColId::ra, 2);
+        indices_hip.insert(ColId::dec, 3);
+        indices_hip.insert(ColId::plx, 4);
+        indices_hip.insert(ColId::plx_err, 5);
+        indices_hip.insert(ColId::pmra, 6);
+        indices_hip.insert(ColId::pmdec, 7);
+        indices_hip.insert(ColId::gmag, 8);
+        indices_hip.insert(ColId::col_idx, 9);
         let loader_hip = load::Loader {
             max_files: 1,
             max_records: 5,
