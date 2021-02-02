@@ -1,8 +1,9 @@
-use crate::constants;
-use crate::data;
+use std::f64::consts;
+
 use data::Vec3;
 
-use std::f64::consts;
+use crate::constants;
+use crate::data;
 
 /**
  * Converts spherical coordinates (lon[rad], lat[rad], r) to

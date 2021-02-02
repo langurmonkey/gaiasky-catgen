@@ -1,8 +1,9 @@
-use crate::parse;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io;
 use std::io::BufRead;
+
+use crate::parse;
 
 pub fn load_xmatch(file: &str) -> HashMap<i64, i32> {
     let mut map = HashMap::new();

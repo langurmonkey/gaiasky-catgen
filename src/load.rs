@@ -574,7 +574,7 @@ impl<'a> Loader<'a> {
     }
 
     fn get_ruwe(&self, source_id: i64, tokens: Vec<&str>) -> f32 {
-        if self.has_col(ColId::ruwe){
+        if self.has_col(ColId::ruwe) {
             parse::parse_f32(tokens.get(self.get_index(&ColId::ruwe)))
         } else {
             let ruwe = self.get_additional(ColId::ruwe, source_id);

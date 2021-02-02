@@ -1,3 +1,12 @@
+extern crate argparse;
+
+use std::collections::{HashMap, HashSet};
+
+use argparse::{ArgumentParser, Store, StoreFalse, StoreTrue};
+
+use data::Args;
+use load::ColId;
+
 mod color;
 mod constants;
 mod coord;
@@ -7,14 +16,6 @@ mod math;
 mod parse;
 mod util;
 mod xmatch;
-
-extern crate argparse;
-
-use data::Args;
-
-use argparse::{ArgumentParser, Store, StoreFalse, StoreTrue};
-use std::collections::{HashMap, HashSet};
-use load::ColId;
 
 fn main() {
     // Arguments

@@ -14,8 +14,8 @@ pub struct Coord {
 
 impl Coord {
     pub fn new() -> Self {
-        let axis_y =na::Unit::new_unchecked(Vector3::new(0.0, 1.0, 0.0));
-        let axis_z =na::Unit::new_unchecked(Vector3::new(0.0, 0.0, 1.0));
+        let axis_y = na::Unit::new_unchecked(Vector3::new(0.0, 1.0, 0.0));
+        let axis_z = na::Unit::new_unchecked(Vector3::new(0.0, 0.0, 1.0));
 
         // Galactic <-> Equatorial
         let gal_eq_mat = Matrix4::from_axis_angle(&axis_y, f64::to_radians(90.0 + P))
