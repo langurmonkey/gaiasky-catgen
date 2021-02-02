@@ -1,22 +1,72 @@
 extern crate flate2;
 extern crate nalgebra as na;
 
+use io::Write;
+use std::{f32, f64, fs::File};
+use std::cmp;
+use std::collections::{HashMap, HashSet};
+use std::fmt;
+use std::fmt::Formatter;
+use std::io;
+use std::io::{BufRead, BufReader, Read};
+use std::path::Path;
+
+use flate2::read::GzDecoder;
+use glob::glob;
+use na::base::Vector3;
+
+use data::Args;
+use data::Particle;
+
 use crate::color;
 use crate::constants;
 use crate::coord;
 use crate::data;
 use crate::parse;
 use crate::util;
-use data::Args;
-use data::Particle;
-use flate2::read::GzDecoder;
-use glob::glob;
-use io::Write;
-use na::base::Vector3;
-use std::collections::{HashMap, HashSet};
-use std::io;
-use std::io::BufRead;
-use std::{f32, f64, fs::File};
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash)]
+pub enum ColId {
+    source_id,
+    hip,
+    names,
+    ra,
+    dec,
+    plx,
+    ra_err,
+    dec_err,
+    plx_err,
+    pmra,
+    pmdec,
+    radvel,
+    pmra_err,
+    pmdec_err,
+    radvel_err,
+    gmag,
+    bpmag,
+    rpmag,
+    bp_rp,
+    col_idx,
+    ref_epoch,
+    teff,
+    radius,
+    ag,
+    ebp_min_rp,
+    ruwe,
+    geodist,
+}
+
+impl fmt::Debug for ColId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl fmt::Display for ColId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
 
 pub struct Additional {
     indices: HashMap<String, usize>,
@@ -27,21 +77,107 @@ impl Additional {
     /**
      * Loads a new batch of additional columns from the given file
      **/
-    pub fn new(file: &&str) -> Additional {
-        Additional {
-            indices: HashMap::new(),
-            values: data::LargeLongMap::new(50),
+    pub fn new(file: &&str) -> Option<Self> {
+        println!("Loading additional columns from {}", file);
+
+        let path = Path::new(file);
+        if path.exists() {
+            if path.is_file() && file.ends_with(".gz") {
+                return Additional::load_file(file);
+            } else {
+                eprintln!("Path is not a gzipped file: {}", file);
+                return None;
+            }
+        } else {
+            eprintln!("Path does not exist: {}", file);
+            return None;
         }
     }
 
-    pub fn has_col(&self, col: &String) -> bool {
-        self.indices.contains_key(col)
+    fn load_file(file: &str) -> Option<Self> {
+        let mut total: u64 = 0;
+        // Read csv.gz using GzDecoder
+        let f = File::open(file).expect("Error: file not found");
+        let gz = GzDecoder::new(f);
+
+        let mut indices = HashMap::new();
+        let mut values = data::LargeLongMap::new(60);
+
+        for line in io::BufReader::new(gz).lines() {
+            if total == 0 {
+                // Header
+                let line_str = line.expect("Error reading line");
+                let tokens: Vec<&str> = line_str.split(',').collect();
+                let mut i = 0;
+                for token in tokens {
+                    if i == 0 && !token.eq("source_id") && !token.eq("sourceid") {
+                        eprintln!("Error: first column '{}' of additional must be '{}'", token, ColId::source_id);
+                        return None;
+                    }
+                    if i > 0 && !indices.contains_key(token) {
+                        indices.insert(token.to_string(), i - 1);
+                    }
+                    i += 1;
+                }
+            } else {
+                // Data
+                let line_str = line.expect("Error reading line");
+                let tokens: Vec<&str> = line_str.split(',').collect();
+                let source_id: i64 = parse::parse_i64(tokens.get(0));
+                let ncols = tokens.len() - 1;
+
+                // Vector with values
+                let mut vals: Vec<f64> = Vec::new();
+
+                for j in 1..ncols {
+                    let token = tokens.get(j);
+                    if token.is_none() {
+                        vals.push(f64::NAN);
+                    } else {
+                        if token.unwrap().trim().is_empty() {
+                            vals.push(f64::NAN);
+                        } else {
+                            // Actual value
+                            let val = parse::parse_f64(token);
+                            vals.push(val);
+                        }
+                    }
+                }
+                values.put(source_id, vals);
+            }
+            total += 1;
+        }
+
+        Some(Additional {
+            indices: indices,
+            values: values,
+        })
     }
 
-    pub fn get(&mut self, col: String, source_id: i64) -> Option<f64> {
-        if self.has_col(&col) {
-            let index: usize = *self.indices.get(&col).expect("Error: could not get index");
-            Some(*self.values.get(source_id).unwrap().get(index).unwrap())
+    pub fn n_cols(&self) -> usize {
+        self.indices.len()
+    }
+
+    pub fn size(&self) -> usize {
+        self.values.size
+    }
+    pub fn has_col(&self, col_id: ColId) -> bool {
+        self.indices.contains_key(&col_id.to_string())
+    }
+
+    pub fn get(&self, col_id: ColId, source_id: i64) -> Option<f64> {
+        if self.has_col(col_id) {
+            let index: usize = *self.indices.get(&col_id.to_string()).expect("Error: could not get index");
+            Some(self.values.get(source_id).unwrap().get(index).unwrap().clone())
+        } else {
+            None
+        }
+    }
+
+    pub fn get_mut(&mut self, col_id: ColId, source_id: i64) -> Option<f64> {
+        if self.has_col(col_id) {
+            let index: usize = *self.indices.get(&col_id.to_string()).expect("Error: could not get index");
+            Some(self.values.get(source_id).unwrap().get(index).unwrap().clone())
         } else {
             None
         }
@@ -59,6 +195,8 @@ pub struct Loader<'a> {
     pub must_load: Option<HashSet<i64>>,
     // Additional columns
     pub additional: Vec<Additional>,
+    // Indices
+    pub indices: HashMap<ColId, usize>,
 }
 
 impl<'a> Loader<'a> {
@@ -97,7 +235,7 @@ impl<'a> Loader<'a> {
             for line in io::BufReader::new(gz).lines() {
                 // Skip header
                 if total > 0 {
-                    match self.parse_line_gz(line.expect("Error reading line")) {
+                    match self.parse_line(line.expect("Error reading line")) {
                         Some(part) => {
                             list.push(part);
                             loaded += 1;
@@ -115,10 +253,10 @@ impl<'a> Loader<'a> {
             // Read plain text file
             let f = File::open(file).expect("Error: file not found");
 
-            for line in io::BufReader::new(f).lines() {
+            for line in io::BufReader::new(&f).lines() {
                 // Skip header
                 if total > 0 {
-                    match self.parse_line_csv(line.expect("Error reading line")) {
+                    match self.parse_line(line.expect("Error reading line")) {
                         Some(part) => {
                             list.push(part);
                             loaded += 1;
@@ -145,51 +283,36 @@ impl<'a> Loader<'a> {
         );
     }
 
-    // Parses a hipparcos csv file and returns a Particle
-    // 0:hip,1:name,2:ra,3:dec,4:plx,5:e_plx,6:pmra,7:pmde,8:mag,9:b_v
-    fn parse_line_csv(&self, line: String) -> Option<Particle> {
+    fn get_index(&self, col_id: &ColId) -> usize {
+        match self.indices.get(col_id) {
+            Some(value) => *value,
+            // Set out of range so that tokens.get() produces None
+            None => 5000
+        }
+    }
+
+    // Parses a line using self.indices
+    fn parse_line(&self, line: String) -> Option<Particle> {
         let tokens: Vec<&str> = line.split(',').collect();
 
         self.create_particle(
-            tokens.get(0),
-            tokens.get(0),
-            tokens.get(2),
-            tokens.get(3),
-            tokens.get(4),
-            tokens.get(5),
-            tokens.get(6),
-            tokens.get(7),
-            None,
-            tokens.get(8),
-            None,
-            None,
-            tokens.get(9),
-            None,
+            tokens.get(self.get_index(&ColId::source_id)),
+            tokens.get(self.get_index(&ColId::hip)),
+            tokens.get(self.get_index(&ColId::ra)),
+            tokens.get(self.get_index(&ColId::dec)),
+            tokens.get(self.get_index(&ColId::plx)),
+            tokens.get(self.get_index(&ColId::plx_err)),
+            tokens.get(self.get_index(&ColId::pmra)),
+            tokens.get(self.get_index(&ColId::pmdec)),
+            tokens.get(self.get_index(&ColId::radvel)),
+            tokens.get(self.get_index(&ColId::gmag)),
+            tokens.get(self.get_index(&ColId::bpmag)),
+            tokens.get(self.get_index(&ColId::rpmag)),
+            tokens.get(self.get_index(&ColId::col_idx)),
+            tokens.get(self.get_index(&ColId::ruwe)),
         )
     }
 
-    // Parses a line in eDR3 csv.gz format and returns a Particle
-    // 0:sourceid,1:ra,2:dec,3:plx,4:e_ra,5:e_dec,6:e_plx,7:pmra,8:pmde,9:rv,10:gmag,11:bp,12:rp,13:ruwe,14:ref_epoch
-    fn parse_line_gz(&self, line: String) -> Option<Particle> {
-        let tokens: Vec<&str> = line.split(',').collect();
-
-        self.create_particle(
-            tokens.get(0),
-            Some(&"-1"),
-            tokens.get(1),
-            tokens.get(2),
-            tokens.get(3),
-            tokens.get(6),
-            tokens.get(7),
-            tokens.get(8),
-            tokens.get(9),
-            tokens.get(10),
-            tokens.get(11),
-            tokens.get(12),
-            None,
-            tokens.get(13),
-        )
-    }
 
     fn must_load_particle(&self, id: i64) -> bool {
         match &self.must_load {
@@ -344,6 +467,11 @@ impl<'a> Loader<'a> {
     }
 
     fn accept_parallax(&self, appmag: f64, plx: f64, plx_e: f64) -> bool {
+        // If geometric distances are present, always accept, we use distances directly regardless of parallax
+        if self.has_additional_col(ColId::geodist) {
+            return true;
+        }
+
         if !appmag.is_finite() {
             return false;
         } else if appmag < 13.1 {
@@ -357,7 +485,69 @@ impl<'a> Loader<'a> {
         self.args.distpc_cap <= 0.0 || dist_pc <= self.args.distpc_cap
     }
 
+    fn get_geodistance(&self, source_id: i64) -> f64 {
+        let geodist = self.get_additional(ColId::geodist, source_id);
+        match geodist {
+            Some(d) => if d.is_finite() { d } else { -1.0 },
+            None => -1.0,
+        }
+    }
+
     fn accept_ruwe(&self, ruwe: f32) -> bool {
         ruwe.is_nan() || self.args.ruwe_cap.is_nan() || ruwe < self.args.ruwe_cap
+    }
+
+    fn get_ruwe(&self, source_id: i64, tokens: Vec<&str>) -> f32 {
+        if self.has_col(ColId::ruwe){
+            parse::parse_f32(tokens.get(self.get_index(&ColId::ruwe)))
+        } else {
+            let ruwe = self.get_additional(ColId::ruwe, source_id);
+            match ruwe {
+                Some(d) => if d.is_finite() { d as f32 } else { f32::NAN },
+                None => f32::NAN,
+            }
+        }
+    }
+
+    fn get_additional(&self, col_id: ColId, source_id: i64) -> Option<f64> {
+        if self.additional.is_empty() {
+            None
+        } else {
+            for add in &self.additional {
+                if add.has_col(col_id) {
+                    let d = add.get(col_id, source_id);
+                    match d {
+                        Some(val) => return Some(val),
+                        None => return None
+                    }
+                }
+            }
+            None
+        }
+    }
+
+    fn has_col(&self, col_id: ColId) -> bool {
+        !self.indices.is_empty() && self.indices.contains_key(&col_id) && self.indices.get(&col_id).expect("Error getting column") >= &0
+    }
+
+    fn has_additional_col(&self, col_id: ColId) -> bool {
+        if self.additional.is_empty() {
+            false
+        } else {
+            for add in &self.additional {
+                if add.has_col(col_id) {
+                    return true;
+                }
+            }
+            false
+        }
+    }
+
+    fn has_additional(&self, col_id: ColId, source_id: i64) -> bool {
+        let val = self.get_additional(col_id, source_id);
+        match val {
+            Some(v) => !v.is_nan() && !v.is_finite(),
+            None => false
+        }
     }
 }

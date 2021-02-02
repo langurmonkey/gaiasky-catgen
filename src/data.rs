@@ -65,17 +65,19 @@ pub struct Args {
  * very many entries.
  **/
 pub struct LargeLongMap<T> {
-    pub n: u32,
+    pub n_maps: u32,
     pub maps: Vec<HashMap<i64, T>>,
     pub empty: bool,
+    pub size: usize,
 }
 
 impl<T> LargeLongMap<T> {
     pub fn new(n: u32) -> LargeLongMap<T> {
         let mut llm = LargeLongMap::<T> {
-            n: n,
+            n_maps: n,
             empty: true,
             maps: Vec::new(),
+            size: 0,
         };
         for i in 0..n {
             llm.maps.push(HashMap::new());
@@ -84,7 +86,7 @@ impl<T> LargeLongMap<T> {
     }
 
     pub fn contains_key(&self, key: i64) -> bool {
-        let idx: usize = (key % self.n as i64) as usize;
+        let idx: usize = (key % self.n_maps as i64) as usize;
         self.maps
             .get(idx)
             .expect("Error: map not found")
@@ -92,24 +94,25 @@ impl<T> LargeLongMap<T> {
     }
 
     pub fn put(&mut self, key: i64, value: T) {
-        let idx: usize = (key % self.n as i64) as usize;
+        let idx: usize = (key % self.n_maps as i64) as usize;
         self.maps
             .get_mut(idx)
             .expect("Error: map not found")
             .insert(key, value);
         self.empty = false;
+        self.size += 1;
     }
 
-    pub fn get(&mut self, key: i64) -> Option<&T> {
-        let idx: usize = (key % self.n as i64) as usize;
+    pub fn get(&self, key: i64) -> Option<&T> {
+        let idx: usize = (key % self.n_maps as i64) as usize;
         self.maps
-            .get_mut(idx)
+            .get(idx)
             .expect("Error: map not found")
             .get(&key)
     }
 
     pub fn get_mut(&mut self, key: i64) -> Option<&mut T> {
-        let idx: usize = (key % self.n as i64) as usize;
+        let idx: usize = (key % self.n_maps as i64) as usize;
         self.maps
             .get_mut(idx)
             .expect("Error: map not found")

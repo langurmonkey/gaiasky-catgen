@@ -126,7 +126,6 @@ fn main() {
 
         let mut must_load = HashSet::new();
         // xmatch helps us construct the must_load ids
-        let mut xmatch_mp: Option<HashMap<i64, i32>> = None;
         if args.hip.len() > 0 && args.xmatch.len() > 0 {
             let xmatch_map = xmatch::load_xmatch(&args.xmatch);
             if !xmatch_map.is_empty() {
@@ -141,19 +140,38 @@ fn main() {
         if !args.additional.is_empty() {
             let tokens: Vec<&str> = args.additional.split(',').collect();
             for token in tokens {
-                additional.push(load::Additional::new(&token));
+                let add = load::Additional::new(&token).expect("Error loading additional");
+                println!("Loaded {} columns and {} records from {}", add.n_cols(), add.size(), token);
+                additional.push(add);
             }
         }
 
         //
         // GAIA
         //
+        let mut indices_gaia = HashMap::new();
+        indices_gaia.insert(load::ColId::source_id, 0);
+        indices_gaia.insert(load::ColId::ra, 1);
+        indices_gaia.insert(load::ColId::dec, 2);
+        indices_gaia.insert(load::ColId::plx, 3);
+        indices_gaia.insert(load::ColId::ra_err, 4);
+        indices_gaia.insert(load::ColId::dec_err, 5);
+        indices_gaia.insert(load::ColId::plx_err, 6);
+        indices_gaia.insert(load::ColId::pmra, 7);
+        indices_gaia.insert(load::ColId::pmdec, 8);
+        indices_gaia.insert(load::ColId::radvel, 9);
+        indices_gaia.insert(load::ColId::gmag, 10);
+        indices_gaia.insert(load::ColId::bpmag, 11);
+        indices_gaia.insert(load::ColId::rpmag, 12);
+        indices_gaia.insert(load::ColId::ruwe, 13);
+        indices_gaia.insert(load::ColId::ref_epoch, 14);
         let loader_gaia = load::Loader {
             max_files: 1,
             max_records: 5,
             args: &args,
             must_load: Some(must_load),
             additional: additional,
+            indices: indices_gaia,
         };
         // Load Gaia
         let list_gaia = loader_gaia
@@ -167,12 +185,25 @@ fn main() {
         //
         // HIPPARCOS
         //
+        let mut indices_hip = HashMap::new();
+        indices_hip.insert(load::ColId::hip, 0);
+        indices_hip.insert(load::ColId::source_id, 0);
+        indices_hip.insert(load::ColId::names, 1);
+        indices_hip.insert(load::ColId::ra, 2);
+        indices_hip.insert(load::ColId::dec, 3);
+        indices_hip.insert(load::ColId::plx, 4);
+        indices_hip.insert(load::ColId::plx_err, 5);
+        indices_hip.insert(load::ColId::pmra, 6);
+        indices_hip.insert(load::ColId::pmdec, 7);
+        indices_hip.insert(load::ColId::gmag, 8);
+        indices_hip.insert(load::ColId::col_idx, 9);
         let loader_hip = load::Loader {
             max_files: 1,
             max_records: 5,
             args: &args,
             must_load: None,
             additional: Vec::new(),
+            indices: indices_hip,
         };
         // Load HIP
         if args.hip.len() > 0 {
