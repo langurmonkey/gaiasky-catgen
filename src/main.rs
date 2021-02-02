@@ -4,7 +4,7 @@ use std::collections::{HashMap, HashSet};
 
 use argparse::{ArgumentParser, Store, StoreFalse, StoreTrue};
 
-use data::Args;
+use data::Config;
 use load::ColId;
 
 mod color;
@@ -17,9 +17,14 @@ mod parse;
 mod util;
 mod xmatch;
 
+/**
+ * The main function parses the arguments, loads the Gaia and
+ * Hipparcos catalogs (if needed, plus additional columns and metadata),
+ * generates the LOD structure and writes it all to disk.
+ **/
 fn main() {
     // Arguments
-    let mut args: Args = Args {
+    let mut args: Config = Config {
         input: "".to_string(),
         output: "".to_string(),
         max_part: 100000,
@@ -37,7 +42,7 @@ fn main() {
         xmatch: "".to_string(),
         columns: "source_id,ra,dec,plx,ra_err,dec_err,plx_err,pmra,pmdec,radvel,gmag,bpmag,rpmag,ruwe,ref_epoch".to_string(),
     };
-    // Parse
+    // Parse CLI arguments
     {
         // this block limits scope of borrows by ap.refer() method
         let mut ap = ArgumentParser::new();
@@ -130,8 +135,10 @@ fn main() {
         args.input.push_str("/*.gz");
         args.hip.push_str("/*.csv");
 
+        // Load Hip-Gaia cross-match file
+        // All stars with Hip counter-part are added to the
+        // must_load list, which is later passed into the loader
         let mut must_load = HashSet::new();
-        // xmatch helps us construct the must_load ids
         if args.hip.len() > 0 && args.xmatch.len() > 0 {
             let xmatch_map = xmatch::load_xmatch(&args.xmatch);
             if !xmatch_map.is_empty() {
@@ -141,28 +148,30 @@ fn main() {
                 }
             }
         }
-        // Load additional, if any
+        // Load additional Gaia columns, if any
         let mut additional = Vec::new();
         if !args.additional.is_empty() {
             let tokens: Vec<&str> = args.additional.split(',').collect();
             for token in tokens {
                 let add = load::Additional::new(&token).expect("Error loading additional");
-                println!("Loaded {} columns and {} records from {}", add.n_cols(), add.size(), token);
+                println!(
+                    "Loaded {} columns and {} records from {}",
+                    add.n_cols(),
+                    add.size(),
+                    token
+                );
                 additional.push(add);
             }
         }
 
         //
-        // GAIA
+        // GAIA - Load Gaia DRx catalog, the columns come from CLI arguments
         //
         let mut indices_gaia = HashMap::new();
         let cols: Vec<&str> = args.columns.split(',').collect();
         for i in 0..cols.len() {
             indices_gaia.insert(ColId::from_str(cols.get(i).unwrap()).unwrap(), i);
         }
-        //for cid in indices_gaia.keys() {
-        //    println!("{} : {}", cid.to_str(), indices_gaia.get(cid).unwrap());
-        //}
         let loader_gaia = load::Loader {
             max_files: 1,
             max_records: 5,
@@ -172,7 +181,7 @@ fn main() {
             indices: indices_gaia,
             coord: coord::Coord::new(),
         };
-        // Load Gaia
+        // Actually load the catalog
         let list_gaia = loader_gaia
             .load_dir(&args.input)
             .expect("Error loading Gaia data");
@@ -182,7 +191,7 @@ fn main() {
         );
 
         //
-        // HIPPARCOS
+        // HIP - For hipparcos we only support the columns in that order
         //
         let mut indices_hip = HashMap::new();
         indices_hip.insert(ColId::hip, 0);
@@ -205,7 +214,7 @@ fn main() {
             indices: indices_hip,
             coord: coord::Coord::new(),
         };
-        // Load HIP
+        // Actually load hipparcos
         if args.hip.len() > 0 {
             let list_hip = loader_hip
                 .load_dir(&args.hip)
@@ -213,11 +222,18 @@ fn main() {
             println!("{} particles loaded successfully form HIP", list_hip.len());
         }
 
-        let n = std::cmp::min(50, list_gaia.len());
-        for i in 0..n {
-            let star = list_gaia.get(i).expect("Error getting star from list");
-            println!("{}: [{},{},{}]", i, star.x, star.y, star.z);
-        }
+        //
+        // Merge Gaia and Hipparcos
+        //
+
+        //
+        // Actually generate LOD octree
+        //
+        //
+
+        //
+        // Write tree and particles
+        //
         std::process::exit(0);
     } else {
         eprintln!("Input catalog not specified!");

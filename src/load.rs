@@ -2,7 +2,6 @@ extern crate flate2;
 extern crate nalgebra as na;
 
 use io::Write;
-use std::{f32, f64, fs::File};
 use std::cmp;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -11,12 +10,13 @@ use std::io;
 use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
 use std::str::FromStr;
+use std::{f32, f64, fs::File};
 
 use flate2::read::GzDecoder;
 use glob::glob;
 use na::base::Vector3;
 
-use data::Args;
+use data::Config;
 use data::Particle;
 
 use crate::color;
@@ -185,7 +185,11 @@ impl Additional {
                 let mut i = 0;
                 for token in tokens {
                     if i == 0 && !token.eq("source_id") && !token.eq("sourceid") {
-                        eprintln!("Error: first column '{}' of additional must be '{}'", token, ColId::source_id);
+                        eprintln!(
+                            "Error: first column '{}' of additional must be '{}'",
+                            token,
+                            ColId::source_id
+                        );
                         return None;
                     }
                     if i > 0 && !indices.contains_key(token) {
@@ -241,8 +245,18 @@ impl Additional {
 
     pub fn get(&self, col_id: ColId, source_id: i64) -> Option<f64> {
         if self.has_col(col_id) {
-            let index: usize = *self.indices.get(&col_id.to_string()).expect("Error: could not get index");
-            Some(self.values.get(source_id).unwrap().get(index).unwrap().clone())
+            let index: usize = *self
+                .indices
+                .get(&col_id.to_string())
+                .expect("Error: could not get index");
+            Some(
+                self.values
+                    .get(source_id)
+                    .unwrap()
+                    .get(index)
+                    .unwrap()
+                    .clone(),
+            )
         } else {
             None
         }
@@ -250,8 +264,18 @@ impl Additional {
 
     pub fn get_mut(&mut self, col_id: ColId, source_id: i64) -> Option<f64> {
         if self.has_col(col_id) {
-            let index: usize = *self.indices.get(&col_id.to_string()).expect("Error: could not get index");
-            Some(self.values.get(source_id).unwrap().get(index).unwrap().clone())
+            let index: usize = *self
+                .indices
+                .get(&col_id.to_string())
+                .expect("Error: could not get index");
+            Some(
+                self.values
+                    .get(source_id)
+                    .unwrap()
+                    .get(index)
+                    .unwrap()
+                    .clone(),
+            )
         } else {
             None
         }
@@ -263,8 +287,8 @@ pub struct Loader<'a> {
     pub max_files: u64,
     // Maximum number of records to load per file
     pub max_records: u64,
-    // Arguments
-    pub args: &'a Args,
+    // Configuration
+    pub args: &'a Config,
     // Must-load star ids
     pub must_load: Option<HashSet<i64>>,
     // Additional columns
@@ -363,7 +387,7 @@ impl<'a> Loader<'a> {
         match self.indices.get(col_id) {
             Some(value) => *value,
             // Set out of range so that tokens.get() produces None
-            None => 5000
+            None => 5000,
         }
     }
 
@@ -388,7 +412,6 @@ impl<'a> Loader<'a> {
             tokens.get(self.get_index(&ColId::ruwe)),
         )
     }
-
 
     fn must_load_particle(&self, id: i64) -> bool {
         match &self.must_load {
@@ -564,7 +587,13 @@ impl<'a> Loader<'a> {
     fn get_geodistance(&self, source_id: i64) -> f64 {
         let geodist = self.get_additional(ColId::geodist, source_id);
         match geodist {
-            Some(d) => if d.is_finite() { d } else { -1.0 },
+            Some(d) => {
+                if d.is_finite() {
+                    d
+                } else {
+                    -1.0
+                }
+            }
             None => -1.0,
         }
     }
@@ -579,7 +608,13 @@ impl<'a> Loader<'a> {
         } else {
             let ruwe = self.get_additional(ColId::ruwe, source_id);
             match ruwe {
-                Some(d) => if d.is_finite() { d as f32 } else { f32::NAN },
+                Some(d) => {
+                    if d.is_finite() {
+                        d as f32
+                    } else {
+                        f32::NAN
+                    }
+                }
                 None => f32::NAN,
             }
         }
@@ -594,7 +629,7 @@ impl<'a> Loader<'a> {
                     let d = add.get(col_id, source_id);
                     match d {
                         Some(val) => return Some(val),
-                        None => return None
+                        None => return None,
                     }
                 }
             }
@@ -603,7 +638,9 @@ impl<'a> Loader<'a> {
     }
 
     fn has_col(&self, col_id: ColId) -> bool {
-        !self.indices.is_empty() && self.indices.contains_key(&col_id) && self.indices.get(&col_id).expect("Error getting column") >= &0
+        !self.indices.is_empty()
+            && self.indices.contains_key(&col_id)
+            && self.indices.get(&col_id).expect("Error getting column") >= &0
     }
 
     fn has_additional_col(&self, col_id: ColId) -> bool {
@@ -623,7 +660,7 @@ impl<'a> Loader<'a> {
         let val = self.get_additional(col_id, source_id);
         match val {
             Some(v) => !v.is_nan() && !v.is_finite(),
-            None => false
+            None => false,
         }
     }
 }

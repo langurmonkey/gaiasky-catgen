@@ -1,5 +1,10 @@
 use std::collections::HashMap;
 
+/**
+ * Represents a star. The cartesian
+ * positions use double-precision floating point
+ * numbers. The rest use single-precision.
+ **/
 pub struct Particle {
     pub x: f64,
     pub y: f64,
@@ -19,12 +24,20 @@ pub struct Particle {
     pub names: Option<Vec<String>>,
 }
 
+/**
+ * Simple vector with three components
+ **/
 pub struct Vec3<T> {
     pub x: T,
     pub y: T,
     pub z: T,
 }
 
+/**
+ * Defines an octree, a tree in which
+ * each node is a cube and parts the
+ * space into 8 children sub-cubes
+ **/
 pub struct Octant {
     pub id: i64,
     pub min: Vec3<f64>,
@@ -41,7 +54,11 @@ pub struct Octant {
     pub objs: Vec<Particle>,
 }
 
-pub struct Args {
+/**
+ * Holds the program configuration, which
+ * corresponds roughly to the CLI arguments
+ **/
+pub struct Config {
     pub input: String,
     pub output: String,
     pub hip: String,
@@ -106,10 +123,7 @@ impl<T> LargeLongMap<T> {
 
     pub fn get(&self, key: i64) -> Option<&T> {
         let idx: usize = (key % self.n_maps as i64) as usize;
-        self.maps
-            .get(idx)
-            .expect("Error: map not found")
-            .get(&key)
+        self.maps.get(idx).expect("Error: map not found").get(&key)
     }
 
     pub fn get_mut(&mut self, key: i64) -> Option<&mut T> {
