@@ -11,3 +11,6 @@ flate2 = "1.0.19"
 glob = "0.3.0"
 nalgebra = "*"
 argparse = "0.2.2"
+
+[profile.release]
+lto = true

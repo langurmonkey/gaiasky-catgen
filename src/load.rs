@@ -26,7 +26,7 @@ use crate::data;
 use crate::parse;
 use crate::util;
 
-#[derive(Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Copy, Debug, Clone, Eq, PartialEq, Hash)]
 pub enum ColId {
     source_id,
     hip,
@@ -130,21 +130,18 @@ impl ColId {
     }
 }
 
-impl fmt::Debug for ColId {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
+const ADDITIONAL_MAPS: u32 = 50;
 
-impl fmt::Display for ColId {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
+/**
+ * This holds additional columns for this loader.
+ * The columns are in a large map whose keys are
+ * source IDs. The column data is a vector of f64.
+ * The index in the vector corresponding to each
+ * column can be found in the map indices.
+ **/
 pub struct Additional {
-    indices: HashMap<String, usize>,
-    values: data::LargeLongMap<Vec<f64>>,
+    pub indices: HashMap<String, usize>,
+    pub values: data::LargeLongMap<Vec<f64>>,
 }
 
 impl Additional {
@@ -175,7 +172,7 @@ impl Additional {
         let gz = GzDecoder::new(f);
 
         let mut indices = HashMap::new();
-        let mut values = data::LargeLongMap::new(60);
+        let mut values = data::LargeLongMap::new(ADDITIONAL_MAPS);
 
         for line in io::BufReader::new(gz).lines() {
             if total == 0 {
@@ -188,7 +185,7 @@ impl Additional {
                         eprintln!(
                             "Error: first column '{}' of additional must be '{}'",
                             token,
-                            ColId::source_id
+                            ColId::source_id.to_str()
                         );
                         return None;
                     }
@@ -202,7 +199,7 @@ impl Additional {
                 let line_str = line.expect("Error reading line");
                 let tokens: Vec<&str> = line_str.split(',').collect();
                 let source_id: i64 = parse::parse_i64(tokens.get(0));
-                let ncols = tokens.len() - 1;
+                let ncols = tokens.len();
 
                 // Vector with values
                 let mut vals: Vec<f64> = Vec::new();
@@ -240,14 +237,14 @@ impl Additional {
         self.values.size
     }
     pub fn has_col(&self, col_id: ColId) -> bool {
-        self.indices.contains_key(&col_id.to_string())
+        self.indices.contains_key(col_id.to_str())
     }
 
     pub fn get(&self, col_id: ColId, source_id: i64) -> Option<f64> {
         if self.has_col(col_id) {
             let index: usize = *self
                 .indices
-                .get(&col_id.to_string())
+                .get(col_id.to_str())
                 .expect("Error: could not get index");
             Some(
                 self.values
@@ -266,7 +263,7 @@ impl Additional {
         if self.has_col(col_id) {
             let index: usize = *self
                 .indices
-                .get(&col_id.to_string())
+                .get(col_id.to_str())
                 .expect("Error: could not get index");
             Some(
                 self.values
@@ -300,6 +297,48 @@ pub struct Loader<'a> {
 }
 
 impl<'a> Loader<'a> {
+    pub fn new(
+        max_files: u64,
+        max_records: u64,
+        args: &'a Config,
+        must_load: Option<HashSet<i64>>,
+        additional_str: &str,
+        indices_str: &str,
+    ) -> Self {
+        // Additional
+        let mut additional = Vec::new();
+        if !additional_str.is_empty() {
+            let tokens: Vec<&str> = additional_str.split(',').collect();
+            for token in tokens {
+                let add = Additional::new(&token).expect("Error loading additional");
+                println!(
+                    "Loaded {} columns and {} records from {}",
+                    add.n_cols(),
+                    add.size(),
+                    token
+                );
+                additional.push(add);
+            }
+        }
+
+        // Indices
+        let mut indices = HashMap::new();
+        let cols: Vec<&str> = indices_str.split(',').collect();
+        for i in 0..cols.len() {
+            indices.insert(ColId::from_str(cols.get(i).unwrap()).unwrap(), i);
+        }
+
+        Loader {
+            max_files: max_files,
+            max_records: max_records,
+            args: args,
+            must_load: must_load,
+            additional: additional,
+            indices: indices,
+            coord: coord::Coord::new(),
+        }
+    }
+
     pub fn load_dir(&self, dir: &str) -> Result<Vec<Particle>, &'a str> {
         let mut list: Vec<Particle> = Vec::new();
         let mut i = 0;
@@ -624,9 +663,9 @@ impl<'a> Loader<'a> {
         if self.additional.is_empty() {
             None
         } else {
-            for add in &self.additional {
-                if add.has_col(col_id) {
-                    let d = add.get(col_id, source_id);
+            for entry in &self.additional {
+                if entry.has_col(col_id) {
+                    let d = entry.get(col_id, source_id);
                     match d {
                         Some(val) => return Some(val),
                         None => return None,
@@ -647,8 +686,8 @@ impl<'a> Loader<'a> {
         if self.additional.is_empty() {
             false
         } else {
-            for add in &self.additional {
-                if add.has_col(col_id) {
+            for entry in &self.additional {
+                if entry.has_col(col_id) {
                     return true;
                 }
             }
@@ -661,6 +700,21 @@ impl<'a> Loader<'a> {
         match val {
             Some(v) => !v.is_nan() && !v.is_finite(),
             None => false,
+        }
+    }
+
+    pub fn debug_additional(&self) {
+        for entry in &self.additional {
+            println!("Indices: {}", entry.indices.keys().len());
+            let mut i = 0;
+            for map in &entry.values.maps {
+                println!("Map {} len: {}", i, map.len());
+                let keys = map.keys();
+                for key in keys {
+                    println!("Key: {}, Value: {:?}", key, map.get(key));
+                }
+                i += 1;
+            }
         }
     }
 }

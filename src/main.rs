@@ -17,6 +17,11 @@ mod parse;
 mod util;
 mod xmatch;
 
+// Maximum number of files to load per catalog
+const MAX_FILES: u64 = 2;
+// Maximum number of records (stars) to load per file
+const MAX_RECORDS: u64 = 5000;
+
 /**
  * The main function parses the arguments, loads the Gaia and
  * Hipparcos catalogs (if needed, plus additional columns and metadata),
@@ -148,39 +153,18 @@ fn main() {
                 }
             }
         }
-        // Load additional Gaia columns, if any
-        let mut additional = Vec::new();
-        if !args.additional.is_empty() {
-            let tokens: Vec<&str> = args.additional.split(',').collect();
-            for token in tokens {
-                let add = load::Additional::new(&token).expect("Error loading additional");
-                println!(
-                    "Loaded {} columns and {} records from {}",
-                    add.n_cols(),
-                    add.size(),
-                    token
-                );
-                additional.push(add);
-            }
-        }
 
         //
         // GAIA - Load Gaia DRx catalog, the columns come from CLI arguments
         //
-        let mut indices_gaia = HashMap::new();
-        let cols: Vec<&str> = args.columns.split(',').collect();
-        for i in 0..cols.len() {
-            indices_gaia.insert(ColId::from_str(cols.get(i).unwrap()).unwrap(), i);
-        }
-        let loader_gaia = load::Loader {
-            max_files: 1,
-            max_records: 5,
-            args: &args,
-            must_load: Some(must_load),
-            additional: additional,
-            indices: indices_gaia,
-            coord: coord::Coord::new(),
-        };
+        let loader_gaia = load::Loader::new(
+            MAX_FILES,
+            MAX_RECORDS,
+            &args,
+            Some(must_load),
+            &args.additional,
+            &args.columns,
+        );
         // Actually load the catalog
         let list_gaia = loader_gaia
             .load_dir(&args.input)
@@ -193,27 +177,14 @@ fn main() {
         //
         // HIP - For hipparcos we only support the columns in that order
         //
-        let mut indices_hip = HashMap::new();
-        indices_hip.insert(ColId::hip, 0);
-        indices_hip.insert(ColId::source_id, 0);
-        indices_hip.insert(ColId::names, 1);
-        indices_hip.insert(ColId::ra, 2);
-        indices_hip.insert(ColId::dec, 3);
-        indices_hip.insert(ColId::plx, 4);
-        indices_hip.insert(ColId::plx_err, 5);
-        indices_hip.insert(ColId::pmra, 6);
-        indices_hip.insert(ColId::pmdec, 7);
-        indices_hip.insert(ColId::gmag, 8);
-        indices_hip.insert(ColId::col_idx, 9);
-        let loader_hip = load::Loader {
-            max_files: 1,
-            max_records: 5,
-            args: &args,
-            must_load: None,
-            additional: Vec::new(),
-            indices: indices_hip,
-            coord: coord::Coord::new(),
-        };
+        let loader_hip = load::Loader::new(
+            MAX_FILES,
+            MAX_RECORDS,
+            &args,
+            None,
+            "",
+            "hip,names,ra,dec,plx,plx_err,pmra,pmdec,gmag,col_idx",
+        );
         // Actually load hipparcos
         if args.hip.len() > 0 {
             let list_hip = loader_hip
