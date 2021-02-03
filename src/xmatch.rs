@@ -5,9 +5,7 @@ use std::io::BufRead;
 
 use crate::parse;
 
-pub fn load_xmatch(file: &str) -> HashMap<i64, i32> {
-    let mut map = HashMap::new();
-
+pub fn load_xmatch(file: &str, map: &mut HashMap<i64, i32>) {
     // Read plain text file
     let f = File::open(file).expect("Error: file not found");
     let mut total = 0;
@@ -24,6 +22,4 @@ pub fn load_xmatch(file: &str) -> HashMap<i64, i32> {
         total += 1;
     }
     println!("{} records loaded from {}", total, file);
-
-    map
 }

@@ -1,3 +1,5 @@
+use crate::load;
+
 use std::collections::HashMap;
 
 /**
@@ -21,7 +23,49 @@ pub struct Particle {
     pub size: f32,
     pub hip: i32,
     pub id: i64,
-    pub names: Option<Vec<String>>,
+    pub names: Vec<String>,
+    pub extra: HashMap<load::ColId, f32>,
+}
+
+impl Particle {
+    pub fn get_extra(&self, col_id: load::ColId) -> &f32 {
+        match self.extra.get(&col_id) {
+            Some(val) => &val,
+            None => &f32::NAN,
+        }
+    }
+
+    pub fn copy(&self) -> Self {
+        // Copy names
+        let mut new_names = Vec::new();
+        for name in &self.names {
+            new_names.push(String::from(name));
+        }
+        // Copy extra
+        let mut new_extra = HashMap::new();
+        for key in self.extra.keys() {
+            new_extra.insert(*key, *self.extra.get(key).unwrap());
+        }
+        Particle {
+            x: self.x,
+            y: self.y,
+            z: self.z,
+            pmx: self.pmx,
+            pmy: self.pmy,
+            pmz: self.pmz,
+            mualpha: self.mualpha,
+            mudelta: self.mudelta,
+            radvel: self.radvel,
+            appmag: self.appmag,
+            absmag: self.absmag,
+            col: self.col,
+            size: self.size,
+            hip: self.hip,
+            id: self.id,
+            names: new_names,
+            extra: new_extra,
+        }
+    }
 }
 
 /**

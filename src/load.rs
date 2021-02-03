@@ -10,6 +10,7 @@ use std::io;
 use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
 use std::str::FromStr;
+use std::time::{Duration, Instant};
 use std::{f32, f64, fs::File};
 
 use flate2::read::GzDecoder;
@@ -279,13 +280,27 @@ impl Additional {
     }
 }
 
-pub struct Loader<'a> {
+pub struct Loader {
     // Maximum number of files to load in a directory
     pub max_files: u64,
     // Maximum number of records to load per file
     pub max_records: u64,
-    // Configuration
-    pub args: &'a Config,
+    // Zero point for parallaxes
+    pub plx_zeropoint: f64,
+    // RUWE cap value
+    pub ruwe_cap: f32,
+    // Distance cap in parsecs
+    pub distpc_cap: f64,
+    // plx_error criteria for faint stars
+    pub plx_err_faint: f64,
+    // plx_error criteria for bright stars
+    pub plx_err_bright: f64,
+    // Cap on the parallax error (stars with larger plx_err are discarded)
+    pub plx_err_cap: f64,
+    // Whether to apply mag corrections
+    pub mag_corrections: bool,
+    // If set to true, negative parallaxes will be transformed to the default 0.04 arcsec value
+    pub allow_negative_plx: bool,
     // Must-load star ids
     pub must_load: Option<HashSet<i64>>,
     // Additional columns
@@ -296,11 +311,18 @@ pub struct Loader<'a> {
     pub coord: coord::Coord,
 }
 
-impl<'a> Loader<'a> {
+impl Loader {
     pub fn new(
         max_files: u64,
         max_records: u64,
-        args: &'a Config,
+        plx_zeropoint: f64,
+        ruwe_cap: f32,
+        distpc_cap: f64,
+        plx_err_faint: f64,
+        plx_err_bright: f64,
+        plx_err_cap: f64,
+        mag_corrections: bool,
+        allow_negative_plx: bool,
         must_load: Option<HashSet<i64>>,
         additional_str: &str,
         indices_str: &str,
@@ -331,7 +353,14 @@ impl<'a> Loader<'a> {
         Loader {
             max_files: max_files,
             max_records: max_records,
-            args: args,
+            plx_zeropoint: plx_zeropoint,
+            ruwe_cap: ruwe_cap,
+            distpc_cap: distpc_cap,
+            plx_err_faint: plx_err_faint,
+            plx_err_bright: plx_err_bright,
+            plx_err_cap: plx_err_cap,
+            mag_corrections: mag_corrections,
+            allow_negative_plx: allow_negative_plx,
             must_load: must_load,
             additional: additional,
             indices: indices,
@@ -339,7 +368,7 @@ impl<'a> Loader<'a> {
         }
     }
 
-    pub fn load_dir(&self, dir: &str) -> Result<Vec<Particle>, &'a str> {
+    pub fn load_dir(&self, dir: &str) -> Result<Vec<Particle>, &str> {
         let mut list: Vec<Particle> = Vec::new();
         let mut i = 0;
         for entry in glob(&(dir.to_owned())).expect("Error reading glob pattern") {
@@ -417,7 +446,7 @@ impl<'a> Loader<'a> {
             " - loaded {}/{} objects ({:.3}%, {} skipped)",
             loaded,
             total - 1,
-            loaded as f32 / (total as f32 - 1.0),
+            100.0 * loaded as f32 / (total as f32 - 1.0),
             skipped
         );
     }
@@ -437,6 +466,7 @@ impl<'a> Loader<'a> {
         self.create_particle(
             tokens.get(self.get_index(&ColId::source_id)),
             tokens.get(self.get_index(&ColId::hip)),
+            tokens.get(self.get_index(&ColId::names)),
             tokens.get(self.get_index(&ColId::ra)),
             tokens.get(self.get_index(&ColId::dec)),
             tokens.get(self.get_index(&ColId::plx)),
@@ -463,6 +493,7 @@ impl<'a> Loader<'a> {
         &self,
         ssource_id: Option<&&str>,
         ship_id: Option<&&str>,
+        snames: Option<&&str>,
         sra: Option<&&str>,
         sdec: Option<&&str>,
         splx: Option<&&str>,
@@ -477,9 +508,11 @@ impl<'a> Loader<'a> {
         sruwe: Option<&&str>,
     ) -> Option<Particle> {
         // First, check if we accept it given the current constraints
-        let plx: f64 = parse::parse_f64(splx);
+        let mut plx: f64 = parse::parse_f64(splx) + self.plx_zeropoint;
         let plx_e: f64 = parse::parse_f64(splx_e);
         let mut appmag: f64 = parse::parse_f64(sappmag);
+
+        let has_geodist = self.has_additional_col(ColId::geodist);
 
         // Source ID
         let source_id: i64 = parse::parse_i64(ssource_id);
@@ -487,14 +520,23 @@ impl<'a> Loader<'a> {
         let must_load = self.must_load_particle(source_id);
 
         // Parallax test
-        if !must_load && !self.accept_parallax(appmag, plx, plx_e) {
+        if !has_geodist && plx <= 0.0 && self.allow_negative_plx {
+            plx = 0.04;
+        } else if !must_load && !self.accept_parallax(has_geodist, appmag, plx, plx_e) {
             return None;
         }
+
+        // Extra attributes
+        let mut extra: HashMap<ColId, f32> = HashMap::with_capacity(2);
 
         let ruwe_val: f32 = parse::parse_f32(sruwe);
         // RUWE test
         if !must_load && !self.accept_ruwe(ruwe_val) {
+            println!("NOT ACCEPT RUWE");
             return None;
+        }
+        if ruwe_val.is_finite() {
+            extra.insert(ColId::ruwe, ruwe_val);
         }
 
         // Distance
@@ -502,12 +544,27 @@ impl<'a> Loader<'a> {
 
         // Distance test
         if !must_load && !self.accept_distance(dist_pc) {
+            println!("NOT ACCEPT DIST");
             return None;
         }
         let dist: f64 = dist_pc * constants::PC_TO_U;
 
+        // Parallax error
+        let plx_err: f32 = parse::parse_f32(splx_e);
+        if plx_err.is_finite() {
+            extra.insert(ColId::plx_err, plx_err);
+        } else {
+            //println!("Star {} plx_e {}", source_id, plx_e);
+        }
+
         // Name
-        let name_vec = None;
+        let mut name_vec = Vec::new();
+        if snames.is_some() {
+            let name_tokens: Vec<&str> = snames.unwrap().split("|").collect();
+            for name_token in name_tokens {
+                name_vec.push(String::from(name_token));
+            }
+        }
 
         // RA and DEC
         let ra: f64 = parse::parse_f64(sra);
@@ -544,7 +601,7 @@ impl<'a> Loader<'a> {
         let b = pos_gal_sph.y;
         let magcorraux = dist_pc.min(150.0 / b.sin().abs());
 
-        if self.args.mag_corrections {
+        if self.mag_corrections {
             ag = magcorraux * 5.9e-4;
             ag = ag.min(3.2);
         }
@@ -601,26 +658,27 @@ impl<'a> Loader<'a> {
             hip: hip_id,
             id: source_id,
             names: name_vec,
+            extra: extra,
         })
     }
 
-    fn accept_parallax(&self, appmag: f64, plx: f64, plx_e: f64) -> bool {
+    fn accept_parallax(&self, has_geodist: bool, appmag: f64, plx: f64, plx_e: f64) -> bool {
         // If geometric distances are present, always accept, we use distances directly regardless of parallax
-        if self.has_additional_col(ColId::geodist) {
+        if has_geodist {
             return true;
         }
 
         if !appmag.is_finite() {
             return false;
         } else if appmag < 13.1 {
-            return plx >= 0.0 && plx_e < plx * self.args.plx_err_bright && plx_e <= 1.0;
+            return plx >= 0.0 && plx_e < plx * self.plx_err_bright && plx_e < self.plx_err_cap;
         } else {
-            return plx >= 0.0 && plx_e < plx * self.args.plx_err_faint && plx_e <= 1.0;
+            return plx >= 0.0 && plx_e < plx * self.plx_err_faint && plx_e < self.plx_err_cap;
         }
     }
 
     fn accept_distance(&self, dist_pc: f64) -> bool {
-        self.args.distpc_cap <= 0.0 || dist_pc <= self.args.distpc_cap
+        self.distpc_cap <= 0.0 || dist_pc <= self.distpc_cap
     }
 
     fn get_geodistance(&self, source_id: i64) -> f64 {
@@ -638,7 +696,7 @@ impl<'a> Loader<'a> {
     }
 
     fn accept_ruwe(&self, ruwe: f32) -> bool {
-        ruwe.is_nan() || self.args.ruwe_cap.is_nan() || ruwe < self.args.ruwe_cap
+        ruwe.is_nan() || self.ruwe_cap.is_nan() || ruwe < self.ruwe_cap
     }
 
     fn get_ruwe(&self, source_id: i64, tokens: Vec<&str>) -> f32 {

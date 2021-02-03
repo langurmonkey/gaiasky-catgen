@@ -1,11 +1,15 @@
 extern crate argparse;
 
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    f64::MAX,
+};
 
 use argparse::{ArgumentParser, Store, StoreFalse, StoreTrue};
 
-use data::Config;
+use data::{Config, Particle};
 use load::ColId;
+use std::time::{Duration, Instant};
 
 mod color;
 mod constants;
@@ -18,9 +22,9 @@ mod util;
 mod xmatch;
 
 // Maximum number of files to load per catalog
-const MAX_FILES: u64 = 2;
+const MAX_FILES: u64 = 3;
 // Maximum number of records (stars) to load per file
-const MAX_RECORDS: u64 = 5000;
+const MAX_RECORDS: u64 = 50000;
 
 /**
  * The main function parses the arguments, loads the Gaia and
@@ -136,6 +140,7 @@ fn main() {
     }
 
     if args.input.len() > 0 {
+        let mut start;
         // Complete inputs
         args.input.push_str("/*.gz");
         args.hip.push_str("/*.csv");
@@ -144,8 +149,9 @@ fn main() {
         // All stars with Hip counter-part are added to the
         // must_load list, which is later passed into the loader
         let mut must_load = HashSet::new();
+        let mut xmatch_map = HashMap::new();
         if args.hip.len() > 0 && args.xmatch.len() > 0 {
-            let xmatch_map = xmatch::load_xmatch(&args.xmatch);
+            xmatch::load_xmatch(&args.xmatch, &mut xmatch_map);
             if !xmatch_map.is_empty() {
                 let keys = xmatch_map.keys();
                 for key in keys {
@@ -160,47 +166,127 @@ fn main() {
         let loader_gaia = load::Loader::new(
             MAX_FILES,
             MAX_RECORDS,
-            &args,
+            args.plx_zeropoint,
+            args.ruwe_cap,
+            args.distpc_cap,
+            args.plx_err_faint,
+            args.plx_err_bright,
+            1.0,
+            args.mag_corrections,
+            false,
             Some(must_load),
             &args.additional,
             &args.columns,
         );
         // Actually load the catalog
+        start = Instant::now();
         let list_gaia = loader_gaia
             .load_dir(&args.input)
             .expect("Error loading Gaia data");
         println!(
-            "{} particles loaded successfully form Gaia",
-            list_gaia.len()
+            "{} particles loaded form Gaia in {:?}",
+            list_gaia.len(),
+            start.elapsed(),
         );
 
         //
         // HIP - For hipparcos we only support the columns in that order
         //
         let loader_hip = load::Loader::new(
-            MAX_FILES,
-            MAX_RECORDS,
-            &args,
+            1,
+            u64::MAX,
+            0.0,
+            args.ruwe_cap,
+            -1.0,
+            1000.0,
+            1000.0,
+            1000.0,
+            args.mag_corrections,
+            true,
             None,
             "",
             "hip,names,ra,dec,plx,plx_err,pmra,pmdec,gmag,col_idx",
         );
         // Actually load hipparcos
+        start = Instant::now();
+        let mut list_hip = Vec::new();
         if args.hip.len() > 0 {
-            let list_hip = loader_hip
+            list_hip = loader_hip
                 .load_dir(&args.hip)
                 .expect("Error loading HIP data");
-            println!("{} particles loaded successfully form HIP", list_hip.len());
+            println!(
+                "{} particles loaded form HIP in {:?}",
+                list_hip.len(),
+                start.elapsed()
+            );
         }
 
         //
         // Merge Gaia and Hipparcos
         //
+        let mut hip_map: HashMap<i32, &data::Particle> = HashMap::new();
+        let mut main_list = Vec::new();
+        let mut hip_added = HashSet::new();
+        for hip_star in &list_hip {
+            hip_map.insert(hip_star.hip, hip_star);
+        }
+        println!("{} stars added to hip_map", hip_map.len());
+        let mut no_hit = 0;
+        let mut hit = 0;
+        let mut gaia_wins = 0;
+        let mut hip_wins = 0;
+        for mut gaia_star in list_gaia {
+            if !xmatch_map.contains_key(&gaia_star.id) {
+                // No hit, add directly to main list
+                main_list.push(gaia_star);
+                no_hit += 1;
+            } else {
+                // Hit, merge
+                let hip_id = xmatch_map.get(&gaia_star.id).unwrap();
+                if hip_map.contains_key(hip_id) {
+                    hip_added.insert(hip_id);
+                    let hip_star = hip_map.get(&hip_id).unwrap();
+                    let gaia_plx_e = gaia_star.get_extra(load::ColId::plx_err);
+                    let hip_plx_e = hip_star.get_extra(load::ColId::plx_err);
+
+                    if gaia_plx_e <= hip_plx_e {
+                        //println!("Gaia wins: {} <= {}", gaia_plx_e, hip_plx_e);
+                        main_list.push(gaia_star);
+                        gaia_wins += 1;
+                    } else {
+                        //println!("Hip wins: {} <= {}", hip_plx_e, gaia_plx_e);
+                        main_list.push(hip_star.copy());
+                        hip_wins += 1;
+                    }
+                } else {
+                }
+                hit += 1;
+            }
+        }
+        let mut rest = 0;
+        // Add rest of hip
+        for hip_star in &list_hip {
+            if !hip_added.contains(&hip_star.hip) {
+                main_list.push(hip_star.copy());
+                rest += 1;
+            }
+        }
+        println!(
+            "{} hits ({} gaia wins, {} hip wins), {} no-hits",
+            hit, gaia_wins, hip_wins, no_hit
+        );
+
+        println!("{} stars in the final list", main_list.len());
 
         //
         // Actually generate LOD octree
         //
-        //
+
+        // Sort by magnitude
+        start = Instant::now();
+        println!("Sorting list with {} objects", main_list.len());
+        main_list.sort_by(|a, b| a.absmag.partial_cmp(&b.absmag).unwrap());
+        println!("List sorted in {:?}", start.elapsed());
 
         //
         // Write tree and particles
