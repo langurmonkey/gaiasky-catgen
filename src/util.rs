@@ -9,7 +9,7 @@ use crate::data;
  * Converts spherical coordinates (lon[rad], lat[rad], r) to
  * Cartesian coordinates in the same units as the radius.
  */
-pub fn spherical_to_cartesian(lon: f64, lat: f64, r: f64) -> Vec3<f64> {
+pub fn spherical_to_cartesian(lon: f64, lat: f64, r: f64) -> Vec3 {
     // out.x = radius * Math.cos(latitude) * Math.sin(longitude);
     // out.y = radius * Math.sin(latitude);
     // out.z = radius * Math.cos(latitude) * Math.cos(longitude);
@@ -21,7 +21,7 @@ pub fn spherical_to_cartesian(lon: f64, lat: f64, r: f64) -> Vec3<f64> {
     }
 }
 
-pub fn cartesian_to_spherical(x: f64, y: f64, z: f64) -> Vec3<f64> {
+pub fn cartesian_to_spherical(x: f64, y: f64, z: f64) -> Vec3 {
     let x2 = x * x;
     let y2 = y * y;
     let z2 = z * z;
@@ -58,7 +58,7 @@ pub fn propermotion_to_cartesian(
     ra_rad: f64,
     dec_rad: f64,
     dist_pc: f64,
-) -> Vec3<f64> {
+) -> Vec3 {
     let ma = mualphastar * constants::MILLIARCSEC_TO_ARCSEC;
     let md = mudelta * constants::MILLIARCSEC_TO_ARCSEC;
 

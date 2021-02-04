@@ -9,13 +9,14 @@ use argparse::{ArgumentParser, Store, StoreFalse, StoreTrue};
 
 use data::{Config, Particle};
 use load::ColId;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 mod color;
 mod constants;
 mod coord;
 mod data;
 mod load;
+mod lod;
 mod math;
 mod parse;
 mod util;
@@ -281,12 +282,18 @@ fn main() {
         //
         // Actually generate LOD octree
         //
-
-        // Sort by magnitude
         start = Instant::now();
         println!("Sorting list with {} objects", main_list.len());
         main_list.sort_by(|a, b| a.absmag.partial_cmp(&b.absmag).unwrap());
         println!("List sorted in {:?}", start.elapsed());
+
+        let mut octree = lod::Octree::new(
+            args.max_part,
+            args.postprocess,
+            args.child_count,
+            args.parent_count,
+        );
+        octree.generate(&main_list);
 
         //
         // Write tree and particles

@@ -1,6 +1,13 @@
 extern crate flate2;
 extern crate nalgebra as na;
 
+use crate::color;
+use crate::constants;
+use crate::coord;
+use crate::data;
+use crate::parse;
+use crate::util;
+
 use io::Write;
 use std::cmp;
 use std::collections::{HashMap, HashSet};
@@ -19,13 +26,6 @@ use na::base::Vector3;
 
 use data::Config;
 use data::Particle;
-
-use crate::color;
-use crate::constants;
-use crate::coord;
-use crate::data;
-use crate::parse;
-use crate::util;
 
 #[derive(Copy, Debug, Clone, Eq, PartialEq, Hash)]
 pub enum ColId {
@@ -439,6 +439,41 @@ impl Loader {
             }
             self.log_file(loaded, total, skipped);
         }
+    }
+
+    // Loads a single file, being it csv.gz or csv
+    // The format is hardcoded for now, with csv.gz being in eDR3 format,
+    // and csv being in hipparcos format.
+    pub fn load_file2(&self, file: &str, list: &mut Vec<Particle>) {
+        let mut total: u64 = 0;
+        let mut loaded: u64 = 0;
+        let mut skipped: u64 = 0;
+        let is_gz = file.ends_with(".gz") || file.ends_with(".gzip");
+        let f = File::open(file).expect("Error: file not found");
+        let mut reader: Box<Read>;
+        if is_gz {
+            reader = Box::new(GzDecoder::new(f));
+        } else {
+            reader = Box::new(&f);
+        }
+
+        for line in io::BufReader::new(reader.as_mut()).lines() {
+            // Skip header
+            if total > 0 {
+                match self.parse_line(line.expect("Error reading line")) {
+                    Some(part) => {
+                        list.push(part);
+                        loaded += 1;
+                    }
+                    None => skipped += 1,
+                }
+            }
+            total += 1;
+            if total - 1 >= self.max_records {
+                break;
+            }
+        }
+        self.log_file(loaded, total, skipped);
     }
 
     fn log_file(&self, loaded: u64, total: u64, skipped: u64) {

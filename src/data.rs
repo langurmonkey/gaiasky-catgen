@@ -71,31 +71,34 @@ impl Particle {
 /**
  * Simple vector with three components
  **/
-pub struct Vec3<T> {
-    pub x: T,
-    pub y: T,
-    pub z: T,
+pub struct Vec3 {
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
 }
 
-/**
- * Defines an octree, a tree in which
- * each node is a cube and parts the
- * space into 8 children sub-cubes
- **/
-pub struct Octant {
-    pub id: i64,
-    pub min: Vec3<f64>,
-    pub max: Vec3<f64>,
-    pub centre: Vec3<f64>,
-    pub size: Vec3<f64>,
-    pub depth: i32,
-    pub n_obj: i32,
-    pub n_obj_own: i32,
-    pub n_children: i32,
+impl Vec3 {
+    pub fn copy(&self) -> Vec3 {
+        Vec3 {
+            x: self.x,
+            y: self.y,
+            z: self.z,
+        }
+    }
 
-    pub parent: Box<Octant>,
-    pub children: Vec<Octant>,
-    pub objs: Vec<Particle>,
+    pub fn set(&mut self, x: f64, y: f64, z: f64) -> &Self {
+        self.x = x;
+        self.y = y;
+        self.z = z;
+        self
+    }
+
+    pub fn set_from(&mut self, other: &Self) -> &Self {
+        self.x = other.x;
+        self.y = other.y;
+        self.z = other.z;
+        self
+    }
 }
 
 /**
