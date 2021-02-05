@@ -395,59 +395,6 @@ impl Loader {
         let mut total: u64 = 0;
         let mut loaded: u64 = 0;
         let mut skipped: u64 = 0;
-        if file.ends_with(".gz") || file.ends_with(".gzip") {
-            // Read csv.gz using GzDecoder
-            let f = File::open(file).expect("Error: file not found");
-            let gz = GzDecoder::new(f);
-
-            for line in io::BufReader::new(gz).lines() {
-                // Skip header
-                if total > 0 {
-                    match self.parse_line(line.expect("Error reading line")) {
-                        Some(part) => {
-                            list.push(part);
-                            loaded += 1;
-                        }
-                        None => skipped += 1,
-                    }
-                }
-                total += 1;
-                if total - 1 >= self.max_records {
-                    break;
-                }
-            }
-            self.log_file(loaded, total, skipped);
-        } else if file.ends_with(".csv") || file.ends_with(".txt") {
-            // Read plain text file
-            let f = File::open(file).expect("Error: file not found");
-
-            for line in io::BufReader::new(&f).lines() {
-                // Skip header
-                if total > 0 {
-                    match self.parse_line(line.expect("Error reading line")) {
-                        Some(part) => {
-                            list.push(part);
-                            loaded += 1;
-                        }
-                        None => skipped += 1,
-                    }
-                }
-                total += 1;
-                if total - 1 >= self.max_records {
-                    break;
-                }
-            }
-            self.log_file(loaded, total, skipped);
-        }
-    }
-
-    // Loads a single file, being it csv.gz or csv
-    // The format is hardcoded for now, with csv.gz being in eDR3 format,
-    // and csv being in hipparcos format.
-    pub fn load_file2(&self, file: &str, list: &mut Vec<Particle>) {
-        let mut total: u64 = 0;
-        let mut loaded: u64 = 0;
-        let mut skipped: u64 = 0;
         let is_gz = file.ends_with(".gz") || file.ends_with(".gzip");
         let f = File::open(file).expect("Error: file not found");
         let mut reader: Box<Read>;
@@ -796,7 +743,7 @@ impl Loader {
         }
     }
 
-    pub fn debug_additional(&self) {
+    pub fn _debug_additional(&self) {
         for entry in &self.additional {
             println!("Indices: {}", entry.indices.keys().len());
             let mut i = 0;
