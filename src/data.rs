@@ -71,10 +71,19 @@ impl Particle {
 /**
  * Simple vector with three components
  **/
+#[derive(Copy, Clone, Debug)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
     pub z: f64,
+}
+
+impl Eq for Vec3 {}
+
+impl PartialEq for Vec3 {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y && self.z == other.z
+    }
 }
 
 impl Vec3 {
@@ -109,7 +118,7 @@ pub struct Config {
     pub input: String,
     pub output: String,
     pub hip: String,
-    pub max_part: i32,
+    pub max_part: usize,
     pub ruwe_cap: f32,
     pub distpc_cap: f64,
     pub plx_err_faint: f64,
@@ -117,8 +126,8 @@ pub struct Config {
     pub plx_zeropoint: f64,
     pub mag_corrections: bool,
     pub postprocess: bool,
-    pub child_count: i32,
-    pub parent_count: i32,
+    pub child_count: usize,
+    pub parent_count: usize,
     pub additional: String,
     pub xmatch: String,
     pub columns: String,

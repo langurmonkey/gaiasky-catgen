@@ -39,7 +39,7 @@ fn main() {
         output: "".to_string(),
         max_part: 100000,
         ruwe_cap: f32::NAN,
-        distpc_cap: -1.0,
+        distpc_cap: 1.0e6,
         plx_err_faint: 10.0,
         plx_err_bright: 10.0,
         plx_zeropoint: 0.0,
@@ -287,13 +287,20 @@ fn main() {
         main_list.sort_by(|a, b| a.absmag.partial_cmp(&b.absmag).unwrap());
         println!("List sorted in {:?}", start.elapsed());
 
-        let mut octree = lod::Octree::new(
+        let mut octree = lod::Octree::from_params(
             args.max_part,
             args.postprocess,
             args.child_count,
             args.parent_count,
+            args.distpc_cap,
         );
-        octree.generate(&main_list);
+        let num_stars = octree.generate_octree(&main_list);
+        println!(
+            "Octree generated with {} stars ({} skipped)",
+            num_stars,
+            main_list.len() - num_stars
+        );
+        octree.print();
 
         //
         // Write tree and particles
