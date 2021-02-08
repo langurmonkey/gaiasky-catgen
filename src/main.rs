@@ -2,14 +2,12 @@ extern crate argparse;
 
 use std::{
     collections::{HashMap, HashSet},
-    f64::MAX,
     path,
 };
 
 use argparse::{ArgumentParser, Store, StoreFalse, StoreTrue};
 
-use data::{Config, Particle};
-use load::ColId;
+use data::Config;
 use std::fs;
 use std::time::Instant;
 

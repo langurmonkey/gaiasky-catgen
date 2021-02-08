@@ -9,24 +9,19 @@ use crate::parse;
 use crate::util;
 
 use io::Write;
-use std::cmp;
 use std::collections::{HashMap, HashSet};
-use std::fmt;
-use std::fmt::Formatter;
 use std::io;
-use std::io::{BufRead, BufReader, Read};
+use std::io::{BufRead, Read};
 use std::path::Path;
-use std::str::FromStr;
-use std::time::{Duration, Instant};
 use std::{f32, f64, fs::File};
 
 use flate2::read::GzDecoder;
 use glob::glob;
 use na::base::Vector3;
 
-use data::Config;
 use data::Particle;
 
+#[allow(non_camel_case_types, dead_code)]
 #[derive(Copy, Debug, Clone, Eq, PartialEq, Hash)]
 pub enum ColId {
     source_id,
@@ -242,10 +237,7 @@ impl Additional {
             total += 1;
         }
 
-        Some(Additional {
-            indices: indices,
-            values: values,
-        })
+        Some(Additional { indices, values })
     }
 
     pub fn n_cols(&self) -> usize {
@@ -260,25 +252,6 @@ impl Additional {
     }
 
     pub fn get(&self, col_id: ColId, source_id: i64) -> Option<f64> {
-        if self.has_col(col_id) {
-            let index: usize = *self
-                .indices
-                .get(col_id.to_str())
-                .expect("Error: could not get index");
-            Some(
-                self.values
-                    .get(source_id)
-                    .unwrap()
-                    .get(index)
-                    .unwrap()
-                    .clone(),
-            )
-        } else {
-            None
-        }
-    }
-
-    pub fn get_mut(&mut self, col_id: ColId, source_id: i64) -> Option<f64> {
         if self.has_col(col_id) {
             let index: usize = *self
                 .indices

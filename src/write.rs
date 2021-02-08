@@ -4,7 +4,6 @@ use crate::lod;
 use std::io::Write;
 
 use data::Particle;
-use lod::Octant;
 use lod::Octree;
 
 use std::fs::OpenOptions;

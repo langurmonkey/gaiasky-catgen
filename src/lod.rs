@@ -4,9 +4,6 @@ use crate::data;
 use data::{BoundingBox, Particle, Vec3};
 use std::cell::{Cell, RefCell};
 use std::fmt;
-use std::rc::Rc;
-use std::{borrow::Borrow, time::Instant};
-use std::{borrow::BorrowMut, collections::HashMap};
 
 /**
  * An octree contains a root
