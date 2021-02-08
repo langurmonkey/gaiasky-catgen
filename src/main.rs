@@ -3,12 +3,14 @@ extern crate argparse;
 use std::{
     collections::{HashMap, HashSet},
     f64::MAX,
+    path,
 };
 
 use argparse::{ArgumentParser, Store, StoreFalse, StoreTrue};
 
 use data::{Config, Particle};
 use load::ColId;
+use std::fs;
 use std::time::Instant;
 
 mod color;
@@ -20,12 +22,8 @@ mod lod;
 mod math;
 mod parse;
 mod util;
+mod write;
 mod xmatch;
-
-// Maximum number of files to load per catalog
-const MAX_FILES: u64 = 3;
-// Maximum number of records (stars) to load per file
-const MAX_RECORDS: u64 = 50000;
 
 /**
  * The main function parses the arguments, loads the Gaia and
@@ -47,6 +45,8 @@ fn main() {
         postprocess: false,
         child_count: 100,
         parent_count: 1000,
+        file_num_cap: -1,
+        star_num_cap: -1,
         hip: "".to_string(),
         additional: "".to_string(),
         xmatch: "".to_string(),
@@ -137,8 +137,28 @@ fn main() {
             Store,
             "Comma-separated list of column names, in order, of the Gaia catalog",
         );
+        ap.refer(&mut args.file_num_cap).add_option(
+            &["--filescap"],
+            Store,
+            "Maximum number of input files to be processed",
+        );
+        ap.refer(&mut args.star_num_cap).add_option(
+            &["--starscap"],
+            Store,
+            "Maximum number of stars to be processed per file",
+        );
         ap.parse_args_or_exit();
     }
+
+    let input_path = path::Path::new(&args.input);
+    let output_path = path::Path::new(&args.output);
+
+    println!("Input: {:?}", input_path);
+    println!("Output: {:?}", output_path);
+
+    // Make sure input exists
+    assert!(input_path.exists(), "Input directory does not exist");
+    assert!(input_path.is_dir(), "Input directory is not a directory");
 
     if args.input.len() > 0 {
         let mut start;
@@ -165,8 +185,8 @@ fn main() {
         // GAIA - Load Gaia DRx catalog, the columns come from CLI arguments
         //
         let loader_gaia = load::Loader::new(
-            MAX_FILES,
-            MAX_RECORDS,
+            args.file_num_cap,
+            args.star_num_cap,
             args.plx_zeropoint,
             args.ruwe_cap,
             args.distpc_cap,
@@ -195,7 +215,7 @@ fn main() {
         //
         let loader_hip = load::Loader::new(
             1,
-            u64::MAX,
+            1000000,
             0.0,
             args.ruwe_cap,
             -1.0,
@@ -283,20 +303,33 @@ fn main() {
         // Actually generate LOD octree
         //
         start = Instant::now();
-        println!("Sorting list with {} objects", main_list.len());
+        let len_before = main_list.len();
+        main_list.retain(|s| {
+            let dist_pc: f64 = (s.x * s.x + s.y * s.y + s.z * s.z).sqrt() * constants::U_TO_PC;
+            dist_pc <= args.distpc_cap
+        });
+        println!(
+            "Removed {} stars due to being too far (cap = {} pc)",
+            main_list.len() - len_before,
+            args.distpc_cap
+        );
+
+        println!("Sorting list by magnitude with {} objects", main_list.len());
         main_list.sort_by(|a, b| a.absmag.partial_cmp(&b.absmag).unwrap());
         println!("List sorted in {:?}", start.elapsed());
 
-        let mut octree = lod::Octree::from_params(
+        let octree = lod::Octree::from_params(
             args.max_part,
             args.postprocess,
             args.child_count,
             args.parent_count,
             args.distpc_cap,
         );
-        let num_stars = octree.generate_octree(&main_list);
+        let (num_octants, num_stars) = octree.generate_octree(&main_list);
         println!(
-            "Octree generated with {} stars ({} skipped)",
+            "Octree generated with {}={} octants and {} stars ({} skipped)",
+            num_octants,
+            octree.nodes.borrow().len(),
             num_stars,
             main_list.len() - num_stars
         );
@@ -305,6 +338,15 @@ fn main() {
         //
         // Write tree and particles
         //
+
+        // Prepare output
+        fs::remove_dir_all(&args.output).unwrap();
+        fs::create_dir(&args.output).unwrap();
+
+        // Write
+        write::write_metadata(&octree, &args.output);
+        write::write_particles(&octree, main_list, &args.output);
+
         std::process::exit(0);
     } else {
         eprintln!("Input catalog not specified!");

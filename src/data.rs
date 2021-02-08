@@ -1,6 +1,8 @@
+use crate::constants;
 use crate::load;
 
 use std::collections::HashMap;
+use std::fmt;
 
 /**
  * Represents a star. The cartesian
@@ -78,6 +80,18 @@ pub struct Vec3 {
     pub z: f64,
 }
 
+impl fmt::Display for Vec3 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "[{:.3}, {:.3}, {:.3}]",
+            self.x * constants::U_TO_PC,
+            self.y * constants::U_TO_PC,
+            self.z * constants::U_TO_PC
+        )
+    }
+}
+
 impl Eq for Vec3 {}
 
 impl PartialEq for Vec3 {
@@ -87,6 +101,23 @@ impl PartialEq for Vec3 {
 }
 
 impl Vec3 {
+    pub fn empty() -> Vec3 {
+        Vec3 {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        }
+    }
+    pub fn new(x: f64, y: f64, z: f64) -> Vec3 {
+        Vec3 { x, y, z }
+    }
+    pub fn with(value: f64) -> Vec3 {
+        Vec3 {
+            x: value,
+            y: value,
+            z: value,
+        }
+    }
     pub fn copy(&self) -> Vec3 {
         Vec3 {
             x: self.x,
@@ -111,6 +142,79 @@ impl Vec3 {
 }
 
 /**
+ * An axis-aligned bounding box
+ **/
+pub struct BoundingBox {
+    pub min: Vec3,
+    pub max: Vec3,
+
+    pub cnt: Vec3,
+    pub dim: Vec3,
+}
+
+impl BoundingBox {
+    pub fn empty() -> BoundingBox {
+        BoundingBox {
+            min: Vec3::empty(),
+            max: Vec3::empty(),
+            cnt: Vec3::empty(),
+            dim: Vec3::empty(),
+        }
+    }
+
+    pub fn from(min: &Vec3, max: &Vec3) -> BoundingBox {
+        let mut bb = BoundingBox::empty();
+        bb.set_min_max(min, max);
+        bb
+    }
+
+    pub fn set_min_max(&mut self, min: &Vec3, max: &Vec3) {
+        let minx = if min.x < max.x { min.x } else { max.x };
+        let miny = if min.y < max.y { min.y } else { max.y };
+        let minz = if min.z < max.z { min.z } else { max.z };
+        let maxx = if min.x > max.x { min.x } else { max.x };
+        let maxy = if min.y > max.y { min.y } else { max.y };
+        let maxz = if min.z > max.z { min.z } else { max.z };
+        self.min.set(minx, miny, minz);
+        self.max.set(maxx, maxy, maxz);
+        self.cnt.set(
+            (minx + maxx) / 2.0,
+            (miny + maxy) / 2.0,
+            (minz + maxz) / 2.0,
+        );
+        self.dim.set(maxx - minx, maxy - miny, maxz - minz);
+    }
+
+    pub fn set(&mut self, other: &BoundingBox) {
+        self.min.set_from(&other.min);
+        self.max.set_from(&other.max);
+        self.cnt.set_from(&other.cnt);
+        self.dim.set_from(&other.dim);
+    }
+
+    pub fn volume(&self) -> f64 {
+        self.dim.x * self.dim.y * self.dim.z
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.min.x < self.max.x && self.min.y < self.max.y && self.min.z < self.max.z
+    }
+
+    pub fn contains_vec(&self, vec: &Vec3) -> bool {
+        self.contains(vec.x, vec.y, vec.z)
+    }
+
+    pub fn contains(&self, x: f64, y: f64, z: f64) -> bool {
+        self.min.x <= x
+            && self.max.x >= x
+            && self.min.y <= y
+            && self.max.y >= y
+            && self.min.z <= z
+            && self.max.z >= z
+    }
+}
+
+/**
  * Holds the program configuration, which
  * corresponds roughly to the CLI arguments
  **/
@@ -131,6 +235,8 @@ pub struct Config {
     pub additional: String,
     pub xmatch: String,
     pub columns: String,
+    pub file_num_cap: i32,
+    pub star_num_cap: i32,
 }
 
 /**

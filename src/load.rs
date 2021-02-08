@@ -84,6 +84,7 @@ impl ColId {
             ColId::teff => "teff",
             ColId::ag => "ag",
             ColId::ebp_min_rp => "ebp_min_rp",
+            ColId::geodist => "geodist",
             _ => "*none*",
         }
     }
@@ -99,12 +100,22 @@ impl ColId {
             "de" => Some(ColId::dec),
             "plx" => Some(ColId::plx),
             "pllx" => Some(ColId::plx),
+            "parallax" => Some(ColId::plx),
+            "ra_error" => Some(ColId::ra_err),
             "ra_err" => Some(ColId::ra_err),
             "ra_e" => Some(ColId::ra_err),
+            "dec_error" => Some(ColId::dec_err),
             "dec_err" => Some(ColId::dec_err),
             "dec_e" => Some(ColId::dec_err),
+            "de_error" => Some(ColId::dec_err),
+            "de_err" => Some(ColId::dec_err),
+            "de_e" => Some(ColId::dec_err),
+            "plx_error" => Some(ColId::plx_err),
             "plx_err" => Some(ColId::plx_err),
             "plx_e" => Some(ColId::plx_err),
+            "pllx_error" => Some(ColId::plx_err),
+            "pllx_err" => Some(ColId::plx_err),
+            "pllx_e" => Some(ColId::plx_err),
             "pmra" => Some(ColId::pmra),
             "pmdec" => Some(ColId::pmdec),
             "pmde" => Some(ColId::pmdec),
@@ -112,6 +123,8 @@ impl ColId {
             "rv" => Some(ColId::radvel),
             "radvel_err" => Some(ColId::radvel_err),
             "radvel_e" => Some(ColId::radvel_err),
+            "rv_err" => Some(ColId::radvel_err),
+            "rv_e" => Some(ColId::radvel_err),
             "gmag" => Some(ColId::gmag),
             "appmag" => Some(ColId::gmag),
             "bpmag" => Some(ColId::bpmag),
@@ -119,13 +132,18 @@ impl ColId {
             "rpmag" => Some(ColId::rpmag),
             "rp" => Some(ColId::rpmag),
             "bp_rp" => Some(ColId::bp_rp),
+            "bp-rp" => Some(ColId::bp_rp),
             "col_idx" => Some(ColId::col_idx),
             "b_v" => Some(ColId::col_idx),
+            "b-v" => Some(ColId::col_idx),
             "ref_epoch" => Some(ColId::ref_epoch),
             "teff" => Some(ColId::teff),
+            "t_eff" => Some(ColId::teff),
+            "T_eff" => Some(ColId::teff),
             "ruwe" => Some(ColId::ruwe),
             "ag" => Some(ColId::ag),
             "ebp_min_rp" => Some(ColId::ebp_min_rp),
+            "geodist" => Some(ColId::geodist),
             _ => None,
         }
     }
@@ -282,9 +300,9 @@ impl Additional {
 
 pub struct Loader {
     // Maximum number of files to load in a directory
-    pub max_files: u64,
+    pub max_files: i32,
     // Maximum number of records to load per file
-    pub max_records: u64,
+    pub max_records: i32,
     // Zero point for parallaxes
     pub plx_zeropoint: f64,
     // RUWE cap value
@@ -313,8 +331,8 @@ pub struct Loader {
 
 impl Loader {
     pub fn new(
-        max_files: u64,
-        max_records: u64,
+        max_files: i32,
+        max_records: i32,
         plx_zeropoint: f64,
         ruwe_cap: f32,
         distpc_cap: f64,
@@ -351,19 +369,19 @@ impl Loader {
         }
 
         Loader {
-            max_files: max_files,
-            max_records: max_records,
-            plx_zeropoint: plx_zeropoint,
-            ruwe_cap: ruwe_cap,
-            distpc_cap: distpc_cap,
-            plx_err_faint: plx_err_faint,
-            plx_err_bright: plx_err_bright,
-            plx_err_cap: plx_err_cap,
-            mag_corrections: mag_corrections,
-            allow_negative_plx: allow_negative_plx,
-            must_load: must_load,
-            additional: additional,
-            indices: indices,
+            max_files,
+            max_records,
+            plx_zeropoint,
+            ruwe_cap,
+            distpc_cap,
+            plx_err_faint,
+            plx_err_bright,
+            plx_err_cap,
+            mag_corrections,
+            allow_negative_plx,
+            must_load,
+            additional,
+            indices,
             coord: coord::Coord::new(),
         }
     }
@@ -372,7 +390,7 @@ impl Loader {
         let mut list: Vec<Particle> = Vec::new();
         let mut i = 0;
         for entry in glob(&(dir.to_owned())).expect("Error reading glob pattern") {
-            if i >= self.max_files {
+            if self.max_files >= 0 && i >= self.max_files {
                 return Ok(list);
             }
             match entry {
@@ -392,9 +410,9 @@ impl Loader {
     // The format is hardcoded for now, with csv.gz being in eDR3 format,
     // and csv being in hipparcos format.
     pub fn load_file(&self, file: &str, list: &mut Vec<Particle>) {
-        let mut total: u64 = 0;
-        let mut loaded: u64 = 0;
-        let mut skipped: u64 = 0;
+        let mut total: usize = 0;
+        let mut loaded: usize = 0;
+        let mut skipped: usize = 0;
         let is_gz = file.ends_with(".gz") || file.ends_with(".gzip");
         let f = File::open(file).expect("Error: file not found");
         let mut reader: Box<Read>;
@@ -416,14 +434,14 @@ impl Loader {
                 }
             }
             total += 1;
-            if total - 1 >= self.max_records {
+            if self.max_records >= 0 && (total - 1) as i32 >= self.max_records {
                 break;
             }
         }
         self.log_file(loaded, total, skipped);
     }
 
-    fn log_file(&self, loaded: u64, total: u64, skipped: u64) {
+    fn log_file(&self, loaded: usize, total: usize, skipped: usize) {
         println!(
             " - loaded {}/{} objects ({:.3}%, {} skipped)",
             loaded,

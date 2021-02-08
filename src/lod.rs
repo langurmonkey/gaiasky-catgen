@@ -1,9 +1,8 @@
 use crate::constants;
 use crate::data;
 
-use data::Particle;
-use data::Vec3;
-use std::cell::RefCell;
+use data::{BoundingBox, Particle, Vec3};
+use std::cell::{Cell, RefCell};
 use std::fmt;
 use std::rc::Rc;
 use std::{borrow::Borrow, time::Instant};
@@ -54,13 +53,15 @@ impl Octree {
      * Generates a new octree with the given list
      * of stars and parameters. The list must be
      * sorted by magnitude beforehand. Returns the
-     * number of stars actually added (i.e. not skipped
+     * number of octants in the octree and thenumber
+     * of stars actually added (i.e. not skipped
      * due to being too far)
      **/
-    pub fn generate_octree(&self, list: &Vec<Particle>) -> usize {
+    pub fn generate_octree(&self, list: &Vec<Particle>) -> (usize, usize) {
         self.start_generation(list);
 
         let mut octree_star_num: usize = 0;
+        let mut octree_node_num: usize = 1;
         let mut cat_idx = 0;
         for level in 0..25 {
             println!(
@@ -84,10 +85,12 @@ impl Octree {
                 let y = star.y;
                 let z = star.z;
 
-                let mut octant_id: OctantId;
+                let octant_id: OctantId;
+
                 if !self.has_node(x, y, z, level) {
                     // Octree node does not exist yet, create it
                     octant_id = self.create_octant(x, y, z, level);
+                    octree_node_num += 1;
                 } else {
                     octant_id = self.get_node(x, y, z, level).expect("Node does not exist!");
                 }
@@ -107,12 +110,14 @@ impl Octree {
                 }
             }
 
-            if (cat_idx >= list.len()) {
+            if cat_idx >= list.len() {
                 // All stars added -> FINISHED
                 break;
             }
         }
-        octree_star_num
+        // Compute numbers
+        self.nodes.borrow()[0].compute_numbers(&self);
+        (octree_node_num, octree_star_num)
     }
 
     fn has_node(&self, x: f64, y: f64, z: f64, level: u32) -> bool {
@@ -239,66 +244,38 @@ impl Octree {
     fn start_generation(&self, list: &Vec<Particle>) {
         println!("Starting generation of octree");
 
-        let mut max_dist = -1.0;
-        let mut furthest = list.get(0).unwrap();
+        let mut min = Vec3::with(1.0e50);
+        let mut max = Vec3::with(-1.0e50);
 
         for particle in list {
-            let dist =
-                (particle.x * particle.x + particle.y * particle.y + particle.z * particle.z)
-                    .sqrt();
-            if dist * constants::U_TO_PC <= self.distpc_cap {
-                if dist > max_dist {
-                    max_dist = dist;
-                    furthest = &particle;
-                }
+            if particle.x < min.x {
+                min.x = particle.x;
+            }
+            if particle.y < min.y {
+                min.y = particle.y;
+            }
+            if particle.z < min.z {
+                min.z = particle.z;
+            }
+            if particle.x > max.x {
+                max.x = particle.x;
+            }
+            if particle.y > max.y {
+                max.y = particle.y;
+            }
+            if particle.z > max.z {
+                max.z = particle.z;
             }
         }
-        println!("Furthest star is at {} pc", max_dist * constants::U_TO_PC);
-
-        let pos1: data::Vec3 = Vec3 {
-            x: furthest.x,
-            y: furthest.y,
-            z: furthest.z,
-        };
-
-        let mut volume = -1.0;
-        let mut pos0: data::Vec3;
-
-        let mut min: data::Vec3 = Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-        };
-        let mut max: data::Vec3 = Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-        };
-
-        for particle in list {
-            pos0 = Vec3 {
-                x: particle.x,
-                y: particle.y,
-                z: particle.z,
-            };
-            let vol = compute_volume(&pos1, &pos0);
-            if vol > volume {
-                volume = vol;
-                min = pos1.copy();
-                max = pos0.copy();
-            }
-        }
-        let half_size = (max.x - min.x) / 2.0;
+        // The bounding box
+        let bx = BoundingBox::from(&min, &max);
+        let half_size = f64::max(f64::max(bx.dim.z, bx.dim.y), bx.dim.x) / 2.0;
 
         let root = Octant {
             id: OctantId(0),
-            min: min.copy(),
-            max: max.copy(),
-            centre: Vec3 {
-                x: (min.x + max.x) / 2.0,
-                y: (min.y + max.y) / 2.0,
-                z: (min.z + max.z) / 2.0,
-            },
+            min: bx.min.copy(),
+            max: bx.max.copy(),
+            centre: bx.cnt.copy(),
             size: Vec3 {
                 x: half_size,
                 y: half_size,
@@ -306,19 +283,31 @@ impl Octree {
             },
             level: 0,
 
+            num_objects: Cell::new(0),
+            num_objects_rec: Cell::new(0),
+            num_children: Cell::new(0),
+
             parent: None,
             children: RefCell::new([None; 8]),
             objects: RefCell::new(Vec::new()),
         };
+
+        // Volume of root node in pc^3
+        let vol = bx.dim.x
+            * constants::U_TO_PC
+            * bx.dim.y
+            * constants::U_TO_PC
+            * bx.dim.z
+            * constants::U_TO_PC;
         println!(
-            "Octree generation started with min: {:?}, max: {:?}, centre: {:?}",
-            root.min, root.max, root.centre
+            "Octree root node generated with min: {}, max: {}, centre: {}, volume: {} pc3",
+            root.min, root.max, root.centre, vol
         );
         self.nodes.borrow_mut().push(root);
     }
 
-    pub fn get_num_objects(&self) -> usize {
-        self.nodes.borrow()[0].get_num_objects(self)
+    pub fn get_num_objects(&self) -> i32 {
+        self.nodes.borrow()[0].num_objects_rec.get()
     }
 
     pub fn print(&self) {
@@ -362,6 +351,10 @@ pub struct Octant {
     pub size: Vec3,
     pub level: u32,
 
+    pub num_objects: Cell<i32>,
+    pub num_objects_rec: Cell<i32>,
+    pub num_children: Cell<i32>,
+
     pub parent: Option<OctantId>,
     pub children: RefCell<[Option<OctantId>; 8]>,
     pub objects: RefCell<Vec<usize>>,
@@ -400,6 +393,10 @@ impl Octant {
             },
             level,
 
+            num_objects: Cell::new(0),
+            num_objects_rec: Cell::new(0),
+            num_children: Cell::new(0),
+
             parent,
             children: RefCell::new([None; 8]),
             objects: RefCell::new(Vec::new()),
@@ -435,12 +432,14 @@ impl Octant {
     pub fn print(&self, parent_idx: usize, octree: &Octree) {
         // 32 is the UTF-8 code for whitespace
         println!(
-            "{}{}:L{} ID: {} Objs:{}",
-            String::from_utf8(vec![32; self.level as usize]).unwrap(),
+            "{}{}:L{} id:{} Obj(own/rec):({}/{}) Nchld:{}",
+            String::from_utf8(vec![32; (self.level * 2) as usize]).unwrap(),
             parent_idx,
             self.level,
             self.id.0,
-            self.objects.borrow().len()
+            self.num_objects.get(),
+            self.num_objects_rec.get(),
+            self.num_children.get(),
         );
 
         if self.has_kids() {
@@ -449,12 +448,13 @@ impl Octant {
                 let c = b[i];
                 match c {
                     Some(child) => octree.nodes.borrow().get(child.0).unwrap().print(i, octree),
-                    None => println!(
-                        "{}{}:L{} x",
-                        String::from_utf8(vec![32; (self.level + 1) as usize]).unwrap(),
-                        i,
-                        self.level + 1
-                    ),
+                    None => (),
+                    //println!(
+                    //"{}{}:L{} x",
+                    //String::from_utf8(vec![32; ((self.level + 1) * 2) as usize]).unwrap(),
+                    //i,
+                    //self.level + 1
+                    //),
                 }
             }
         }
@@ -469,29 +469,38 @@ impl Octant {
         false
     }
 
-    pub fn get_num_objects(&self, octree: &Octree) -> usize {
-        let mut num = self.objects.borrow().len();
-        if self.has_kids() {
-            for i in 0..8 {
-                if self.children.borrow()[i].is_some() {
-                    let idx = self.children.borrow()[i].unwrap();
-                    num += octree.nodes.borrow()[idx.0].get_num_objects(octree);
-                }
+    /**
+     * Computes the number of objects and the number of children nodes
+     * recursively, sets the attributes and returns them.
+     **/
+    pub fn compute_numbers(&self, octree: &Octree) -> i32 {
+        let mut num_objects_rec = self.get_num_objects();
+        self.num_objects.set(num_objects_rec);
+
+        let mut num_children = 0;
+        for ch in 0..8 {
+            if self.has_child(ch) {
+                num_children += 1;
             }
         }
-        num
-    }
-}
+        self.num_children.set(num_children);
 
-/**
- * Computes the volume of the axis-aligned box
- * within the points min and max
- **/
-fn compute_volume(min: &Vec3, max: &Vec3) -> f64 {
-    let dim = Vec3 {
-        x: max.x - min.x,
-        y: max.y - min.y,
-        z: max.z - min.z,
-    };
-    dim.x * dim.y * dim.z
+        // Recursively count objects
+        for i in 0..8 {
+            if self.children.borrow()[i].is_some() {
+                let idx = self.children.borrow()[i].unwrap();
+                let objs = octree.nodes.borrow()[idx.0].compute_numbers(octree);
+
+                num_objects_rec += objs;
+            }
+        }
+
+        self.num_objects_rec.set(num_objects_rec);
+
+        num_objects_rec
+    }
+
+    pub fn get_num_objects(&self) -> i32 {
+        self.objects.borrow().len() as i32
+    }
 }
