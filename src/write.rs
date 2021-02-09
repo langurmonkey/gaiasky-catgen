@@ -117,14 +117,10 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
                 // Names length
                 f.write_all(&(names_concat.len() as i32).to_be_bytes());
                 // Characters
-                let mut buf: [u8; 2] = [0; 2];
+                let mut buf: [u16; 1] = [0; 1];
                 for ch in names_concat.chars() {
-                    ch.encode_utf8(&mut buf);
-                    // Reverse
-                    let aux = buf[0];
-                    buf[0] = buf[1];
-                    buf[1] = aux;
-                    f.write_all(&buf);
+                    ch.encode_utf16(&mut buf);
+                    f.write_all(&(buf[0]).to_be_bytes());
                 }
             } else {
                 eprintln!(
