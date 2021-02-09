@@ -11,13 +11,10 @@ use crate::util;
 
 use io::Write;
 use memmap::Mmap;
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io;
 use std::io::{BufRead, Read};
 use std::path::Path;
-use std::{
-    cmp::min,
-    collections::{BTreeMap, HashMap, HashSet},
-};
 use std::{f32, f64, fs::File};
 
 use flate2::read::GzDecoder;
@@ -149,8 +146,6 @@ impl ColId {
     }
 }
 
-const ADDITIONAL_MAPS: u32 = 50;
-
 /**
  * This holds additional columns for this loader.
  * The columns are in a large map whose keys are
@@ -188,7 +183,8 @@ impl Additional {
         let mut total: u64 = 0;
         // Read csv.gz using GzDecoder
         let f = File::open(file).expect("Error: file not found");
-        let gz = GzDecoder::new(f);
+        let mmap = unsafe { Mmap::map(&f).expect(&format!("Error mapping file {}", file)) };
+        let gz = GzDecoder::new(&mmap[..]);
 
         let mut indices = HashMap::new();
         let mut values = BTreeMap::new();
