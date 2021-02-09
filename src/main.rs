@@ -3,6 +3,7 @@ extern crate argparse;
 use std::{
     collections::{HashMap, HashSet},
     path,
+    time::Duration,
 };
 
 use argparse::{ArgumentParser, Store, StoreFalse, StoreTrue};
@@ -159,7 +160,7 @@ fn main() {
     assert!(input_path.is_dir(), "Input directory is not a directory");
 
     if args.input.len() > 0 {
-        let mut start;
+        let start = Instant::now();
         // Complete inputs, load all files
         args.input.push_str("/*");
         args.hip.push_str("/*");
@@ -198,14 +199,15 @@ fn main() {
             &args.columns,
         );
         // Actually load the catalog
-        start = Instant::now();
+        let start_gaia = Instant::now();
         let list_gaia = loader_gaia
             .load_dir(&args.input)
             .expect("Error loading Gaia data");
+        let time_gaia = start_gaia.elapsed();
         println!(
             "{} particles loaded form Gaia in {:?}",
             list_gaia.len(),
-            start.elapsed(),
+            time_gaia,
         );
 
         //
@@ -227,16 +229,18 @@ fn main() {
             "hip,names,ra,dec,plx,plx_err,pmra,pmdec,gmag,col_idx",
         );
         // Actually load hipparcos
-        start = Instant::now();
         let mut list_hip = Vec::new();
+        let mut time_hip = Duration::new(0, 0);
         if args.hip.len() > 0 {
+            let start_hip = Instant::now();
             list_hip = loader_hip
                 .load_dir(&args.hip)
                 .expect("Error loading HIP data");
+            time_hip = start_hip.elapsed();
             println!(
                 "{} particles loaded form HIP in {:?}",
                 list_hip.len(),
-                start.elapsed()
+                time_hip
             );
         }
 
@@ -296,11 +300,12 @@ fn main() {
         );
 
         println!("{} stars in the final list", main_list.len());
+        let time_load = start.elapsed();
 
         //
         // Actually generate LOD octree
         //
-        start = Instant::now();
+        let start_gen = Instant::now();
         let len_before = main_list.len();
         main_list.retain(|s| {
             let dist_pc: f64 = (s.x * s.x + s.y * s.y + s.z * s.z).sqrt() * constants::U_TO_PC;
@@ -314,7 +319,9 @@ fn main() {
 
         println!("Sorting list by magnitude with {} objects", main_list.len());
         main_list.sort_by(|a, b| a.absmag.partial_cmp(&b.absmag).unwrap());
-        println!("List sorted in {:?}", start.elapsed());
+        println!("List sorted in {:?}", start_gen.elapsed());
+
+        let time_gen = start_gen.elapsed();
 
         let octree = lod::Octree::from_params(
             args.max_part,
@@ -325,11 +332,12 @@ fn main() {
         );
         let (num_octants, num_stars) = octree.generate_octree(&main_list);
         println!(
-            "Octree generated with {}={} octants and {} stars ({} skipped)",
+            "Octree generated with {}={} octants and {} stars ({} skipped) in {:?}",
             num_octants,
             octree.nodes.borrow().len(),
             num_stars,
-            main_list.len() - num_stars
+            main_list.len() - num_stars,
+            start_gen.elapsed()
         );
         octree.print();
 
@@ -337,6 +345,7 @@ fn main() {
         // Write tree and particles
         //
 
+        let start_write = Instant::now();
         // Prepare output
         fs::remove_dir_all(&args.output).expect(&format!("Error removing dir: {}", args.output));
         fs::create_dir_all(&args.output).expect(&format!("Error creating dir: {}", args.output));
@@ -344,7 +353,15 @@ fn main() {
         // Write
         write::write_metadata(&octree, &args.output);
         write::write_particles(&octree, main_list, &args.output);
+        let time_write = start_write.elapsed();
 
+        println!("================");
+        println!("FINAL TIME STATS");
+        println!("================");
+        println!("Loading: {:?}", time_load);
+        println!("Generation: {:?}", time_gen);
+        println!("Writing: {:?}", time_write);
+        println!("Total: {:?}", start.elapsed());
         std::process::exit(0);
     } else {
         eprintln!("Input catalog not specified!");
