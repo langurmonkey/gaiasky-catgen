@@ -385,7 +385,7 @@ impl Loader {
     }
 
     // Loads a single file, being it csv.gz or csv
-    // The format is hardcoded for now, with csv.gz being in eDR3 format,
+    // The format is hard-coded for now, with csv.gz being in eDR3 format,
     // and csv being in hipparcos format.
     pub fn load_file(&self, file: &str, list: &mut Vec<Particle>) {
         let mut total: usize = 0;

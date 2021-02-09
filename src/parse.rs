@@ -1,3 +1,5 @@
+extern crate fast_float;
+
 pub fn parse_i32(val_str: Option<&&str>) -> i32 {
     match val_str {
         Some(val) => val.parse::<i32>().unwrap_or(0),
@@ -14,14 +16,14 @@ pub fn parse_i64(val_str: Option<&&str>) -> i64 {
 
 pub fn parse_f32(val_str: Option<&&str>) -> f32 {
     match val_str {
-        Some(val) => val.parse::<f32>().unwrap_or(f32::NAN),
+        Some(val) => fast_float::parse(val).unwrap_or(f32::NAN),
         None => f32::NAN,
     }
 }
 
 pub fn parse_f64(val_str: Option<&&str>) -> f64 {
     match val_str {
-        Some(val) => val.parse::<f64>().unwrap_or(f64::NAN),
+        Some(val) => fast_float::parse(val).unwrap_or(f64::NAN),
         None => f64::NAN,
     }
 }
