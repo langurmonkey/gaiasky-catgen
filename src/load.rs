@@ -1,4 +1,5 @@
 extern crate flate2;
+extern crate memmap;
 extern crate nalgebra as na;
 
 use crate::color;
@@ -9,10 +10,14 @@ use crate::parse;
 use crate::util;
 
 use io::Write;
-use std::collections::{HashMap, HashSet};
+use memmap::Mmap;
 use std::io;
 use std::io::{BufRead, Read};
 use std::path::Path;
+use std::{
+    cmp::min,
+    collections::{BTreeMap, HashMap, HashSet},
+};
 use std::{f32, f64, fs::File};
 
 use flate2::read::GzDecoder;
@@ -155,7 +160,7 @@ const ADDITIONAL_MAPS: u32 = 50;
  **/
 pub struct Additional {
     pub indices: HashMap<String, usize>,
-    pub values: data::LargeLongMap<Vec<f64>>,
+    pub values: BTreeMap<i64, Vec<f64>>,
 }
 
 impl Additional {
@@ -186,7 +191,7 @@ impl Additional {
         let gz = GzDecoder::new(f);
 
         let mut indices = HashMap::new();
-        let mut values = data::LargeLongMap::new(ADDITIONAL_MAPS);
+        let mut values = BTreeMap::new();
 
         for line in io::BufReader::new(gz).lines() {
             if total == 0 {
@@ -232,7 +237,7 @@ impl Additional {
                         }
                     }
                 }
-                values.put(source_id, vals);
+                values.insert(source_id, vals);
             }
             total += 1;
         }
@@ -244,8 +249,8 @@ impl Additional {
         self.indices.len()
     }
 
-    pub fn size(&self) -> usize {
-        self.values.size
+    pub fn len(&self) -> usize {
+        self.values.len()
     }
     pub fn has_col(&self, col_id: ColId) -> bool {
         self.indices.contains_key(col_id.to_str())
@@ -259,7 +264,7 @@ impl Additional {
                 .expect("Error: could not get index");
             Some(
                 self.values
-                    .get(source_id)
+                    .get(&source_id)
                     .unwrap()
                     .get(index)
                     .unwrap()
@@ -327,7 +332,7 @@ impl Loader {
                 println!(
                     "Loaded {} columns and {} records from {}",
                     add.n_cols(),
-                    add.size(),
+                    add.len(),
                     token
                 );
                 additional.push(add);
@@ -388,11 +393,13 @@ impl Loader {
         let mut skipped: usize = 0;
         let is_gz = file.ends_with(".gz") || file.ends_with(".gzip");
         let f = File::open(file).expect("Error: file not found");
-        let mut reader: Box<Read>;
+        let mmap = unsafe { Mmap::map(&f).expect(&format!("Error mapping file {}", file)) };
+
+        let mut reader: Box<dyn Read>;
         if is_gz {
-            reader = Box::new(GzDecoder::new(f));
+            reader = Box::new(GzDecoder::new(&mmap[..]));
         } else {
-            reader = Box::new(&f);
+            reader = Box::new(&mmap[..]);
         }
 
         for line in io::BufReader::new(reader.as_mut()).lines() {
@@ -488,7 +495,11 @@ impl Loader {
         let has_geodist = self.has_additional_col(ColId::geodist);
 
         // Source ID
-        let source_id: i64 = parse::parse_i64(ssource_id);
+        let mut source_id: i64 = parse::parse_i64(ssource_id);
+        let hip: i32 = parse::parse_i32(ship_id);
+        if source_id == 0 {
+            source_id = hip as i64;
+        }
 
         let must_load = self.must_load_particle(source_id);
 
@@ -588,7 +599,7 @@ impl Loader {
         // Size
         let pseudo_l = 10.0_f64.powf(-0.4 * absmag);
         let size_fac = constants::PC_TO_M * constants::M_TO_U * 0.15;
-        let size: f32 = 1.0e10_f64.powf(pseudo_l.powf(0.45) * size_fac) as f32;
+        let size: f32 = f64::min(pseudo_l.powf(0.45) * size_fac, 1e10) as f32;
 
         // Color
         let ebr: f64 = 0.0;
@@ -609,10 +620,7 @@ impl Loader {
             teff = color::bv_to_teff_ballesteros(col_idx);
         }
         let (col_r, col_g, col_b) = color::teff_to_rgb(teff);
-        let col: u32 = color::col_to_rgba8888(col_r as f32, col_g as f32, col_b as f32, 1.0);
-
-        // HIP
-        let hip_id: i32 = parse::parse_i32(ship_id);
+        let col = color::col_to_f32(col_r as f32, col_g as f32, col_b as f32, 1.0);
 
         Some(Particle {
             x: pos.x,
@@ -626,12 +634,12 @@ impl Loader {
             radvel: radvel as f32,
             appmag: appmag as f32,
             absmag: absmag as f32,
-            col: col,
-            size: size,
-            hip: hip_id,
+            col,
+            size,
+            hip,
             id: source_id,
             names: name_vec,
-            extra: extra,
+            extra,
         })
     }
 
@@ -731,21 +739,6 @@ impl Loader {
         match val {
             Some(v) => !v.is_nan() && !v.is_finite(),
             None => false,
-        }
-    }
-
-    pub fn _debug_additional(&self) {
-        for entry in &self.additional {
-            println!("Indices: {}", entry.indices.keys().len());
-            let mut i = 0;
-            for map in &entry.values.maps {
-                println!("Map {} len: {}", i, map.len());
-                let keys = map.keys();
-                for key in keys {
-                    println!("Key: {}, Value: {:?}", key, map.get(key));
-                }
-                i += 1;
-            }
         }
     }
 }

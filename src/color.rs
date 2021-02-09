@@ -1,4 +1,5 @@
 use crate::math;
+use std::mem;
 
 const A: f64 = 0.92;
 const B: f64 = 1.7;
@@ -64,23 +65,43 @@ pub fn teff_to_rgb(teff: f64) -> (f32, f32, f32) {
 }
 
 /**
- * Packs the color components into a u32 with the format ABGR
+ * Packs the color components into an i32 with the format ABGR8888
  **/
-pub fn col_to_rgba8888(r: f32, g: f32, b: f32, a: f32) -> u32 {
-    (((255.0 * a) as u32) << 24)
+pub fn col_to_f32(r: f32, g: f32, b: f32, a: f32) -> f32 {
+    let col = (((255.0 * a) as u32) << 24)
         | (((255.0 * b) as u32) << 16)
         | (((255.0 * g) as u32) << 8)
-        | ((255.0 * r) as u32)
+        | ((255.0 * r) as u32);
+    i32_to_f32_color(col)
+}
+
+pub fn i32_to_f32_color(value: u32) -> f32 {
+    i32_bits_to_f32(value & 0xfeffffff)
+}
+pub fn i32_bits_to_f32(value: u32) -> f32 {
+    let bytes = value.to_ne_bytes();
+    unsafe { mem::transmute::<[u8; 4], f32>(bytes) }
 }
 
 /**
- * Unpacks the RGBA888 u32 into the color components
+ * Packs the color components into an i32 with the format RGBA8888
  **/
-pub fn rgba8888_to_col(value: u32) -> (f32, f32, f32, f32) {
+pub fn col_to_rgba8888(r: f32, g: f32, b: f32, a: f32) -> i32 {
+    (((255.0 * r) as i32) << 24)
+        | (((255.0 * g) as i32) << 16)
+        | (((255.0 * b) as i32) << 8)
+        | ((255.0 * a) as i32)
+}
+
+/**
+ * Unpacks the RGBA888 i32 into the color components
+ **/
+pub fn rgba8888_to_col(value: i32) -> (f32, f32, f32, f32) {
+    let val: u32 = value as u32;
     (
-        ((value & 0xff000000) >> 24) as f32 / 255.0,
-        ((value & 0x00ff0000) >> 16) as f32 / 255.0,
-        ((value & 0x0000ff00) >> 8) as f32 / 255.0,
-        ((value & 0x000000ff) as f32 / 255.0),
+        ((val & 0xff000000) >> 24) as f32 / 255.0,
+        ((val & 0x00ff0000) >> 16) as f32 / 255.0,
+        ((val & 0x0000ff00) >> 8) as f32 / 255.0,
+        ((val & 0x000000ff) as f32 / 255.0),
     )
 }

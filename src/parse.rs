@@ -1,27 +1,27 @@
 pub fn parse_i32(val_str: Option<&&str>) -> i32 {
     match val_str {
-        Some(val) => val.to_string().parse::<i32>().unwrap(),
+        Some(val) => val.parse::<i32>().unwrap_or(0),
         None => 0,
     }
 }
 
 pub fn parse_i64(val_str: Option<&&str>) -> i64 {
     match val_str {
-        Some(val) => val.to_string().parse::<i64>().unwrap(),
+        Some(val) => val.parse::<i64>().unwrap_or(0),
         None => 0,
     }
 }
 
 pub fn parse_f32(val_str: Option<&&str>) -> f32 {
     match val_str {
-        Some(val) => val.to_string().parse::<f32>().map_or(f32::NAN, |v| v),
+        Some(val) => val.parse::<f32>().unwrap_or(f32::NAN),
         None => f32::NAN,
     }
 }
 
 pub fn parse_f64(val_str: Option<&&str>) -> f64 {
     match val_str {
-        Some(val) => val.to_string().parse::<f64>().map_or(f64::NAN, |v| v),
+        Some(val) => val.parse::<f64>().unwrap_or(f64::NAN),
         None => f64::NAN,
     }
 }

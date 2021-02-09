@@ -160,9 +160,9 @@ fn main() {
 
     if args.input.len() > 0 {
         let mut start;
-        // Complete inputs
-        args.input.push_str("/*.gz");
-        args.hip.push_str("/*.csv");
+        // Complete inputs, load all files
+        args.input.push_str("/*");
+        args.hip.push_str("/*");
 
         // Load Hip-Gaia cross-match file
         // All stars with Hip counter-part are added to the
@@ -213,7 +213,7 @@ fn main() {
         //
         let loader_hip = load::Loader::new(
             1,
-            1000000,
+            5000000,
             0.0,
             args.ruwe_cap,
             -1.0,
@@ -338,8 +338,8 @@ fn main() {
         //
 
         // Prepare output
-        fs::remove_dir_all(&args.output).unwrap();
-        fs::create_dir(&args.output).unwrap();
+        fs::remove_dir_all(&args.output).expect(&format!("Error removing dir: {}", args.output));
+        fs::create_dir_all(&args.output).expect(&format!("Error creating dir: {}", args.output));
 
         // Write
         write::write_metadata(&octree, &args.output);

@@ -69,12 +69,16 @@ impl Octree {
             while cat_idx < list.len() {
                 // Add stars to nodes until we reach max_part
                 let star = list.get(cat_idx).expect("Error getting star");
-                let star_idx = cat_idx;
-                cat_idx += 1;
 
                 // Check if star is too far
                 let dist = (star.x * star.x + star.y * star.y + star.z * star.z).sqrt();
                 if dist * constants::U_TO_PC > self.distpc_cap {
+                    println!(
+                        "Star {} discarded due to being too far ({} pc)",
+                        star.id,
+                        dist * constants::U_TO_PC
+                    );
+                    cat_idx += 1;
                     continue;
                 }
 
@@ -101,6 +105,8 @@ impl Octree {
                     .add_obj(cat_idx);
                 octree_star_num += 1;
 
+                cat_idx += 1;
+
                 if added_num >= self.max_part {
                     // Next level
                     break;
@@ -118,10 +124,13 @@ impl Octree {
     }
 
     fn has_node(&self, x: f64, y: f64, z: f64, level: u32) -> bool {
+        let upc = constants::U_TO_PC;
+        let mut i = 1;
         for node in self.nodes.borrow().iter() {
             if node.level == level && node.contains(x, y, z) {
                 return true;
             }
+            i += 1;
         }
         false
     }
@@ -162,7 +171,7 @@ impl Octree {
 
         // start at root, which is always 0
         let mut current = OctantId(0);
-        for l in 1..level {
+        for l in 1..=level {
             let hs: f64 = self.nodes.borrow().get(current.0).unwrap().size.x / 2.0;
             let idx;
 

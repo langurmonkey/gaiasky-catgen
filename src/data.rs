@@ -21,7 +21,7 @@ pub struct Particle {
     pub radvel: f32,
     pub appmag: f32,
     pub absmag: f32,
-    pub col: u32,
+    pub col: f32,
     pub size: f32,
     pub hip: i32,
     pub id: i64,
