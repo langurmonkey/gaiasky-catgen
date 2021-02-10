@@ -10,7 +10,7 @@ endif
 set shortmess=aoO
 badd +1 src/main.rs
 badd +1 src/data.rs
-badd +1 src/lod.rs
+badd +137 src/lod.rs
 badd +1 src/write.rs
 badd +1 src/color.rs
 badd +1 src/xmatch.rs
@@ -96,13 +96,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 18) / 36)
+let s:l = 139 - ((13 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
-lcd ~/Projects/gaiasky-catgen
+139
+normal! 042|
 tabnext
 edit ~/Projects/gaiasky-catgen/src/write.rs
 set splitbelow splitright
@@ -206,7 +205,7 @@ exe s:l
 normal! zt
 1
 normal! 0
-tabnext 7
+tabnext 3
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0&& getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
@@ -218,7 +217,6 @@ if filereadable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &g:so = s:so_save | let &g:siso = s:siso_save
-nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :
