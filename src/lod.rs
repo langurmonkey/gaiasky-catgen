@@ -122,6 +122,12 @@ impl Octree {
                 break;
             }
         }
+
+        // Post-process
+        if self.postprocess {
+            todo!();
+        }
+
         // Compute numbers
         self.nodes.borrow()[0].compute_numbers(&self);
         (octree_node_num, octree_star_num, depth)
@@ -456,12 +462,6 @@ impl Octant {
                 match c {
                     Some(child) => octree.nodes.borrow().get(child.0).unwrap().print(i, octree),
                     None => (),
-                    //println!(
-                    //"{}{}:L{} x",
-                    //String::from_utf8(vec![32; ((self.level + 1) * 2) as usize]).unwrap(),
-                    //i,
-                    //self.level + 1
-                    //),
                 }
             }
         }
