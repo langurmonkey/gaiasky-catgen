@@ -12,9 +12,11 @@ pub const PC_TO_M: f64 = PC_TO_KM * 1000.0;
 //INTERNAL UNITS
 //
 pub const M_TO_U: f64 = 1e-9;
+#[allow(dead_code)]
 pub const U_TO_M: f64 = 1.0 / M_TO_U;
 
 pub const KM_TO_U: f64 = M_TO_U * 1000.0;
+#[allow(dead_code)]
 pub const U_TO_KM: f64 = 1.0 / KM_TO_U;
 
 pub const PC_TO_U: f64 = PC_TO_KM * KM_TO_U;

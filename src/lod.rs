@@ -128,13 +128,10 @@ impl Octree {
     }
 
     fn has_node(&self, x: f64, y: f64, z: f64, level: u32) -> bool {
-        let upc = constants::U_TO_PC;
-        let mut i = 1;
         for node in self.nodes.borrow().iter() {
             if node.level == level && node.contains(x, y, z) {
                 return true;
             }
-            i += 1;
         }
         false
     }

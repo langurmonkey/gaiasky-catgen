@@ -189,6 +189,7 @@ impl BoundingBox {
         self.dim.set(maxx - minx, maxy - miny, maxz - minz);
     }
 
+    #[allow(dead_code)]
     pub fn set(&mut self, other: &BoundingBox) {
         self.min.set_from(&other.min);
         self.max.set_from(&other.max);
@@ -196,18 +197,22 @@ impl BoundingBox {
         self.dim.set_from(&other.dim);
     }
 
+    #[allow(dead_code)]
     pub fn volume(&self) -> f64 {
         self.dim.x * self.dim.y * self.dim.z
     }
 
+    #[allow(dead_code)]
     pub fn is_valid(&self) -> bool {
         self.min.x < self.max.x && self.min.y < self.max.y && self.min.z < self.max.z
     }
 
+    #[allow(dead_code)]
     pub fn contains_vec(&self, vec: &Vec3) -> bool {
         self.contains(vec.x, vec.y, vec.z)
     }
 
+    #[allow(dead_code)]
     pub fn contains(&self, x: f64, y: f64, z: f64) -> bool {
         self.min.x <= x
             && self.max.x >= x
@@ -248,6 +253,7 @@ pub struct Config {
  * regular HashMaps. It is supposed to hold
  * very many entries.
  **/
+#[allow(dead_code)]
 pub struct LargeLongMap<T> {
     pub n_maps: u32,
     pub maps: Vec<HashMap<i64, T>>,
@@ -256,6 +262,7 @@ pub struct LargeLongMap<T> {
 }
 
 impl<T> LargeLongMap<T> {
+    #[allow(dead_code)]
     pub fn new(n: u32) -> LargeLongMap<T> {
         let mut llm = LargeLongMap::<T> {
             n_maps: n,
@@ -263,12 +270,13 @@ impl<T> LargeLongMap<T> {
             maps: Vec::new(),
             size: 0,
         };
-        for i in 0..n {
+        for _ in 0..n {
             llm.maps.push(HashMap::new());
         }
         llm
     }
 
+    #[allow(dead_code)]
     pub fn contains_key(&self, key: i64) -> bool {
         let idx: usize = (key % self.n_maps as i64) as usize;
         self.maps
@@ -277,6 +285,7 @@ impl<T> LargeLongMap<T> {
             .contains_key(&key)
     }
 
+    #[allow(dead_code)]
     pub fn put(&mut self, key: i64, value: T) {
         let idx: usize = (key % self.n_maps as i64) as usize;
         self.maps
@@ -287,11 +296,13 @@ impl<T> LargeLongMap<T> {
         self.size += 1;
     }
 
+    #[allow(dead_code)]
     pub fn get(&self, key: i64) -> Option<&T> {
         let idx: usize = (key % self.n_maps as i64) as usize;
         self.maps.get(idx).expect("Error: map not found").get(&key)
     }
 
+    #[allow(dead_code)]
     pub fn get_mut(&mut self, key: i64) -> Option<&mut T> {
         let idx: usize = (key % self.n_maps as i64) as usize;
         self.maps
@@ -300,6 +311,7 @@ impl<T> LargeLongMap<T> {
             .get_mut(&key)
     }
 
+    #[allow(dead_code)]
     pub fn is_empty(&self) -> bool {
         self.empty
     }

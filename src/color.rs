@@ -86,6 +86,7 @@ pub fn i32_bits_to_f32(value: u32) -> f32 {
 /**
  * Packs the color components into an i32 with the format RGBA8888
  **/
+#[allow(dead_code)]
 pub fn col_to_rgba8888(r: f32, g: f32, b: f32, a: f32) -> i32 {
     (((255.0 * r) as i32) << 24)
         | (((255.0 * g) as i32) << 16)
@@ -96,6 +97,7 @@ pub fn col_to_rgba8888(r: f32, g: f32, b: f32, a: f32) -> i32 {
 /**
  * Unpacks the RGBA888 i32 into the color components
  **/
+#[allow(dead_code)]
 pub fn rgba8888_to_col(value: i32) -> (f32, f32, f32, f32) {
     let val: u32 = value as u32;
     (

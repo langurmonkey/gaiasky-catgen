@@ -3,7 +3,6 @@ extern crate argparse;
 use std::{
     collections::{HashMap, HashSet},
     path,
-    time::Duration,
 };
 
 use argparse::{ArgumentParser, Store, StoreFalse, StoreTrue};
@@ -231,13 +230,12 @@ fn main() {
         );
         // Actually load hipparcos
         let mut list_hip = Vec::new();
-        let mut time_hip = Duration::new(0, 0);
         if args.hip.len() > 0 {
             let start_hip = Instant::now();
             list_hip = loader_hip
                 .load_dir(&args.hip)
                 .expect("Error loading HIP data");
-            time_hip = start_hip.elapsed();
+            let time_hip = start_hip.elapsed();
             println!(
                 "{} particles loaded form HIP in {:?}",
                 list_hip.len(),
@@ -260,7 +258,7 @@ fn main() {
         let mut gaia_wins = 0;
         let mut hip_wins = 0;
 
-        for mut gaia_star in list_gaia {
+        for gaia_star in list_gaia {
             if !xmatch_map.contains_key(&gaia_star.id) {
                 // No hit, add directly to main list
                 main_list.push(gaia_star);
