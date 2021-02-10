@@ -50,15 +50,16 @@ impl Octree {
      * Generates a new octree with the given list
      * of stars and parameters. The list must be
      * sorted by magnitude beforehand. Returns the
-     * number of octants in the octree and thenumber
+     * number of octants in the octree, the number
      * of stars actually added (i.e. not skipped
-     * due to being too far)
+     * due to being too far) and the depth of the tree
      **/
-    pub fn generate_octree(&self, list: &Vec<Particle>) -> (usize, usize) {
+    pub fn generate_octree(&self, list: &Vec<Particle>) -> (usize, usize, u32) {
         self.start_generation(list);
 
         let mut octree_star_num: usize = 0;
         let mut octree_node_num: usize = 1;
+        let mut depth: u32 = 0;
         let mut cat_idx = 0;
         for level in 0..25 {
             println!(
@@ -103,8 +104,11 @@ impl Octree {
                     .get(octant_id.0)
                     .unwrap()
                     .add_obj(cat_idx);
-                octree_star_num += 1;
 
+                if level > depth {
+                    depth = level;
+                }
+                octree_star_num += 1;
                 cat_idx += 1;
 
                 if added_num >= self.max_part {
@@ -120,7 +124,7 @@ impl Octree {
         }
         // Compute numbers
         self.nodes.borrow()[0].compute_numbers(&self);
-        (octree_node_num, octree_star_num)
+        (octree_node_num, octree_star_num, depth)
     }
 
     fn has_node(&self, x: f64, y: f64, z: f64, level: u32) -> bool {

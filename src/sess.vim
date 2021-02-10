@@ -8,7 +8,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +216 main.rs
+badd +303 main.rs
 badd +140 lod.rs
 badd +641 load.rs
 badd +71 write.rs
@@ -48,12 +48,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 59 - ((16 * winheight(0) + 16) / 32)
+let s:l = 361 - ((22 * winheight(0) + 16) / 32)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-59
-normal! 018|
+361
+normal! 040|
 tabnext
 edit lod.rs
 set splitbelow splitright
@@ -260,7 +260,7 @@ exe s:l
 normal! zt
 116
 normal! 021|
-tabnext 7
+tabnext 1
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0&& getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf

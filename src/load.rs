@@ -6,11 +6,13 @@ use crate::color;
 use crate::constants;
 use crate::coord;
 use crate::data;
+use crate::math;
 use crate::parse;
 use crate::util;
 
 use io::Write;
 use memmap::Mmap;
+use std::cell::RefCell;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io;
 use std::io::{BufRead, Read};
@@ -258,14 +260,17 @@ impl Additional {
                 .indices
                 .get(col_id.to_str())
                 .expect("Error: could not get index");
-            Some(
-                self.values
-                    .get(&source_id)
-                    .unwrap()
-                    .get(index)
-                    .unwrap()
-                    .clone(),
-            )
+            let sid = self.values.get(&source_id);
+            if sid.is_some() {
+                let v = sid.unwrap().get(index);
+                if v.is_some() {
+                    Some(v.unwrap().clone())
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
         } else {
             None
         }
@@ -301,6 +306,8 @@ pub struct Loader {
     pub indices: HashMap<ColId, usize>,
     // Coordinate conversion
     pub coord: coord::Coord,
+    // Star counts per magnitude
+    pub counts_per_mag: RefCell<[u32; 21]>,
 }
 
 impl Loader {
@@ -357,6 +364,7 @@ impl Loader {
             additional,
             indices,
             coord: coord::Coord::new(),
+            counts_per_mag: RefCell::new([0; 21]),
         }
     }
 
@@ -455,6 +463,9 @@ impl Loader {
             tokens.get(self.get_index(&ColId::rpmag)),
             tokens.get(self.get_index(&ColId::col_idx)),
             tokens.get(self.get_index(&ColId::ruwe)),
+            tokens.get(self.get_index(&ColId::ag)),
+            tokens.get(self.get_index(&ColId::ebp_min_rp)),
+            tokens.get(self.get_index(&ColId::teff)),
         )
     }
 
@@ -482,6 +493,9 @@ impl Loader {
         srp: Option<&&str>,
         sbv: Option<&&str>,
         sruwe: Option<&&str>,
+        sag: Option<&&str>,
+        sebp_min_rp: Option<&&str>,
+        steff: Option<&&str>,
     ) -> Option<Particle> {
         // First, check if we accept it given the current constraints
         let mut plx: f64 = parse::parse_f64(splx) + self.plx_zeropoint;
@@ -509,22 +523,36 @@ impl Loader {
         // Extra attributes
         let mut extra: HashMap<ColId, f32> = HashMap::with_capacity(2);
 
-        let ruwe_val: f32 = parse::parse_f32(sruwe);
+        let ruwe_val: f32 = self.get_ruwe(source_id, sruwe);
         // RUWE test
         if !must_load && !self.accept_ruwe(ruwe_val) {
-            println!("NOT ACCEPT RUWE");
             return None;
         }
         if ruwe_val.is_finite() {
             extra.insert(ColId::ruwe, ruwe_val);
         }
 
+        // If we have geometric distances, we only accept stars which have one, otherwise
+        // we accept all
+        if !(must_load
+            || !has_geodist
+            || (has_geodist && self.has_additional(ColId::geodist, source_id)))
+        {
+            return None;
+        }
+
         // Distance
-        let dist_pc: f64 = 1000.0 / plx;
+        let mut dist_pc: f64 = 1000.0 / plx;
+        let geodist_pc = self.get_geodistance(source_id);
+        dist_pc = if geodist_pc > 0.0 {
+            geodist_pc
+        } else {
+            dist_pc
+        };
 
         // Distance test
         if !must_load && !self.accept_distance(dist_pc) {
-            println!("NOT ACCEPT DIST");
+            println!("No dist: {} , cap: {}", dist_pc, self.distpc_cap);
             return None;
         }
         let dist: f64 = dist_pc * constants::PC_TO_U;
@@ -533,8 +561,6 @@ impl Loader {
         let plx_err: f32 = parse::parse_f32(splx_e);
         if plx_err.is_finite() {
             extra.insert(ColId::plx_err, plx_err);
-        } else {
-            //println!("Star {} plx_e {}", source_id, plx_e);
         }
 
         // Name
@@ -574,7 +600,7 @@ impl Loader {
         );
 
         // Apparent magnitudes
-        let mut ag: f64 = 0.0;
+        let mut ag: f64 = parse::parse_f64(sag);
         let pos_gal: Vector3<f64> = Vector3::new(pos.x, pos.y, pos.z);
         self.coord.eq_gal.transform_vector(&pos_gal);
         let pos_gal_sph = util::cartesian_to_spherical(pos_gal.x, pos_gal.y, pos_gal.z);
@@ -582,8 +608,17 @@ impl Loader {
         let magcorraux = dist_pc.min(150.0 / b.sin().abs());
 
         if self.mag_corrections {
-            ag = magcorraux * 5.9e-4;
-            ag = ag.min(3.2);
+            if !ag.is_finite() {
+                // Analytical extinction, cap to 3.2
+                let ag_analytical: f64 = f64::min(3.2, magcorraux * 5.9e-4);
+                if self.has_additional_col(ColId::ag) {
+                    ag = self
+                        .get_additional(ColId::ag, source_id)
+                        .unwrap_or(ag_analytical);
+                } else {
+                    ag = ag_analytical;
+                }
+            }
         }
         if ag.is_finite() {
             appmag -= ag;
@@ -598,16 +633,31 @@ impl Loader {
         let size: f32 = f64::min(pseudo_l.powf(0.45) * size_fac, 1e10) as f32;
 
         // Color
-        let ebr: f64 = 0.0;
+        let mut ebr: f64 = parse::parse_f64(sebp_min_rp);
+        if self.mag_corrections {
+            if !self.has_col(ColId::ebp_min_rp) || ebr.is_finite() {
+                // Analytical reddening, cap to 1.6
+                let ebr_analytical = f64::min(1.6, magcorraux * 2.9e-4);
+                if self.has_additional(ColId::ebp_min_rp, source_id) {
+                    ebr = self
+                        .get_additional(ColId::ebp_min_rp, source_id)
+                        .unwrap_or(ebr_analytical);
+                } else {
+                    ebr = ebr_analytical;
+                }
+            }
+        }
 
         let col_idx: f64;
-        let teff: f64;
+        let mut teff: f64 = parse::parse_f64(steff);
         if sbp.is_some() && srp.is_some() {
             let bp: f64 = parse::parse_f64(sbp);
             let rp: f64 = parse::parse_f64(srp);
             col_idx = bp - rp - ebr;
 
-            teff = color::xp_to_teff(col_idx);
+            if !teff.is_finite() {
+                teff = color::xp_to_teff(col_idx);
+            }
         } else if sbv.is_some() {
             col_idx = parse::parse_f64(sbv);
             teff = color::bv_to_teff_ballesteros(col_idx);
@@ -616,7 +666,11 @@ impl Loader {
             teff = color::bv_to_teff_ballesteros(col_idx);
         }
         let (col_r, col_g, col_b) = color::teff_to_rgb(teff);
-        let col = color::col_to_f32(col_r as f32, col_g as f32, col_b as f32, 1.0);
+        let color_packed: f32 = color::col_to_f32(col_r as f32, col_g as f32, col_b as f32, 1.0);
+
+        // Update counts per mag
+        let appmag_clamp = math::clamp(appmag, 0.0, 21.0) as usize;
+        self.counts_per_mag.borrow_mut()[appmag_clamp] += 1;
 
         Some(Particle {
             x: pos.x,
@@ -630,7 +684,7 @@ impl Loader {
             radvel: radvel as f32,
             appmag: appmag as f32,
             absmag: absmag as f32,
-            col,
+            col: color_packed,
             size,
             hip,
             id: source_id,
@@ -655,7 +709,7 @@ impl Loader {
     }
 
     fn accept_distance(&self, dist_pc: f64) -> bool {
-        self.distpc_cap <= 0.0 || dist_pc <= self.distpc_cap
+        dist_pc <= self.distpc_cap
     }
 
     fn get_geodistance(&self, source_id: i64) -> f64 {
@@ -676,9 +730,9 @@ impl Loader {
         ruwe.is_nan() || self.ruwe_cap.is_nan() || ruwe < self.ruwe_cap
     }
 
-    fn get_ruwe(&self, source_id: i64, tokens: Vec<&str>) -> f32 {
+    fn get_ruwe(&self, source_id: i64, sruwe: Option<&&str>) -> f32 {
         if self.has_col(ColId::ruwe) {
-            parse::parse_f32(tokens.get(self.get_index(&ColId::ruwe)))
+            parse::parse_f32(sruwe)
         } else {
             let ruwe = self.get_additional(ColId::ruwe, source_id);
             match ruwe {

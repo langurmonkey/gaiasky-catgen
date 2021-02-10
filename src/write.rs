@@ -10,7 +10,7 @@ use std::fs::OpenOptions;
 
 pub fn write_metadata(octree: &Octree, output_dir: &str) {
     println!(
-        "Writing metadata ({} nodes): {}/metadata.bin",
+        ":: Writing metadata ({} nodes) to {}/metadata.bin",
         octree.nodes.borrow().len(),
         output_dir
     );
@@ -22,28 +22,42 @@ pub fn write_metadata(octree: &Octree, output_dir: &str) {
         .expect("Error: file not found");
 
     // Number of nodes
-    f.write_all(&(octree.nodes.borrow().len() as i32).to_be_bytes());
+    f.write_all(&(octree.nodes.borrow().len() as i32).to_be_bytes())
+        .expect("Error writing");
 
     for node in octree.nodes.borrow().iter() {
-        f.write_all(&(node.id.0 as i32).to_be_bytes());
-        f.write_all(&(node.centre.x as f32).to_be_bytes());
-        f.write_all(&(node.centre.y as f32).to_be_bytes());
-        f.write_all(&(node.centre.z as f32).to_be_bytes());
-        f.write_all(&(node.size.x as f32).to_be_bytes());
-        f.write_all(&(node.size.y as f32).to_be_bytes());
-        f.write_all(&(node.size.z as f32).to_be_bytes());
+        f.write_all(&(node.id.0 as i32).to_be_bytes())
+            .expect("Error writing");
+        f.write_all(&(node.centre.x as f32).to_be_bytes())
+            .expect("Error writing");
+        f.write_all(&(node.centre.y as f32).to_be_bytes())
+            .expect("Error writing");
+        f.write_all(&(node.centre.z as f32).to_be_bytes())
+            .expect("Error writing");
+        f.write_all(&(node.size.x as f32).to_be_bytes())
+            .expect("Error writing");
+        f.write_all(&(node.size.y as f32).to_be_bytes())
+            .expect("Error writing");
+        f.write_all(&(node.size.z as f32).to_be_bytes())
+            .expect("Error writing");
         for i in 0..8_usize {
             // Children
             if node.has_child(i) {
-                f.write_all(&(node.get_child(i).unwrap().0 as i32).to_be_bytes());
+                f.write_all(&(node.get_child(i).unwrap().0 as i32).to_be_bytes())
+                    .expect("Error writing");
             } else {
-                f.write_all(&(-1 as i32).to_be_bytes());
+                f.write_all(&(-1 as i32).to_be_bytes())
+                    .expect("Error writing");
             }
         }
-        f.write_all(&(node.level as i32).to_be_bytes());
-        f.write_all(&(node.num_objects_rec.get()).to_be_bytes());
-        f.write_all(&(node.num_objects.get()).to_be_bytes());
-        f.write_all(&(node.num_children.get()).to_be_bytes());
+        f.write_all(&(node.level as i32).to_be_bytes())
+            .expect("Error writing");
+        f.write_all(&(node.num_objects_rec.get()).to_be_bytes())
+            .expect("Error writing");
+        f.write_all(&(node.num_objects.get()).to_be_bytes())
+            .expect("Error writing");
+        f.write_all(&(node.num_children.get()).to_be_bytes())
+            .expect("Error writing");
     }
 }
 
@@ -69,12 +83,13 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
             .expect("Error: file not found");
 
         // Version marker
-        f.write_all(&(-1_i32).to_be_bytes());
+        f.write_all(&(-1_i32).to_be_bytes()).expect("Error writing");
         // Version = 2
-        f.write_all(&(2_i32).to_be_bytes());
+        f.write_all(&(2_i32).to_be_bytes()).expect("Error writing");
 
         // Size
-        f.write_all(&(node.objects.borrow().len() as i32).to_be_bytes());
+        f.write_all(&(node.objects.borrow().len() as i32).to_be_bytes())
+            .expect("Error writing");
 
         // Particles
         for star_idx in node.objects.borrow().iter() {
@@ -84,27 +99,33 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
                     .expect(&format!("Star not found: {}", *star_idx));
 
                 // 64-bit floats
-                f.write_all(&(sb.x).to_be_bytes());
-                f.write_all(&(sb.y).to_be_bytes());
-                f.write_all(&(sb.z).to_be_bytes());
+                f.write_all(&(sb.x).to_be_bytes()).expect("Error writing");
+                f.write_all(&(sb.y).to_be_bytes()).expect("Error writing");
+                f.write_all(&(sb.z).to_be_bytes()).expect("Error writing");
 
                 // 32-bit floats
-                f.write_all(&(sb.pmx).to_be_bytes());
-                f.write_all(&(sb.pmy).to_be_bytes());
-                f.write_all(&(sb.pmz).to_be_bytes());
-                f.write_all(&(sb.mualpha).to_be_bytes());
-                f.write_all(&(sb.mudelta).to_be_bytes());
-                f.write_all(&(sb.radvel).to_be_bytes());
-                f.write_all(&(sb.appmag).to_be_bytes());
-                f.write_all(&(sb.absmag).to_be_bytes());
-                f.write_all(&(sb.col).to_be_bytes());
-                f.write_all(&(sb.size).to_be_bytes());
+                f.write_all(&(sb.pmx).to_be_bytes()).expect("Error writing");
+                f.write_all(&(sb.pmy).to_be_bytes()).expect("Error writing");
+                f.write_all(&(sb.pmz).to_be_bytes()).expect("Error writing");
+                f.write_all(&(sb.mualpha).to_be_bytes())
+                    .expect("Error writing");
+                f.write_all(&(sb.mudelta).to_be_bytes())
+                    .expect("Error writing");
+                f.write_all(&(sb.radvel).to_be_bytes())
+                    .expect("Error writing");
+                f.write_all(&(sb.appmag).to_be_bytes())
+                    .expect("Error writing");
+                f.write_all(&(sb.absmag).to_be_bytes())
+                    .expect("Error writing");
+                f.write_all(&(sb.col).to_be_bytes()).expect("Error writing");
+                f.write_all(&(sb.size).to_be_bytes())
+                    .expect("Error writing");
 
                 // 32-bit int
-                f.write_all(&(sb.hip).to_be_bytes());
+                f.write_all(&(sb.hip).to_be_bytes()).expect("Error writing");
 
                 // 64-bit int
-                f.write_all(&(sb.id).to_be_bytes());
+                f.write_all(&(sb.id).to_be_bytes()).expect("Error writing");
 
                 // Names
                 let mut names_concat = String::new();
@@ -115,12 +136,13 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
                 names_concat.pop();
 
                 // Names length
-                f.write_all(&(names_concat.len() as i32).to_be_bytes());
+                f.write_all(&(names_concat.len() as i32).to_be_bytes())
+                    .expect("Error writing");
                 // Characters
                 let mut buf: [u16; 1] = [0; 1];
                 for ch in names_concat.chars() {
                     ch.encode_utf16(&mut buf);
-                    f.write_all(&(buf[0]).to_be_bytes());
+                    f.write_all(&(buf[0]).to_be_bytes()).expect("Error writing");
                 }
             } else {
                 eprintln!(

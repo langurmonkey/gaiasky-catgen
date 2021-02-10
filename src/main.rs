@@ -8,6 +8,7 @@ use std::{
 
 use argparse::{ArgumentParser, Store, StoreFalse, StoreTrue};
 
+use constants::NEGATIVE_DIST;
 use data::Config;
 use std::fs;
 use std::time::Instant;
@@ -218,7 +219,7 @@ fn main() {
             5000000,
             0.0,
             args.ruwe_cap,
-            -1.0,
+            1e9,
             1000.0,
             1000.0,
             1000.0,
@@ -258,6 +259,7 @@ fn main() {
         let mut hit = 0;
         let mut gaia_wins = 0;
         let mut hip_wins = 0;
+
         for mut gaia_star in list_gaia {
             if !xmatch_map.contains_key(&gaia_star.id) {
                 // No hit, add directly to main list
@@ -268,30 +270,80 @@ fn main() {
                 let hip_id = xmatch_map.get(&gaia_star.id).unwrap();
                 if hip_map.contains_key(hip_id) {
                     hip_added.insert(hip_id);
+
                     let hip_star = hip_map.get(&hip_id).unwrap();
                     let gaia_plx_e = gaia_star.get_extra(load::ColId::plx_err);
                     let hip_plx_e = hip_star.get_extra(load::ColId::plx_err);
 
                     if gaia_plx_e <= hip_plx_e {
                         //println!("Gaia wins: {} <= {}", gaia_plx_e, hip_plx_e);
-                        main_list.push(gaia_star);
                         gaia_wins += 1;
+
+                        let mut size = gaia_star.size;
+                        let mut pos_gaia = data::Vec3::new(gaia_star.x, gaia_star.y, gaia_star.z);
+                        let negative_dist = f64::abs(pos_gaia.len() - NEGATIVE_DIST) < 1e-10;
+                        if negative_dist {
+                            // Negative distance in gaia star
+                            // use gaia 2D position, HIP distance and name
+
+                            // Fetch Gaia RA/DEC
+                            let gaia_sph =
+                                util::cartesian_to_spherical(pos_gaia.x, pos_gaia.y, pos_gaia.z);
+                            let gaia_ra = gaia_sph.x;
+                            let gaia_dec = gaia_sph.y;
+
+                            // Fetch HIP distance
+                            let pos_hip = data::Vec3::new(hip_star.x, hip_star.y, hip_star.z);
+                            let hip_sph =
+                                util::cartesian_to_spherical(pos_hip.x, pos_hip.y, pos_hip.z);
+                            let hip_dist = hip_sph.z;
+
+                            // Compute new cartesian position
+                            pos_gaia.set_from(&util::spherical_to_cartesian(
+                                gaia_ra, gaia_dec, hip_dist,
+                            ));
+
+                            size = hip_star.size;
+                        }
+
+                        // Merged star
+                        let mut star = hip_star.copy();
+                        star.id = gaia_star.id;
+                        // Pos
+                        star.x = pos_gaia.x;
+                        star.y = pos_gaia.y;
+                        star.z = pos_gaia.z;
+                        // Vel vector
+                        star.pmx = gaia_star.pmx;
+                        star.pmy = gaia_star.pmy;
+                        star.pmz = gaia_star.pmz;
+                        // Pm
+                        star.mualpha = gaia_star.mualpha;
+                        star.mudelta = gaia_star.mudelta;
+                        star.radvel = gaia_star.radvel;
+                        // Mag
+                        star.appmag = gaia_star.appmag;
+                        star.absmag = gaia_star.absmag;
+                        // Col
+                        star.col = gaia_star.col;
+                        // Size
+                        star.size = size;
+
+                        main_list.push(star);
                     } else {
                         //println!("Hip wins: {} <= {}", hip_plx_e, gaia_plx_e);
                         main_list.push(hip_star.copy());
                         hip_wins += 1;
                     }
-                } else {
                 }
                 hit += 1;
             }
         }
-        let mut rest = 0;
+
         // Add rest of hip
         for hip_star in &list_hip {
             if !hip_added.contains(&hip_star.hip) {
                 main_list.push(hip_star.copy());
-                rest += 1;
             }
         }
         println!(
@@ -299,8 +351,16 @@ fn main() {
             hit, gaia_wins, hip_wins, no_hit
         );
 
+        // Drop hip lists
+        std::mem::drop(list_hip);
+
         println!("{} stars in the final list", main_list.len());
         let time_load = start.elapsed();
+
+        if main_list.is_empty() {
+            println!("No stars were loaded, aborting.");
+            std::process::exit(1);
+        }
 
         //
         // Actually generate LOD octree
@@ -330,7 +390,7 @@ fn main() {
             args.parent_count,
             args.distpc_cap,
         );
-        let (num_octants, num_stars) = octree.generate_octree(&main_list);
+        let (num_octants, num_stars, depth) = octree.generate_octree(&main_list);
         println!(
             "Octree generated with {}={} octants and {} stars ({} skipped) in {:?}",
             num_octants,
@@ -351,10 +411,38 @@ fn main() {
         fs::create_dir_all(&args.output).expect(&format!("Error creating dir: {}", args.output));
 
         // Write
+        let main_list_len = main_list.len() as f32;
         write::write_metadata(&octree, &args.output);
         write::write_particles(&octree, main_list, &args.output);
         let time_write = start_write.elapsed();
 
+        // Star counts per magnitude
+        println!();
+        println!("=========================");
+        println!("STAR COUNTS PER MAGNITUDE");
+        println!("=========================");
+        for i in 0..21 {
+            let count =
+                loader_hip.counts_per_mag.borrow()[i] + loader_gaia.counts_per_mag.borrow()[i];
+            println!(
+                "Magnitude {}: {} stars ({:.3}%)",
+                i,
+                count,
+                (count as f32 * 100.0) / main_list_len
+            )
+        }
+
+        // Octree stats
+        println!();
+        println!("============");
+        println!("OCTREE STATS");
+        println!("============");
+        println!("Octants: {}", num_octants);
+        println!("Particles: {}", num_stars);
+        println!("Depth: {}", depth);
+
+        // Final stats
+        println!();
         println!("================");
         println!("FINAL TIME STATS");
         println!("================");

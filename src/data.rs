@@ -139,6 +139,10 @@ impl Vec3 {
         self.z = other.z;
         self
     }
+
+    pub fn len(&self) -> f64 {
+        f64::sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+    }
 }
 
 /**
