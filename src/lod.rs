@@ -125,7 +125,61 @@ impl Octree {
 
         // Post-process
         if self.postprocess {
-            todo!();
+            println!(
+                "Post-processing octree: child_count={}, parent_count={}",
+                self.child_count, self.parent_count
+            );
+            let mut merged_nodes: usize = 0;
+            let mut merged_objects: usize = 0;
+            let nodes = self.nodes.borrow();
+
+            // From deepest to root
+            for level in (0..=depth).rev() {
+                for node in nodes.iter() {
+                    if !node.deleted.get()
+                        && !node.has_kids()
+                        && node.level == level
+                        && node.parent.is_some()
+                    {
+                        let parent_id = node.parent.unwrap();
+                        let parent = nodes.get(parent_id.0).unwrap();
+                        let node_objects_count = node.objects.borrow().len();
+                        let parent_objects_count = parent.objects.borrow().len();
+                        if node_objects_count <= self.child_count
+                            && parent_objects_count <= self.parent_count
+                        {
+                            // Add all node objects to parent objects, delete node
+
+                            // Add objects from node to parent
+                            let mut p_objects = parent.objects.borrow_mut();
+                            for id in node.objects.borrow().iter() {
+                                p_objects.push(*id);
+                            }
+
+                            // Remove objects from node
+                            node.objects.borrow_mut().clear();
+
+                            // Delete node from parent
+                            let mut p_nodes = parent.children.borrow_mut();
+                            for i in 0..8 {
+                                if p_nodes[i].is_some() && p_nodes[i].unwrap().0 == node.id.0 {
+                                    p_nodes[i] = None;
+                                }
+                            }
+
+                            // Mark deleted
+                            node.deleted.set(true);
+
+                            merged_objects += node_objects_count;
+                            merged_nodes += 1;
+                        }
+                    }
+                }
+            }
+
+            println!("POSTPROCESS STATS:");
+            println!("    Merged nodes:    {}", merged_nodes);
+            println!("    Merged objects:  {}", merged_objects);
         }
 
         // Compute numbers
@@ -300,6 +354,8 @@ impl Octree {
             num_objects_rec: Cell::new(0),
             num_children: Cell::new(0),
 
+            deleted: Cell::new(false),
+
             parent: None,
             children: RefCell::new([None; 8]),
             objects: RefCell::new(Vec::new()),
@@ -368,6 +424,8 @@ pub struct Octant {
     pub num_objects_rec: Cell<i32>,
     pub num_children: Cell<i32>,
 
+    pub deleted: Cell<bool>,
+
     pub parent: Option<OctantId>,
     pub children: RefCell<[Option<OctantId>; 8]>,
     pub objects: RefCell<Vec<usize>>,
@@ -409,6 +467,8 @@ impl Octant {
             num_objects: Cell::new(0),
             num_objects_rec: Cell::new(0),
             num_children: Cell::new(0),
+
+            deleted: Cell::new(false),
 
             parent,
             children: RefCell::new([None; 8]),
