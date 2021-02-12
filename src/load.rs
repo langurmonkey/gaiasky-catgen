@@ -6,7 +6,6 @@ use crate::color;
 use crate::constants;
 use crate::coord;
 use crate::data;
-use crate::math;
 use crate::parse;
 use crate::util;
 
@@ -669,7 +668,7 @@ impl Loader {
         let color_packed: f32 = color::col_to_f32(col_r as f32, col_g as f32, col_b as f32, 1.0);
 
         // Update counts per mag
-        let appmag_clamp = math::clamp(appmag, 0.0, 21.0) as usize;
+        let appmag_clamp = f64::clamp(appmag, 0.0, 21.0) as usize;
         self.counts_per_mag.borrow_mut()[appmag_clamp] += 1;
 
         Some(Particle {
