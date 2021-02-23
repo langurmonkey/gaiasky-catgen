@@ -189,6 +189,8 @@ fn main() {
 
     log4rs::init_config(config).expect("Error initializing logger");
 
+    log::info!("{:?}", args);
+
     log::info!("Input: {:?}", input_path);
     log::info!("Output: {:?}", output_path);
 

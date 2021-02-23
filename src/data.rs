@@ -248,6 +248,31 @@ pub struct Config {
     pub star_num_cap: i32,
 }
 
+impl fmt::Debug for Config {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Arguments")
+            .field("input", &self.input)
+            .field("output", &self.output)
+            .field("hip", &self.hip)
+            .field("max_part", &self.max_part)
+            .field("ruwe_cap", &self.ruwe_cap)
+            .field("distpc_cap", &self.distpc_cap)
+            .field("plx_err_faint", &self.plx_err_faint)
+            .field("plx_err_bright", &self.plx_err_bright)
+            .field("plx_zeropoint", &self.plx_zeropoint)
+            .field("mag_corrections", &self.mag_corrections)
+            .field("postprocess", &self.postprocess)
+            .field("child_count", &self.child_count)
+            .field("parent_count", &self.parent_count)
+            .field("additional", &self.additional)
+            .field("xmatch", &self.xmatch)
+            .field("columns", &self.columns)
+            .field("file_num_cap", &self.file_num_cap)
+            .field("star_num_cap", &self.star_num_cap)
+            .finish()
+    }
+}
+
 /**
  * A map with i64 keys backed by a number of
  * regular HashMaps. It is supposed to hold
