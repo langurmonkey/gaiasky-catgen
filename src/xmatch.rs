@@ -21,5 +21,5 @@ pub fn load_xmatch(file: &str, map: &mut HashMap<i64, i32>) {
 
         total += 1;
     }
-    println!("{} records loaded from {}", total, file);
+    log::info!("{} records loaded from {}", total, file);
 }

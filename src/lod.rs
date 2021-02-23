@@ -62,7 +62,7 @@ impl Octree {
         let mut depth: u32 = 0;
         let mut cat_idx = 0;
         for level in 0..25 {
-            println!(
+            log::info!(
                 "Generating level {} ({} stars left)",
                 level,
                 list.len() - cat_idx
@@ -74,7 +74,7 @@ impl Octree {
                 // Check if star is too far
                 let dist = (star.x * star.x + star.y * star.y + star.z * star.z).sqrt();
                 if dist * constants::U_TO_PC > self.distpc_cap {
-                    println!(
+                    log::info!(
                         "Star {} discarded due to being too far ({} pc)",
                         star.id,
                         dist * constants::U_TO_PC
@@ -125,9 +125,10 @@ impl Octree {
 
         // Post-process
         if self.postprocess {
-            println!(
+            log::info!(
                 "Post-processing octree: child_count={}, parent_count={}",
-                self.child_count, self.parent_count
+                self.child_count,
+                self.parent_count
             );
             let mut merged_nodes: usize = 0;
             let mut merged_objects: usize = 0;
@@ -177,9 +178,9 @@ impl Octree {
                 }
             }
 
-            println!("POSTPROCESS STATS:");
-            println!("    Merged nodes:    {}", merged_nodes);
-            println!("    Merged objects:  {}", merged_objects);
+            log::info!("POSTPROCESS STATS:");
+            log::info!("    Merged nodes:    {}", merged_nodes);
+            log::info!("    Merged objects:  {}", merged_objects);
         }
 
         // Compute numbers
@@ -309,7 +310,7 @@ impl Octree {
      * containing all the particles in the list.
      **/
     fn start_generation(&self, list: &Vec<Particle>) {
-        println!("Starting generation of octree");
+        log::info!("Starting generation of octree");
 
         let mut min = Vec3::with(1.0e50);
         let mut max = Vec3::with(-1.0e50);
@@ -368,9 +369,12 @@ impl Octree {
             * constants::U_TO_PC
             * bx.dim.z
             * constants::U_TO_PC;
-        println!(
+        log::info!(
             "Octree root node generated with min: {}, max: {}, centre: {}, volume: {} pc3",
-            root.min, root.max, root.centre, vol
+            root.min,
+            root.max,
+            root.centre,
+            vol
         );
         self.nodes.borrow_mut().push(root);
     }
@@ -380,7 +384,7 @@ impl Octree {
     }
 
     pub fn print(&self) {
-        println!(
+        log::info!(
             "Octree contains {} nodes and {} objects",
             self.nodes.borrow().len(),
             self.get_num_objects()
@@ -504,7 +508,7 @@ impl Octant {
 
     pub fn print(&self, parent_idx: usize, octree: &Octree) {
         // 32 is the UTF-8 code for whitespace
-        println!(
+        log::info!(
             "{}{}:L{} id:{} Obj(own/rec):({}/{}) Nchld:{}",
             String::from_utf8(vec![32; (self.level * 2) as usize]).unwrap(),
             parent_idx,

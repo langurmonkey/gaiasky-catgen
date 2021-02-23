@@ -13,6 +13,8 @@ nalgebra = "*"
 argparse = "0.2.2"
 memmap ="*"
 fast-float = "*"
+log = "*"
+log4rs = "*"
 
 [profile.release]
 lto = true

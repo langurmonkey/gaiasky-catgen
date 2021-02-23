@@ -9,6 +9,12 @@ use argparse::{ArgumentParser, Store, StoreFalse, StoreTrue};
 
 use constants::NEGATIVE_DIST;
 use data::Config;
+use log::LevelFilter;
+use log4rs::append::console::ConsoleAppender;
+use log4rs::append::file::FileAppender;
+use log4rs::config::Config as LogConfig;
+use log4rs::config::{Appender, Root};
+use log4rs::encode::pattern::PatternEncoder;
 use std::fs;
 use std::time::Instant;
 
@@ -157,8 +163,34 @@ fn main() {
     let input_path = path::Path::new(&args.input);
     let output_path = path::Path::new(&args.output);
 
-    println!("Input: {:?}", input_path);
-    println!("Output: {:?}", output_path);
+    // Init logging
+    let logfile = FileAppender::builder()
+        .encoder(Box::new(PatternEncoder::new(
+            "{d(%Y%m%d %H:%M:%S)} - {l} - {m}\n",
+        )))
+        .build(format!("{}/log", args.output))
+        .expect("Error creating file appender");
+    let console = ConsoleAppender::builder()
+        .encoder(Box::new(PatternEncoder::new(
+            "{d(%Y%m%d %H:%M:%S)} - {l} - {m}\n",
+        )))
+        .build();
+
+    let config = LogConfig::builder()
+        .appender(Appender::builder().build("logfile", Box::new(logfile)))
+        .appender(Appender::builder().build("console", Box::new(console)))
+        .build(
+            Root::builder()
+                .appender("logfile")
+                .appender("console")
+                .build(LevelFilter::Info),
+        )
+        .expect("Error building logger config");
+
+    log4rs::init_config(config).expect("Error initializing logger");
+
+    log::info!("Input: {:?}", input_path);
+    log::info!("Output: {:?}", output_path);
 
     // Make sure input exists
     assert!(input_path.exists(), "Input directory does not exist");
@@ -209,7 +241,7 @@ fn main() {
             .load_dir(&args.input)
             .expect("Error loading Gaia data");
         let time_gaia = start_gaia.elapsed();
-        println!(
+        log::info!(
             "{} particles loaded form Gaia in {:?}",
             list_gaia.len(),
             time_gaia,
@@ -241,7 +273,7 @@ fn main() {
                 .load_dir(&args.hip)
                 .expect("Error loading HIP data");
             let time_hip = start_hip.elapsed();
-            println!(
+            log::info!(
                 "{} particles loaded form HIP in {:?}",
                 list_hip.len(),
                 time_hip
@@ -257,7 +289,7 @@ fn main() {
         for hip_star in &list_hip {
             hip_map.insert(hip_star.hip, hip_star);
         }
-        println!("{} stars added to hip_map", hip_map.len());
+        log::info!("{} stars added to hip_map", hip_map.len());
         let mut no_hit = 0;
         let mut hit = 0;
         let mut gaia_wins = 0;
@@ -279,7 +311,7 @@ fn main() {
                     let hip_plx_e = hip_star.get_extra(load::ColId::plx_err);
 
                     if gaia_plx_e <= hip_plx_e {
-                        //println!("Gaia wins: {} <= {}", gaia_plx_e, hip_plx_e);
+                        //log::info!("Gaia wins: {} <= {}", gaia_plx_e, hip_plx_e);
                         gaia_wins += 1;
 
                         let mut size = gaia_star.size;
@@ -334,7 +366,7 @@ fn main() {
 
                         main_list.push(star);
                     } else {
-                        //println!("Hip wins: {} <= {}", hip_plx_e, gaia_plx_e);
+                        //log::info!("Hip wins: {} <= {}", hip_plx_e, gaia_plx_e);
                         main_list.push(hip_star.copy());
                         hip_wins += 1;
                     }
@@ -349,19 +381,22 @@ fn main() {
                 main_list.push(hip_star.copy());
             }
         }
-        println!(
+        log::info!(
             "{} hits ({} gaia wins, {} hip wins), {} no-hits",
-            hit, gaia_wins, hip_wins, no_hit
+            hit,
+            gaia_wins,
+            hip_wins,
+            no_hit
         );
 
         // Drop hip lists
         std::mem::drop(list_hip);
 
-        println!("{} stars in the final list", main_list.len());
+        log::info!("{} stars in the final list", main_list.len());
         let time_load = start.elapsed();
 
         if main_list.is_empty() {
-            println!("No stars were loaded, aborting.");
+            log::info!("No stars were loaded, aborting.");
             std::process::exit(1);
         }
 
@@ -374,15 +409,15 @@ fn main() {
             let dist_pc: f64 = (s.x * s.x + s.y * s.y + s.z * s.z).sqrt() * constants::U_TO_PC;
             dist_pc <= args.distpc_cap
         });
-        println!(
+        log::info!(
             "Removed {} stars due to being too far (cap = {} pc)",
             main_list.len() - len_before,
             args.distpc_cap
         );
 
-        println!("Sorting list by magnitude with {} objects", main_list.len());
+        log::info!("Sorting list by magnitude with {} objects", main_list.len());
         main_list.sort_by(|a, b| a.absmag.partial_cmp(&b.absmag).unwrap());
-        println!("List sorted in {:?}", start_gen.elapsed());
+        log::info!("List sorted in {:?}", start_gen.elapsed());
 
         let time_gen = start_gen.elapsed();
 
@@ -394,7 +429,7 @@ fn main() {
             args.distpc_cap,
         );
         let (num_octants, num_stars, depth) = octree.generate_octree(&main_list);
-        println!(
+        log::info!(
             "Octree generated with {}={} octants and {} stars ({} skipped) in {:?}",
             num_octants,
             octree.nodes.borrow().len(),
@@ -423,14 +458,14 @@ fn main() {
         let time_write = start_write.elapsed();
 
         // Star counts per magnitude
-        println!();
-        println!("=========================");
-        println!("STAR COUNTS PER MAGNITUDE");
-        println!("=========================");
+        log::info!("");
+        log::info!("=========================");
+        log::info!("STAR COUNTS PER MAGNITUDE");
+        log::info!("=========================");
         for i in 0..21 {
             let count =
                 loader_hip.counts_per_mag.borrow()[i] + loader_gaia.counts_per_mag.borrow()[i];
-            println!(
+            log::info!(
                 "Magnitude {}: {} stars ({:.3}%)",
                 i,
                 count,
@@ -439,26 +474,26 @@ fn main() {
         }
 
         // Octree stats
-        println!();
-        println!("============");
-        println!("OCTREE STATS");
-        println!("============");
-        println!("Octants: {}", num_octants);
-        println!("Particles: {}", num_stars);
-        println!("Depth: {}", depth);
+        log::info!("");
+        log::info!("============");
+        log::info!("OCTREE STATS");
+        log::info!("============");
+        log::info!("Octants: {}", num_octants);
+        log::info!("Particles: {}", num_stars);
+        log::info!("Depth: {}", depth);
 
         // Final stats
-        println!();
-        println!("================");
-        println!("FINAL TIME STATS");
-        println!("================");
-        println!("Loading: {:?}", time_load);
-        println!("Generation: {:?}", time_gen);
-        println!("Writing: {:?}", time_write);
-        println!("Total: {:?}", start.elapsed());
+        log::info!("");
+        log::info!("================");
+        log::info!("FINAL TIME STATS");
+        log::info!("================");
+        log::info!("Loading: {:?}", time_load);
+        log::info!("Generation: {:?}", time_gen);
+        log::info!("Writing: {:?}", time_write);
+        log::info!("Total: {:?}", start.elapsed());
         std::process::exit(0);
     } else {
-        eprintln!("Input catalog not specified!");
+        log::error!("Input catalog not specified!");
         std::process::exit(1);
     }
 }

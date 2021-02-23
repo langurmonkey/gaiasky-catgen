@@ -9,7 +9,6 @@ use crate::data;
 use crate::parse;
 use crate::util;
 
-use io::Write;
 use memmap::Mmap;
 use std::cell::RefCell;
 use std::collections::{BTreeMap, HashMap, HashSet};
@@ -164,18 +163,18 @@ impl Additional {
      * Loads a new batch of additional columns from the given file
      **/
     pub fn new(file: &&str) -> Option<Self> {
-        println!("Loading additional columns from {}", file);
+        log::info!("Loading additional columns from {}", file);
 
         let path = Path::new(file);
         if path.exists() {
             if path.is_file() && file.ends_with(".gz") {
                 return Additional::load_file(file);
             } else {
-                eprintln!("Path is not a gzipped file: {}", file);
+                log::error!("Path is not a gzipped file: {}", file);
                 return None;
             }
         } else {
-            eprintln!("Path does not exist: {}", file);
+            log::error!("Path does not exist: {}", file);
             return None;
         }
     }
@@ -198,7 +197,7 @@ impl Additional {
                 let mut i = 0;
                 for token in tokens {
                     if i == 0 && !token.eq("source_id") && !token.eq("sourceid") {
-                        eprintln!(
+                        log::error!(
                             "Error: first column '{}' of additional must be '{}'",
                             token,
                             ColId::source_id.to_str()
@@ -331,7 +330,7 @@ impl Loader {
             let tokens: Vec<&str> = additional_str.split(',').collect();
             for token in tokens {
                 let add = Additional::new(&token).expect("Error loading additional");
-                println!(
+                log::info!(
                     "Loaded {} columns and {} records from {}",
                     add.n_cols(),
                     add.len(),
@@ -379,17 +378,14 @@ impl Loader {
             }
             match entry {
                 Ok(path) => {
-                    print!(
-                        "Processing {}/{} ({:.3}%): {:?}",
-                        i + 1,
+                    self.load_file(
+                        path.to_str().expect("Error: path not valid"),
+                        &mut list,
+                        (i + 1) as usize,
                         count,
-                        100.0 * (i + 1) as f32 / count as f32,
-                        path.display()
                     );
-                    io::stdout().flush().expect("Error flushing stdout");
-                    self.load_file(path.to_str().expect("Error: path not valid"), &mut list);
                 }
-                Err(e) => println!("Error: {:?}", e),
+                Err(e) => log::error!("Error: {:?}", e),
             }
             i += 1;
         }
@@ -399,7 +395,13 @@ impl Loader {
     // Loads a single file, being it csv.gz or csv
     // The format is hard-coded for now, with csv.gz being in eDR3 format,
     // and csv being in hipparcos format.
-    pub fn load_file(&self, file: &str, list: &mut Vec<Particle>) {
+    pub fn load_file(
+        &self,
+        file: &str,
+        list: &mut Vec<Particle>,
+        file_num: usize,
+        file_count: usize,
+    ) {
         let mut total: usize = 0;
         let mut loaded: usize = 0;
         let mut skipped: usize = 0;
@@ -430,12 +432,24 @@ impl Loader {
                 break;
             }
         }
-        self.log_file(loaded, total, skipped);
+        self.log_file(loaded, total, skipped, file, file_num, file_count);
     }
 
-    fn log_file(&self, loaded: usize, total: usize, skipped: usize) {
-        println!(
-            " - loaded {}/{} objects ({:.3}%, {} skipped)",
+    fn log_file(
+        &self,
+        loaded: usize,
+        total: usize,
+        skipped: usize,
+        file: &str,
+        file_num: usize,
+        file_count: usize,
+    ) {
+        log::info!(
+            "{}/{} ({:.3}%): {} -> {}/{} stars ({:.3}%, {} skipped)",
+            file_num,
+            file_count,
+            100.0 * file_num as f32 / file_count as f32,
+            Path::new(file).file_name().unwrap().to_str().unwrap(),
             loaded,
             total - 1,
             100.0 * loaded as f32 / (total as f32 - 1.0),
@@ -560,7 +574,6 @@ impl Loader {
 
         // Distance test
         if !must_load && !self.accept_distance(dist_pc) {
-            println!("No dist: {} , cap: {}", dist_pc, self.distpc_cap);
             return None;
         }
         let dist: f64 = dist_pc * constants::PC_TO_U;

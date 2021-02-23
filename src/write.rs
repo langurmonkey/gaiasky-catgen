@@ -9,7 +9,7 @@ use lod::Octree;
 use std::fs::OpenOptions;
 
 pub fn write_metadata(octree: &Octree, output_dir: &str) {
-    println!(
+    log::info!(
         ":: Writing metadata ({} nodes) to {}/metadata.bin",
         octree.nodes.borrow().len(),
         output_dir
@@ -69,7 +69,7 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
         std::fs::create_dir_all(Path::new(&particles_dir))
             .expect(&format!("Error creating directory: {}", particles_dir));
         let file_path = format!("{}/{}.bin", particles_dir, id_str);
-        println!(
+        log::info!(
             "{}: Writing {} particles of node {} to {}",
             file_num,
             node.num_objects.get(),
@@ -145,7 +145,7 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
                     f.write_all(&(buf[0]).to_be_bytes()).expect("Error writing");
                 }
             } else {
-                eprintln!(
+                log::error!(
                     "The needed star index is out of bounds: len:{}, idx:{}",
                     list.len(),
                     *star_idx
