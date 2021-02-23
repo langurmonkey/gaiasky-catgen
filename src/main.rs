@@ -161,7 +161,6 @@ fn main() {
     }
 
     let input_path = path::Path::new(&args.input);
-    let output_path = path::Path::new(&args.output);
 
     // Init logging
     let logfile = FileAppender::builder()
