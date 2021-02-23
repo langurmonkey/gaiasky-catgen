@@ -369,25 +369,31 @@ impl Loader {
     pub fn load_dir(&self, dir: &str) -> Result<Vec<Particle>, &str> {
         let mut list: Vec<Particle> = Vec::new();
         let mut i = 0;
-        let count = glob(&(dir.to_owned()))
-            .expect("Error reading glob pattern")
-            .count();
-        for entry in glob(&(dir.to_owned())).expect("Error reading glob pattern") {
-            if self.max_files >= 0 && i >= self.max_files {
-                return Ok(list);
-            }
-            match entry {
-                Ok(path) => {
-                    self.load_file(
-                        path.to_str().expect("Error: path not valid"),
-                        &mut list,
-                        (i + 1) as usize,
-                        count,
-                    );
+
+        if Path::new(dir).is_file() {
+            self.load_file(dir, &mut list, 1, 1);
+        } else {
+            // glob directory
+            let mut dir_glob: String = String::from(dir);
+            dir_glob.push_str("/*");
+            let count = glob(&dir_glob).expect("Error reading glob pattern").count();
+            for entry in glob(&dir_glob).expect("Error reading glob pattern") {
+                if self.max_files >= 0 && i >= self.max_files {
+                    return Ok(list);
                 }
-                Err(e) => log::error!("Error: {:?}", e),
+                match entry {
+                    Ok(path) => {
+                        self.load_file(
+                            path.to_str().expect("Error: path not valid"),
+                            &mut list,
+                            (i + 1) as usize,
+                            count,
+                        );
+                    }
+                    Err(e) => log::error!("Error: {:?}", e),
+                }
+                i += 1;
             }
-            i += 1;
         }
         Ok(list)
     }

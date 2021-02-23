@@ -197,10 +197,6 @@ fn main() {
 
     if args.input.len() > 0 {
         let start = Instant::now();
-        // Complete inputs, load all files
-        args.input.push_str("/*");
-        args.hip.push_str("/*");
-
         // Load Hip-Gaia cross-match file
         // All stars with Hip counter-part are added to the
         // must_load list, which is later passed into the loader
@@ -267,6 +263,7 @@ fn main() {
         // Actually load hipparcos
         let mut list_hip = Vec::new();
         if args.hip.len() > 0 {
+            println!("Load hip: {}", &args.hip);
             let start_hip = Instant::now();
             list_hip = loader_hip
                 .load_dir(&args.hip)
