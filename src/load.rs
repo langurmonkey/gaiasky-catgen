@@ -370,13 +370,22 @@ impl Loader {
     pub fn load_dir(&self, dir: &str) -> Result<Vec<Particle>, &str> {
         let mut list: Vec<Particle> = Vec::new();
         let mut i = 0;
+        let count = glob(&(dir.to_owned()))
+            .expect("Error reading glob pattern")
+            .count();
         for entry in glob(&(dir.to_owned())).expect("Error reading glob pattern") {
             if self.max_files >= 0 && i >= self.max_files {
                 return Ok(list);
             }
             match entry {
                 Ok(path) => {
-                    print!("Processing: {:?}", path.display());
+                    print!(
+                        "Processing {}/{} ({:.3}%): {:?}",
+                        i + 1,
+                        count,
+                        100.0 * (i + 1) as f32 / count as f32,
+                        path.display()
+                    );
                     io::stdout().flush().expect("Error flushing stdout");
                     self.load_file(path.to_str().expect("Error: path not valid"), &mut list);
                 }
@@ -668,7 +677,7 @@ impl Loader {
         let color_packed: f32 = color::col_to_f32(col_r as f32, col_g as f32, col_b as f32, 1.0);
 
         // Update counts per mag
-        let appmag_clamp = f64::clamp(appmag, 0.0, 21.0) as usize;
+        let appmag_clamp = f64::clamp(appmag, 0.0, 20.0) as usize;
         self.counts_per_mag.borrow_mut()[appmag_clamp] += 1;
 
         Some(Particle {

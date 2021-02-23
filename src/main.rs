@@ -86,6 +86,11 @@ fn main() {
             Store,
             "Parallax error factor for bright stars (gmag<13.1), where filter [plx_err/plx < plxerrbright] is enforced",
         );
+        ap.refer(&mut args.plx_zeropoint).add_option(
+            &["--plxzeropoint"],
+            Store,
+            "Parallax zero point",
+        );
         ap.refer(&mut args.mag_corrections).add_option(
             &["-c", "--skipmagcorrections"],
             StoreFalse,

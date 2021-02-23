@@ -8,16 +8,22 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 src/main.rs
+badd +165 src/main.rs
 badd +1 src/data.rs
 badd +1 src/write.rs
-badd +1 src/color.rs
+badd +60 src/color.rs
 badd +1 src/xmatch.rs
 badd +1 Cargo.toml
+badd +1 src/lod.rs
+badd +498 src/load.rs
+badd +1 src/math.rs
 argglobal
 %argdel
 $argadd src/main.rs
 set stal=2
+tabnew
+tabnew
+tabnew
 tabnew
 tabnew
 tabnew
@@ -42,12 +48,90 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 19) / 38)
+let s:l = 165 - ((8 * winheight(0) + 19) / 38)
 if s:l < 1 | let s:l = 1 | endif
-exe s:l
+keepjumps exe s:l
 normal! zt
-1
+keepjumps 165
+normal! 026|
+lcd ~/Projects/gaiasky-catgen
+tabnext
+edit ~/Projects/gaiasky-catgen/src/math.rs
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 19 - ((18 * winheight(0) + 19) / 38)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 19
 normal! 0
+lcd ~/Projects/gaiasky-catgen
+tabnext
+edit ~/Projects/gaiasky-catgen/src/lod.rs
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 307 - ((0 * winheight(0) + 19) / 38)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 307
+normal! 0
+lcd ~/Projects/gaiasky-catgen
+tabnext
+edit ~/Projects/gaiasky-catgen/src/load.rs
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 565 - ((37 * winheight(0) + 19) / 38)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 565
+normal! 010|
 lcd ~/Projects/gaiasky-catgen
 tabnext
 edit ~/Projects/gaiasky-catgen/src/data.rs
@@ -70,9 +154,9 @@ silent! normal! zE
 let &fdl = &fdl
 let s:l = 1 - ((0 * winheight(0) + 19) / 38)
 if s:l < 1 | let s:l = 1 | endif
-exe s:l
+keepjumps exe s:l
 normal! zt
-1
+keepjumps 1
 normal! 0
 lcd ~/Projects/gaiasky-catgen
 tabnext
@@ -94,11 +178,11 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 19) / 38)
+let s:l = 23 - ((22 * winheight(0) + 19) / 38)
 if s:l < 1 | let s:l = 1 | endif
-exe s:l
+keepjumps exe s:l
 normal! zt
-1
+keepjumps 23
 normal! 0
 lcd ~/Projects/gaiasky-catgen
 tabnext
@@ -122,10 +206,10 @@ silent! normal! zE
 let &fdl = &fdl
 let s:l = 1 - ((0 * winheight(0) + 19) / 38)
 if s:l < 1 | let s:l = 1 | endif
-exe s:l
+keepjumps exe s:l
 normal! zt
-1
-normal! 0
+keepjumps 1
+normal! 016|
 lcd ~/Projects/gaiasky-catgen
 tabnext
 edit ~/Projects/gaiasky-catgen/src/xmatch.rs
@@ -148,9 +232,9 @@ silent! normal! zE
 let &fdl = &fdl
 let s:l = 1 - ((0 * winheight(0) + 19) / 38)
 if s:l < 1 | let s:l = 1 | endif
-exe s:l
+keepjumps exe s:l
 normal! zt
-1
+keepjumps 1
 normal! 0
 lcd ~/Projects/gaiasky-catgen
 tabnext
@@ -174,11 +258,11 @@ silent! normal! zE
 let &fdl = &fdl
 let s:l = 1 - ((0 * winheight(0) + 19) / 38)
 if s:l < 1 | let s:l = 1 | endif
-exe s:l
+keepjumps exe s:l
 normal! zt
-1
+keepjumps 1
 normal! 0
-tabnext 3
+tabnext 4
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0&& getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
