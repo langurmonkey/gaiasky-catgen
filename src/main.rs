@@ -410,7 +410,10 @@ fn main() {
 
         let start_write = Instant::now();
         // Prepare output
-        fs::remove_dir_all(&args.output).expect(&format!("Error removing dir: {}", args.output));
+        if path::Path::new(&args.output).exists() {
+            fs::remove_dir_all(&args.output)
+                .expect(&format!("Error removing dir: {}", args.output));
+        }
         fs::create_dir_all(&args.output).expect(&format!("Error creating dir: {}", args.output));
 
         // Write
