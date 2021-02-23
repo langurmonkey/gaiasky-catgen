@@ -508,7 +508,7 @@ impl Octant {
 
     pub fn print(&self, parent_idx: usize, octree: &Octree) {
         // 32 is the UTF-8 code for whitespace
-        log::info!(
+        println!(
             "{}{}:L{} id:{} Obj(own/rec):({}/{}) Nchld:{}",
             String::from_utf8(vec![32; (self.level * 2) as usize]).unwrap(),
             parent_idx,
