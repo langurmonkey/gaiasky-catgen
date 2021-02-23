@@ -160,6 +160,11 @@ fn main() {
         ap.parse_args_or_exit();
     }
 
+    // Clean output directory
+    if path::Path::new(&args.output).exists() {
+        fs::remove_dir_all(&args.output).expect("Error cleaning output directory");
+    }
+
     let input_path = path::Path::new(&args.input);
 
     // Init logging
