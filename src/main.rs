@@ -189,10 +189,8 @@ fn main() {
 
     log4rs::init_config(config).expect("Error initializing logger");
 
+    // Log arguments
     log::info!("{:?}", args);
-
-    log::info!("Input: {:?}", input_path);
-    log::info!("Output: {:?}", output_path);
 
     // Make sure input exists
     assert!(input_path.exists(), "Input directory does not exist");
