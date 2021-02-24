@@ -305,7 +305,7 @@ pub struct Loader {
     // Coordinate conversion
     pub coord: coord::Coord,
     // Star counts per magnitude
-    pub counts_per_mag: RefCell<[u32; 21]>,
+    pub counts_per_mag: RefCell<[u32; 22]>,
 }
 
 impl Loader {
@@ -362,7 +362,7 @@ impl Loader {
             additional,
             indices,
             coord: coord::Coord::new(),
-            counts_per_mag: RefCell::new([0; 21]),
+            counts_per_mag: RefCell::new([0; 22]),
         }
     }
 
@@ -701,7 +701,7 @@ impl Loader {
         let color_packed: f32 = color::col_to_f32(col_r as f32, col_g as f32, col_b as f32, 1.0);
 
         // Update counts per mag
-        let appmag_clamp = f64::clamp(appmag, 0.0, 20.0) as usize;
+        let appmag_clamp = f64::clamp(appmag, 0.0, 21.0) as usize;
         self.counts_per_mag.borrow_mut()[appmag_clamp] += 1;
 
         Some(Particle {

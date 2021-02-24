@@ -456,7 +456,7 @@ fn main() {
         log::info!("=========================");
         log::info!("STAR COUNTS PER MAGNITUDE");
         log::info!("=========================");
-        for i in 0..21 {
+        for i in 0..=21 {
             let count =
                 loader_hip.counts_per_mag.borrow()[i] + loader_gaia.counts_per_mag.borrow()[i];
             log::info!(
