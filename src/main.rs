@@ -443,9 +443,7 @@ fn main() {
         //
         // Write tree and particles
         //
-
         let start_write = Instant::now();
-        fs::create_dir_all(&args.output).expect(&format!("Error creating dir: {}", args.output));
 
         // Write
         let main_list_len = main_list.len() as f32;

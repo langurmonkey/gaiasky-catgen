@@ -8,15 +8,17 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +165 src/main.rs
-badd +1 src/data.rs
+badd +270 src/main.rs
+badd +264 src/data.rs
 badd +1 src/write.rs
 badd +60 src/color.rs
 badd +1 src/xmatch.rs
 badd +1 Cargo.toml
 badd +1 src/lod.rs
-badd +498 src/load.rs
-badd +1 src/math.rs
+badd +377 src/load.rs
+badd +19 src/math.rs
+badd +1 ~/.ssh/config
+badd +8 src/log.rs
 argglobal
 %argdel
 $argadd src/main.rs
@@ -30,7 +32,7 @@ tabnew
 tabnew
 tabnew
 tabrewind
-edit src/main.rs
+edit src/math.rs
 set splitbelow splitright
 wincmd t
 set winminheight=0
@@ -48,37 +50,38 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 165 - ((8 * winheight(0) + 19) / 38)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 165
-normal! 026|
-lcd ~/Projects/gaiasky-catgen
-tabnext
-edit ~/Projects/gaiasky-catgen/src/math.rs
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-argglobal
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-silent! normal! zE
-let &fdl = &fdl
-let s:l = 19 - ((18 * winheight(0) + 19) / 38)
+let s:l = 19 - ((18 * winheight(0) + 20) / 40)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
 keepjumps 19
+normal! 0
+lcd ~/Projects/gaiasky-catgen
+tabnext
+edit ~/Projects/gaiasky-catgen/src/main.rs
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+balt ~/Projects/gaiasky-catgen/src/math.rs
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 200 - ((22 * winheight(0) + 20) / 40)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 200
 normal! 0
 lcd ~/Projects/gaiasky-catgen
 tabnext
@@ -100,12 +103,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 307 - ((0 * winheight(0) + 19) / 38)
+let s:l = 546 - ((39 * winheight(0) + 20) / 40)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 307
-normal! 0
+keepjumps 546
+normal! 08|
 lcd ~/Projects/gaiasky-catgen
 tabnext
 edit ~/Projects/gaiasky-catgen/src/load.rs
@@ -126,12 +129,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 565 - ((37 * winheight(0) + 19) / 38)
+let s:l = 390 - ((27 * winheight(0) + 20) / 40)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 565
-normal! 010|
+keepjumps 390
+normal! 034|
 lcd ~/Projects/gaiasky-catgen
 tabnext
 edit ~/Projects/gaiasky-catgen/src/data.rs
@@ -152,12 +155,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 19) / 38)
+let s:l = 272 - ((39 * winheight(0) + 20) / 40)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 1
-normal! 0
+keepjumps 272
+normal! 021|
 lcd ~/Projects/gaiasky-catgen
 tabnext
 edit ~/Projects/gaiasky-catgen/src/write.rs
@@ -178,12 +181,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 23 - ((22 * winheight(0) + 19) / 38)
+let s:l = 12 - ((11 * winheight(0) + 20) / 40)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 23
-normal! 0
+keepjumps 12
+normal! 013|
 lcd ~/Projects/gaiasky-catgen
 tabnext
 edit ~/Projects/gaiasky-catgen/src/color.rs
@@ -204,7 +207,7 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 19) / 38)
+let s:l = 1 - ((0 * winheight(0) + 20) / 40)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -230,12 +233,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 19) / 38)
+let s:l = 24 - ((23 * winheight(0) + 20) / 40)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 1
-normal! 0
+keepjumps 24
+normal! 013|
 lcd ~/Projects/gaiasky-catgen
 tabnext
 edit ~/Projects/gaiasky-catgen/Cargo.toml
@@ -256,12 +259,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 19) / 38)
+let s:l = 17 - ((16 * winheight(0) + 20) / 40)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 1
-normal! 0
+keepjumps 17
+normal! 06|
 tabnext 4
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0&& getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
@@ -274,7 +277,6 @@ if filereadable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &g:so = s:so_save | let &g:siso = s:siso_save
-nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :
