@@ -412,7 +412,7 @@ fn main() {
         });
         log::info!(
             "Removed {} stars due to being too far (cap = {} pc)",
-            main_list.len() - len_before,
+            len_before - main_list.len(),
             args.distpc_cap
         );
 

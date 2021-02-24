@@ -284,9 +284,8 @@ impl Octree {
                 let x = min.x + nhs;
                 let y = min.y + nhs;
                 let z = min.z + nhs;
-                let hs = nhs;
 
-                let node_id = self.add_new_node(x, y, z, hs, l, Some(current));
+                let node_id = self.add_new_node(x, y, z, nhs, l, Some(current));
                 self.nodes
                     .borrow()
                     .get(current.0)
@@ -316,6 +315,7 @@ impl Octree {
         let mut max = Vec3::with(-1.0e50);
 
         for particle in list {
+            // Min
             if particle.x < min.x {
                 min.x = particle.x;
             }
@@ -325,6 +325,8 @@ impl Octree {
             if particle.z < min.z {
                 min.z = particle.z;
             }
+
+            // Max
             if particle.x > max.x {
                 max.x = particle.x;
             }
@@ -337,17 +339,26 @@ impl Octree {
         }
         // The bounding box
         let bx = BoundingBox::from(&min, &max);
-        let half_size = f64::max(f64::max(bx.dim.z, bx.dim.y), bx.dim.x) / 2.0;
+        let size = f64::max(f64::max(bx.dim.z, bx.dim.y), bx.dim.x);
+        let half_size = size / 2.0;
 
         let root = Octant {
             id: OctantId(0),
-            min: bx.min.copy(),
-            max: bx.max.copy(),
+            min: Vec3::new(
+                bx.cnt.x - half_size,
+                bx.cnt.y - half_size,
+                bx.cnt.z - half_size,
+            ),
+            max: Vec3::new(
+                bx.cnt.x + half_size,
+                bx.cnt.y + half_size,
+                bx.cnt.z + half_size,
+            ),
             centre: bx.cnt.copy(),
             size: Vec3 {
-                x: half_size,
-                y: half_size,
-                z: half_size,
+                x: size,
+                y: size,
+                z: size,
             },
             level: 0,
 
@@ -363,12 +374,7 @@ impl Octree {
         };
 
         // Volume of root node in pc^3
-        let vol = bx.dim.x
-            * constants::U_TO_PC
-            * bx.dim.y
-            * constants::U_TO_PC
-            * bx.dim.z
-            * constants::U_TO_PC;
+        let vol = f64::powi(size * constants::U_TO_PC, 3);
         log::info!(
             "Octree root node generated with min: {}, max: {}, centre: {}, volume: {} pc3",
             root.min,
