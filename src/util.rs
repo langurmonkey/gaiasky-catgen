@@ -1,4 +1,4 @@
-use std::f64::consts;
+use std::{f64::consts, time::Duration};
 
 use data::Vec3;
 
@@ -86,4 +86,16 @@ pub fn propermotion_to_cartesian(
         y: vy * to_u_per_y,
         z: vz * to_u_per_y,
     }
+}
+
+pub fn seconds_to_time(secs: u64) -> (u64, u64, u64) {
+    let hours = secs / 3600;
+    let mins = (secs - (hours * 3600)) / 60;
+    let s = secs - (hours * 3600 + mins * 60);
+    (hours, mins, s)
+}
+
+pub fn nice_time(duration: Duration) -> String {
+    let (h, m, s) = seconds_to_time(duration.as_secs());
+    format!("{} h, {} m, {} s", h, m, s)
 }

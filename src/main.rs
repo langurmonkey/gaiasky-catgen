@@ -495,14 +495,27 @@ fn main() {
         }
 
         // Final stats
+        let total = start.elapsed();
         log::info!("");
         log::info!("================");
         log::info!("FINAL TIME STATS");
         log::info!("================");
-        log::info!("Loading: {:?}", time_load);
-        log::info!("Generation: {:?}", time_gen);
-        log::info!("Writing: {:?}", time_write);
-        log::info!("Total: {:?}", start.elapsed());
+        log::info!(
+            "Loading: {} s ({})",
+            time_load.as_secs(),
+            util::nice_time(time_load)
+        );
+        log::info!(
+            "Generation: {} s ({})",
+            time_gen.as_secs(),
+            util::nice_time(time_gen)
+        );
+        log::info!(
+            "Writing: {} s ({})",
+            time_write.as_secs(),
+            util::nice_time(time_write)
+        );
+        log::info!("Total: {} s ({})", total.as_secs(), util::nice_time(total));
         std::process::exit(0);
     } else {
         log::error!("Input catalog not specified!");
