@@ -476,6 +476,24 @@ fn main() {
         log::info!("Particles: {}", num_stars);
         log::info!("Depth: {}", depth);
 
+        for level in 0..=depth {
+            let mut level_octants: usize = 0;
+            let mut level_stars: usize = 0;
+            for octant in octree.nodes.borrow().iter() {
+                if octant.level == level {
+                    level_octants += 1;
+                    level_stars += octant.num_objects.get() as usize;
+                }
+            }
+            log::info!(
+                "   Level {}: {} octants, {} stars ({:.4}%)",
+                level,
+                level_octants,
+                level_stars,
+                100.0 * level_stars as f32 / num_stars as f32
+            );
+        }
+
         // Final stats
         log::info!("");
         log::info!("================");
