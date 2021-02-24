@@ -376,10 +376,12 @@ impl Loader {
             // glob directory
             let mut dir_glob: String = String::from(dir);
             dir_glob.push_str("/*");
-            let count = usize::min(
-                self.max_files as usize,
-                glob(&dir_glob).expect("Error reading glob pattern").count(),
-            );
+            let dir_count = glob(&dir_glob).expect("Error reading glob pattern").count();
+            let count = if self.max_files > 0 {
+                usize::min(self.max_files as usize, dir_count)
+            } else {
+                dir_count
+            };
             for entry in glob(&dir_glob).expect("Error reading glob pattern") {
                 if self.max_files >= 0 && i >= self.max_files {
                     return Ok(list);
