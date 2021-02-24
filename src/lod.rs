@@ -123,7 +123,58 @@ impl Octree {
             }
         }
 
-        // Post-process
+        // Remove empty nodes by floating up objects
+        let mut merged_nodes: usize = 0;
+        let mut merged_objects: usize = 0;
+        let nodes = self.nodes.borrow();
+        // From deepest to root
+        for level in (0..=depth).rev() {
+            for node in nodes.iter() {
+                if !node.deleted.get()
+                    && !node.has_kids()
+                    && node.level == level
+                    && node.parent.is_some()
+                {
+                    let parent_id = node.parent.unwrap();
+                    let parent = nodes.get(parent_id.0).unwrap();
+                    let node_objects_count = node.objects.borrow().len();
+                    let parent_objects_count = parent.objects.borrow().len();
+                    if parent_objects_count == 0 {
+                        // Add all node objects to parent objects, delete node
+
+                        // Add objects from node to parent
+                        let mut p_objects = parent.objects.borrow_mut();
+                        for id in node.objects.borrow().iter() {
+                            p_objects.push(*id);
+                        }
+
+                        // Remove objects from node
+                        node.objects.borrow_mut().clear();
+
+                        // Delete node from parent
+                        let mut p_nodes = parent.children.borrow_mut();
+                        for i in 0..8 {
+                            if p_nodes[i].is_some() && p_nodes[i].unwrap().0 == node.id.0 {
+                                p_nodes[i] = None;
+                            }
+                        }
+
+                        // Mark deleted
+                        node.deleted.set(true);
+
+                        merged_objects += node_objects_count;
+                        merged_nodes += 1;
+                    }
+                }
+            }
+        }
+        log::info!(
+            "Removed {} nodes due to being empty, {} objects floated",
+            merged_nodes,
+            merged_objects
+        );
+
+        // User-defined post-process
         if self.postprocess {
             log::info!(
                 "Post-processing octree: child_count={}, parent_count={}",
