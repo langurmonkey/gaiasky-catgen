@@ -61,13 +61,14 @@ impl Octree {
         let mut octree_node_num: usize = 1;
         let mut depth: u32 = 0;
         let mut cat_idx = 0;
+        let cat_size = list.len();
         for level in 0..25 {
             log::info!(
                 "Generating level {} ({} stars left)",
                 level,
-                list.len() - cat_idx
+                cat_size - cat_idx
             );
-            while cat_idx < list.len() {
+            while cat_idx < cat_size {
                 // Add stars to nodes until we reach max_part
                 let star = list.get(cat_idx).expect("Error getting star");
 
@@ -111,13 +112,26 @@ impl Octree {
                 octree_star_num += 1;
                 cat_idx += 1;
 
+                // Print every 10 M to stdout
+                if cat_idx % 10_000_000 == 0 {
+                    let pct = 100.0 * cat_idx as f64 / cat_size as f64;
+                    let n_fill = (pct / 5.0) as usize;
+                    let progress = String::from_utf8(vec![35; n_fill]).unwrap();
+                    let bg = String::from_utf8(vec![45; 20 - n_fill]).unwrap();
+
+                    println!(
+                        "{}{}   {:.3}% ({}/{})",
+                        progress, bg, pct, cat_idx, cat_size
+                    );
+                }
+
                 if added_num >= self.max_part {
                     // Next level
                     break;
                 }
             }
 
-            if cat_idx >= list.len() {
+            if cat_idx >= cat_size {
                 // All stars added -> FINISHED
                 break;
             }
