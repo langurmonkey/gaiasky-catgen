@@ -97,5 +97,5 @@ pub fn seconds_to_time(secs: u64) -> (u64, u64, u64) {
 
 pub fn nice_time(duration: Duration) -> String {
     let (h, m, s) = seconds_to_time(duration.as_secs());
-    format!("{} h, {} m, {} s", h, m, s)
+    format!("{}h {}m {}s", h, m, s)
 }

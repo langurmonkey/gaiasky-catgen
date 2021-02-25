@@ -501,21 +501,25 @@ fn main() {
         log::info!("FINAL TIME STATS");
         log::info!("================");
         log::info!(
-            "Loading: {} s ({})",
-            time_load.as_secs(),
+            "Loading: {:.2}s ({})",
+            time_load.as_millis() as f64 / 1000.0,
             util::nice_time(time_load)
         );
         log::info!(
-            "Generation: {} s ({})",
-            time_gen.as_secs(),
+            "Generation: {:.2}s ({})",
+            time_gen.as_millis() as f64 / 1000.0,
             util::nice_time(time_gen)
         );
         log::info!(
-            "Writing: {} s ({})",
-            time_write.as_secs(),
+            "Writing: {:.2}s ({})",
+            time_write.as_millis() as f64 / 1000.0,
             util::nice_time(time_write)
         );
-        log::info!("Total: {} s ({})", total.as_secs(), util::nice_time(total));
+        log::info!(
+            "Total: {:.2}s ({})",
+            total.as_millis() as f64 / 1000.0,
+            util::nice_time(total)
+        );
         std::process::exit(0);
     } else {
         log::error!("Input catalog not specified!");
