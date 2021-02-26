@@ -9,9 +9,19 @@ use lod::Octree;
 use std::fs::OpenOptions;
 
 pub fn write_metadata(octree: &Octree, output_dir: &str) {
+    // Compute nubmer of undeleted nodes
+    let mut num_nodes: i32 = 0;
+    for node in octree.nodes.borrow().iter() {
+        num_nodes = if node.deleted.get() {
+            num_nodes
+        } else {
+            num_nodes + 1
+        };
+    }
+
     log::info!(
         ":: Writing metadata ({} nodes) to {}/metadata.bin",
-        octree.nodes.borrow().len(),
+        num_nodes,
         output_dir
     );
 
@@ -22,10 +32,15 @@ pub fn write_metadata(octree: &Octree, output_dir: &str) {
         .expect("Error: file not found");
 
     // Number of nodes
-    f.write_all(&(octree.nodes.borrow().len() as i32).to_be_bytes())
+    f.write_all(&(num_nodes).to_be_bytes())
         .expect("Error writing");
 
+    let mut written_nodes: i32 = 0;
     for node in octree.nodes.borrow().iter() {
+        if node.deleted.get() {
+            // Skip deleted
+            continue;
+        }
         f.write_all(&(node.id.0 as i32).to_be_bytes())
             .expect("Error writing");
         f.write_all(&(node.centre.x as f32).to_be_bytes())
@@ -58,12 +73,24 @@ pub fn write_metadata(octree: &Octree, output_dir: &str) {
             .expect("Error writing");
         f.write_all(&(node.num_children.get()).to_be_bytes())
             .expect("Error writing");
+
+        written_nodes += 1;
     }
+
+    log::info!(
+        ":: Written {}:{} nodes (count:written) to metadata file",
+        num_nodes,
+        written_nodes
+    )
 }
 
 pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
     let mut file_num = 0;
     for node in octree.nodes.borrow().iter() {
+        if node.deleted.get() {
+            // Skip deleted
+            continue;
+        }
         let id_str = format!("particles_{:06}", node.id.0);
         let particles_dir = format!("{}/particles", output_dir);
         std::fs::create_dir_all(Path::new(&particles_dir))
@@ -154,4 +181,5 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
         }
         file_num += 1;
     }
+    log::info!("Written {} particle files", file_num);
 }

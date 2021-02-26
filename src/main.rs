@@ -431,9 +431,8 @@ fn main() {
         );
         let (num_octants, num_stars, depth) = octree.generate_octree(&main_list);
         log::info!(
-            "Octree generated with {}={} octants and {} stars ({} skipped) in {:?}",
+            "Octree generated with {} octants and {} stars ({} skipped) in {:?}",
             num_octants,
-            octree.nodes.borrow().len(),
             num_stars,
             main_list.len() - num_stars,
             start_gen.elapsed()
@@ -480,7 +479,7 @@ fn main() {
             let mut level_octants: usize = 0;
             let mut level_stars: usize = 0;
             for octant in octree.nodes.borrow().iter() {
-                if octant.level == level {
+                if octant.level == level && !octant.deleted.get() {
                     level_octants += 1;
                     level_stars += octant.num_objects.get() as usize;
                 }

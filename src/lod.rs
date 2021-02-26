@@ -1,8 +1,10 @@
 use crate::constants;
 use crate::data;
+use crate::parse;
 
 use data::{BoundingBox, Particle, Vec3};
 use std::cell::{Cell, RefCell};
+use std::collections::HashMap;
 use std::fmt;
 
 /**
@@ -16,6 +18,8 @@ pub struct Octree {
     pub parent_count: usize,
     pub distpc_cap: f64,
 
+    // From octantId to index in nodes vector
+    pub nodes_idx: RefCell<HashMap<i64, usize>>,
     // private data with all octants in the octree
     // the id of each octant is the index in this list
     pub nodes: RefCell<Vec<Octant>>,
@@ -41,6 +45,7 @@ impl Octree {
             parent_count,
             distpc_cap,
 
+            nodes_idx: RefCell::new(HashMap::new()),
             nodes: RefCell::new(Vec::new()),
             root: None,
         }
@@ -88,23 +93,19 @@ impl Octree {
                 let y = star.y;
                 let z = star.z;
 
-                let octant_id: OctantId;
+                let octant_id = self.position_octant_id(x, y, z, level);
+                let octant_i: usize;
 
-                if !self.has_node(x, y, z, level) {
+                if !self.has_node(octant_id) {
                     // Octree node does not exist yet, create it
-                    octant_id = self.create_octant(x, y, z, level);
+                    octant_i = self.create_octant(x, y, z, level);
                     octree_node_num += 1;
                 } else {
-                    octant_id = self.get_node(x, y, z, level).expect("Node does not exist!");
+                    octant_i = self.get_node(octant_id);
                 }
 
                 // Add star to octant
-                let added_num = self
-                    .nodes
-                    .borrow()
-                    .get(octant_id.0)
-                    .unwrap()
-                    .add_obj(cat_idx);
+                let added_num = self.nodes.borrow().get(octant_i).unwrap().add_obj(cat_idx);
 
                 if level > depth {
                     depth = level;
@@ -136,6 +137,7 @@ impl Octree {
                 break;
             }
         }
+        log::info!("GENERATION (1st round): {} nodes", octree_node_num);
 
         // Remove empty nodes by floating up objects
         let mut merged_nodes: usize = 0;
@@ -150,7 +152,8 @@ impl Octree {
                     && node.parent.is_some()
                 {
                     let parent_id = node.parent.unwrap();
-                    let parent = nodes.get(parent_id.0).unwrap();
+                    let parent_i = *self.nodes_idx.borrow().get(&parent_id.0).unwrap();
+                    let parent = nodes.get(parent_i).unwrap();
                     let node_objects_count = node.objects.borrow().len();
                     let parent_objects_count = parent.objects.borrow().len();
                     if parent_objects_count == 0 {
@@ -175,6 +178,7 @@ impl Octree {
 
                         // Mark deleted
                         node.deleted.set(true);
+                        octree_node_num -= 1;
 
                         merged_objects += node_objects_count;
                         merged_nodes += 1;
@@ -187,6 +191,7 @@ impl Octree {
             merged_nodes,
             merged_objects
         );
+        log::info!("GENERATION (2st round): {} nodes", octree_node_num);
 
         // User-defined post-process
         if self.postprocess {
@@ -195,8 +200,8 @@ impl Octree {
                 self.child_count,
                 self.parent_count
             );
-            let mut merged_nodes: usize = 0;
-            let mut merged_objects: usize = 0;
+            let mut merged_nodes_pp: usize = 0;
+            let mut merged_objects_pp: usize = 0;
             let nodes = self.nodes.borrow();
 
             // From deepest to root
@@ -208,7 +213,8 @@ impl Octree {
                         && node.parent.is_some()
                     {
                         let parent_id = node.parent.unwrap();
-                        let parent = nodes.get(parent_id.0).unwrap();
+                        let parent_i = *self.nodes_idx.borrow().get(&parent_id.0).unwrap();
+                        let parent = nodes.get(parent_i).unwrap();
                         let node_objects_count = node.objects.borrow().len();
                         let parent_objects_count = parent.objects.borrow().len();
                         if node_objects_count <= self.child_count
@@ -235,17 +241,20 @@ impl Octree {
 
                             // Mark deleted
                             node.deleted.set(true);
+                            octree_node_num -= 1;
 
-                            merged_objects += node_objects_count;
-                            merged_nodes += 1;
+                            merged_objects_pp += node_objects_count;
+                            merged_nodes_pp += 1;
                         }
                     }
                 }
             }
 
             log::info!("POSTPROCESS STATS:");
-            log::info!("    Merged nodes:    {}", merged_nodes);
-            log::info!("    Merged objects:  {}", merged_objects);
+            log::info!("    Merged nodes:    {}", merged_nodes_pp);
+            log::info!("    Merged objects:  {}", merged_objects_pp);
+
+            log::info!("GENERATION (final round): {} nodes", octree_node_num);
         }
 
         // Compute numbers
@@ -253,43 +262,89 @@ impl Octree {
         (octree_node_num, octree_star_num, depth)
     }
 
-    fn has_node(&self, x: f64, y: f64, z: f64, level: u32) -> bool {
-        for node in self.nodes.borrow().iter() {
-            if node.level == level && node.contains(x, y, z) {
-                return true;
-            }
-        }
-        false
+    fn has_node(&self, octant_id: OctantId) -> bool {
+        self.nodes_idx.borrow().contains_key(&octant_id.0)
     }
 
-    fn get_node(&self, x: f64, y: f64, z: f64, level: u32) -> Option<OctantId> {
-        for node in self.nodes.borrow().iter() {
-            if node.level == level && node.contains(x, y, z) {
-                return Some(OctantId(node.id.0));
-            }
-        }
-        None
+    fn get_node(&self, octant_id: OctantId) -> usize {
+        *self.nodes_idx.borrow().get(&octant_id.0).unwrap()
     }
 
     fn add_new_node(
         &self,
+        new_id: OctantId,
         x: f64,
         y: f64,
         z: f64,
         half_size: f64,
         level: u32,
         parent: Option<OctantId>,
-    ) -> OctantId {
-        let new_id = self.nodes.borrow().len();
-        let octant = Octant::from_params(new_id, x, y, z, half_size, level, parent);
+    ) -> usize {
+        let new_idx = self.nodes.borrow().len();
+        let octant = Octant::from_params(new_id.0, x, y, z, half_size, level, parent);
+        // Add to list
         self.nodes.borrow_mut().push(octant);
-        OctantId(new_id)
+        // Add to index
+        self.nodes_idx.borrow_mut().insert(new_id.0, new_idx);
+        // Return index
+        new_idx
+    }
+
+    pub fn position_octant_id(&self, x: f64, y: f64, z: f64, level: u32) -> OctantId {
+        if level == 0 {
+            return OctantId(0);
+        }
+        let mut min = self.nodes.borrow().get(0).unwrap().min.copy();
+        let max = self.nodes.borrow().get(0).unwrap().max.copy();
+        let mut hs = (max.x - min.x) / 2.0;
+        let mut id: String = String::new();
+        for _ in 1..=level {
+            if x <= min.x + hs {
+                if y <= min.y + hs {
+                    if z <= min.z + hs {
+                        id.push('1');
+                        // min stays the same
+                    } else {
+                        min.set(min.x, min.y, min.z + hs);
+                        id.push('2');
+                    }
+                } else {
+                    if z <= min.z + hs {
+                        min.set(min.x, min.y + hs, min.z);
+                        id.push('3');
+                    } else {
+                        min.set(min.x, min.y + hs, min.z + hs);
+                        id.push('4');
+                    }
+                }
+            } else {
+                if y <= min.y + hs {
+                    if z <= min.z + hs {
+                        min.set(min.x + hs, min.y, min.z);
+                        id.push('5');
+                    } else {
+                        min.set(min.x + hs, min.y, min.z + hs);
+                        id.push('6');
+                    }
+                } else {
+                    if z <= min.z + hs {
+                        min.set(min.x + hs, min.y + hs, min.z);
+                        id.push('7');
+                    } else {
+                        min.set(min.x + hs, min.y + hs, min.z + hs);
+                        id.push('8');
+                    }
+                }
+            }
+            hs = hs / 2.0;
+        }
+        OctantId(parse::parse_i64(Some(&&id[..])))
     }
 
     /**
      * Creates a new octant with the given parameters
      **/
-    pub fn create_octant(&self, x: f64, y: f64, z: f64, level: u32) -> OctantId {
+    pub fn create_octant(&self, x: f64, y: f64, z: f64, level: u32) -> usize {
         let mut min: Vec3 = Vec3 {
             x: 0.0,
             y: 0.0,
@@ -297,12 +352,13 @@ impl Octree {
         };
 
         // start at root, which is always 0
+        let mut current_i: usize = 0;
         let mut current = OctantId(0);
         for l in 1..=level {
-            let hs: f64 = self.nodes.borrow().get(current.0).unwrap().size.x / 2.0;
+            let hs: f64 = self.nodes.borrow().get(current_i).unwrap().size.x / 2.0;
             let idx;
 
-            let cmin = self.nodes.borrow().get(current.0).unwrap().min;
+            let cmin = self.nodes.borrow().get(current_i).unwrap().min;
 
             if x <= cmin.x + hs {
                 if y <= cmin.y + hs {
@@ -342,7 +398,7 @@ impl Octree {
                 }
             }
 
-            if !self.nodes.borrow().get(current.0).unwrap().has_child(idx) {
+            if !self.nodes.borrow().get(current_i).unwrap().has_child(idx) {
                 // Create kid
                 let nhs: f64 = hs / 2.0;
 
@@ -350,23 +406,28 @@ impl Octree {
                 let y = min.y + nhs;
                 let z = min.z + nhs;
 
-                let node_id = self.add_new_node(x, y, z, nhs, l, Some(current));
+                let node_id = self.position_octant_id(x, y, z, l);
+                if self.nodes_idx.borrow().contains_key(&node_id.0) {
+                    panic!("Node {} already exists!!!", node_id.0);
+                }
+                self.add_new_node(node_id, x, y, z, nhs, l, Some(current));
                 self.nodes
                     .borrow()
-                    .get(current.0)
+                    .get(current_i)
                     .unwrap()
                     .add_child(idx, node_id);
             }
             current = self
                 .nodes
                 .borrow()
-                .get(current.0)
+                .get(current_i)
                 .unwrap()
                 .get_child(idx)
                 .expect("OctantId does not exist!");
+            current_i = *self.nodes_idx.borrow().get(&current.0).unwrap();
         }
 
-        current
+        current_i
     }
 
     /**
@@ -447,7 +508,10 @@ impl Octree {
             root.centre,
             vol
         );
+        // Add to list
         self.nodes.borrow_mut().push(root);
+        // Add root to index, id: 0, idx: 0
+        self.nodes_idx.borrow_mut().insert(0, 0);
     }
 
     pub fn get_num_objects(&self) -> i32 {
@@ -455,12 +519,6 @@ impl Octree {
     }
 
     pub fn print(&self) {
-        log::info!(
-            "Octree contains {} nodes and {} objects",
-            self.nodes.borrow().len(),
-            self.get_num_objects()
-        );
-
         // Print root
         self.nodes
             .borrow()
@@ -479,7 +537,7 @@ impl fmt::Debug for Octree {
 }
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Copy, Clone, Debug, Default, Hash)]
-pub struct OctantId(pub usize);
+pub struct OctantId(pub i64);
 
 /**
  * Defines an octree, a tree in which
@@ -511,7 +569,7 @@ impl Octant {
      * Creates a shallow octree node with the given centre, half size and depth
      **/
     pub fn from_params(
-        id: usize,
+        id: i64,
         x: f64,
         y: f64,
         z: f64,
@@ -568,6 +626,7 @@ impl Octant {
         self.children.borrow()[index]
     }
 
+    #[allow(dead_code)]
     pub fn contains(&self, x: f64, y: f64, z: f64) -> bool {
         self.min.x <= x
             && self.max.x >= x
@@ -595,7 +654,10 @@ impl Octant {
                 let b = self.children.borrow();
                 let c = b[i];
                 match c {
-                    Some(child) => octree.nodes.borrow().get(child.0).unwrap().print(i, octree),
+                    Some(child) => {
+                        let idx = *octree.nodes_idx.borrow().get(&child.0).unwrap();
+                        octree.nodes.borrow().get(idx).unwrap().print(i, octree)
+                    }
                     None => (),
                 }
             }
@@ -630,8 +692,9 @@ impl Octant {
         // Recursively count objects
         for i in 0..8 {
             if self.children.borrow()[i].is_some() {
-                let idx = self.children.borrow()[i].unwrap();
-                let objs = octree.nodes.borrow()[idx.0].compute_numbers(octree);
+                let id = self.children.borrow()[i].unwrap();
+                let idx = *octree.nodes_idx.borrow().get(&id.0).unwrap();
+                let objs = octree.nodes.borrow()[idx].compute_numbers(octree);
 
                 num_objects_rec += objs;
             }
