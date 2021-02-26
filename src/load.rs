@@ -217,7 +217,7 @@ impl Additional {
             } else {
                 // Data
                 let line_str = line.expect("Error reading line");
-                let tokens: Vec<&str> = line_str.split(',').collect();
+                let tokens: Vec<&str> = sep.split(&line_str).collect();
                 let source_id: i64 = parse::parse_i64(tokens.get(0));
                 let ncols = tokens.len();
 
@@ -483,7 +483,8 @@ impl Loader {
 
     // Parses a line using self.indices
     fn parse_line(&self, line: String) -> Option<Particle> {
-        let tokens: Vec<&str> = line.split(',').collect();
+        let sep = Regex::new(r"\s+|,").unwrap();
+        let tokens: Vec<&str> = sep.split(&line).collect();
 
         self.create_particle(
             tokens.get(self.get_index(&ColId::source_id)),
