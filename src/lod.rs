@@ -514,10 +514,6 @@ impl Octree {
         self.nodes_idx.borrow_mut().insert(0, 0);
     }
 
-    pub fn get_num_objects(&self) -> i32 {
-        self.nodes.borrow()[0].num_objects_rec.get()
-    }
-
     pub fn print(&self) {
         // Print root
         self.nodes
