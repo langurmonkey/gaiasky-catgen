@@ -3,7 +3,7 @@
 # Generates eDR3int4 catalogs
 
 # Get script path
-SOURCE="${BASH_SOURCE[0]}"
+SOURCE="${BASH_SOURCE[0]}/.."
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   GSDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
   SOURCE="$(readlink "$SOURCE")"
@@ -21,7 +21,7 @@ INPUT="$DR_LOC/csv"
 OUTPUT="$DR_LOC/out-rs"
 
 # Definition file
-CATDEF="$GSDIR/catalogs-edr3int4.json"
+CATDEF="$GSDIR/script/catalogs-edr3int4.json"
 
 # Column names (see ColId)
 COLS="sourceid,ra,dec,pllx,ra_err,dec_err,pllx_err,pmra,pmdec,radvel,gmag,bpmag,rpmag,ruwe,ref_epoch"

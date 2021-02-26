@@ -6,7 +6,7 @@
 # You must copy this script and the definition to your $GSC folder for it to work properly
 
 # Get script path
-SOURCE="${BASH_SOURCE[0]}"
+SOURCE="${BASH_SOURCE[0]}/.."
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   GSDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
   SOURCE="$(readlink "$SOURCE")"
