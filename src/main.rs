@@ -447,7 +447,7 @@ fn main() {
         // Write
         let main_list_len = main_list.len() as f32;
         write::write_metadata(&octree, &args.output);
-        write::write_particles(&octree, main_list, &args.output);
+        write::write_particles_mmap(&octree, main_list, &args.output);
         let time_write = start_write.elapsed();
 
         // Star counts per magnitude

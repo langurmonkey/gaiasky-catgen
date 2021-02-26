@@ -1,12 +1,13 @@
 use crate::data;
 use crate::lod;
 
-use std::{io::Write, path::Path};
+use memmap::MmapMut;
+use std::fs::OpenOptions;
+use std::io::Write;
+use std::path::Path;
 
 use data::Particle;
 use lod::Octree;
-
-use std::fs::OpenOptions;
 
 pub fn write_metadata(octree: &Octree, output_dir: &str) {
     // Compute nubmer of undeleted nodes
@@ -84,6 +85,7 @@ pub fn write_metadata(octree: &Octree, output_dir: &str) {
     )
 }
 
+#[allow(dead_code)]
 pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
     let mut file_num = 0;
     for node in octree.nodes.borrow().iter() {
@@ -179,6 +181,204 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
                 );
             }
         }
+        file_num += 1;
+    }
+    log::info!("Written {} particle files", file_num);
+}
+
+#[allow(dead_code)]
+pub fn write_particles_mmap(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
+    let mut file_num = 0;
+    for node in octree.nodes.borrow().iter() {
+        if node.deleted.get() {
+            // Skip deleted
+            continue;
+        }
+
+        // COMPUTE FILE SIZE
+        // header 3 * i32
+        let mut size = 32 * 3;
+        // particles
+        for star_idx in node.objects.borrow().iter() {
+            if list.len() > *star_idx {
+                // 3 * f64
+                size += 8 * 3;
+                // 10 * f32
+                size += 4 * 10;
+                // 1 * i32 hip
+                size += 4 * 1;
+                // 1 * i64 source_id
+                size += 8 * 1;
+                // 1 * i32 name_len
+                size += 4 * 1;
+
+                let sb = list
+                    .get(*star_idx)
+                    .expect(&format!("Star not found: {}", *star_idx));
+                let mut name_size = 0;
+                for name in sb.names.iter() {
+                    name_size += name.len() + 1;
+                }
+                if name_size > 0 {
+                    name_size -= 1;
+                }
+                // 1 * u16 * name_len
+                size += 2 * name_size;
+            }
+        }
+
+        // File name
+        let id_str = format!("particles_{:06}", node.id.0);
+        let particles_dir = format!("{}/particles", output_dir);
+        std::fs::create_dir_all(Path::new(&particles_dir))
+            .expect(&format!("Error creating directory: {}", particles_dir));
+        let file_path = format!("{}/{}.bin", particles_dir, id_str);
+        log::info!(
+            "{}: Writing {} particles of node {} to {} ({} bytes)",
+            file_num,
+            node.num_objects.get(),
+            node.id.0,
+            file_path,
+            size
+        );
+
+        let f = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create_new(true)
+            .open(file_path)
+            .expect("Error opening memory mapped file");
+
+        f.set_len(size as u64)
+            .expect("Error setting size to memory mapped file");
+        let mut mmap = unsafe { MmapMut::map_mut(&f).expect("Error creating memory map") };
+
+        let mut i: usize = 0;
+        // Version marker
+        (&mut mmap[i..i + 4])
+            .write_all(&(-1_i32).to_be_bytes())
+            .expect("Error writing");
+        i += 4;
+
+        // Version = 2
+        (&mut mmap[i..i + 4])
+            .write_all(&(2_i32).to_be_bytes())
+            .expect("Error writing");
+        i += 4;
+
+        // Size
+        (&mut mmap[i..i + 4])
+            .write_all(&(node.objects.borrow().len() as i32).to_be_bytes())
+            .expect("Error writing");
+        i += 4;
+
+        // Particles
+        for star_idx in node.objects.borrow().iter() {
+            if list.len() > *star_idx {
+                let sb = list
+                    .get(*star_idx)
+                    .expect(&format!("Star not found: {}", *star_idx));
+
+                // 64-bit floats
+                (&mut mmap[i..i + 8])
+                    .write_all(&(sb.x).to_be_bytes())
+                    .expect("Error writing");
+                i += 8;
+                (&mut mmap[i..i + 8])
+                    .write_all(&(sb.y).to_be_bytes())
+                    .expect("Error writing");
+                i += 8;
+                (&mut mmap[i..i + 8])
+                    .write_all(&(sb.z).to_be_bytes())
+                    .expect("Error writing");
+                i += 8;
+
+                // 32-bit floats
+                (&mut mmap[i..i + 4])
+                    .write_all(&(sb.pmx).to_be_bytes())
+                    .expect("Error writing");
+                i += 4;
+                (&mut mmap[i..i + 4])
+                    .write_all(&(sb.pmy).to_be_bytes())
+                    .expect("Error writing");
+                i += 4;
+                (&mut mmap[i..i + 4])
+                    .write_all(&(sb.pmz).to_be_bytes())
+                    .expect("Error writing");
+                i += 4;
+                (&mut mmap[i..i + 4])
+                    .write_all(&(sb.mualpha).to_be_bytes())
+                    .expect("Error writing");
+                i += 4;
+                (&mut mmap[i..i + 4])
+                    .write_all(&(sb.mudelta).to_be_bytes())
+                    .expect("Error writing");
+                i += 4;
+                (&mut mmap[i..i + 4])
+                    .write_all(&(sb.radvel).to_be_bytes())
+                    .expect("Error writing");
+                i += 4;
+                (&mut mmap[i..i + 4])
+                    .write_all(&(sb.appmag).to_be_bytes())
+                    .expect("Error writing");
+                i += 4;
+                (&mut mmap[i..i + 4])
+                    .write_all(&(sb.absmag).to_be_bytes())
+                    .expect("Error writing");
+                i += 4;
+                (&mut mmap[i..i + 4])
+                    .write_all(&(sb.col).to_be_bytes())
+                    .expect("Error writing");
+                i += 4;
+                (&mut mmap[i..i + 4])
+                    .write_all(&(sb.size).to_be_bytes())
+                    .expect("Error writing");
+                i += 4;
+
+                // 32-bit int
+                (&mut mmap[i..i + 4])
+                    .write_all(&(sb.hip).to_be_bytes())
+                    .expect("Error writing");
+                i += 4;
+
+                // 64-bit int
+                (&mut mmap[i..i + 8])
+                    .write_all(&(sb.id).to_be_bytes())
+                    .expect("Error writing");
+                i += 8;
+
+                // Names
+                let mut names_concat = String::new();
+                for name in sb.names.iter() {
+                    names_concat.push_str(name);
+                    names_concat.push_str("|");
+                }
+                names_concat.pop();
+
+                // Names length
+                (&mut mmap[i..i + 4])
+                    .write_all(&(names_concat.len() as i32).to_be_bytes())
+                    .expect("Error writing");
+                i += 4;
+
+                // Characters
+                let mut buf: [u16; 1] = [0; 1];
+                for ch in names_concat.chars() {
+                    ch.encode_utf16(&mut buf);
+                    (&mut mmap[i..i + 2])
+                        .write_all(&(buf[0]).to_be_bytes())
+                        .expect("Error writing");
+                    i += 2;
+                }
+            } else {
+                log::error!(
+                    "The needed star index is out of bounds: len:{}, idx:{}",
+                    list.len(),
+                    *star_idx
+                );
+            }
+        }
+        mmap.flush().expect("Error flushing memory map");
         file_num += 1;
     }
     log::info!("Written {} particle files", file_num);
