@@ -135,6 +135,7 @@ dependencies = [
  "log4rs",
  "memmap",
  "nalgebra",
+ "regex",
 ]
 
 [[package]]

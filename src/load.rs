@@ -1,6 +1,7 @@
 extern crate flate2;
 extern crate memmap;
 extern crate nalgebra as na;
+extern crate regex;
 
 use crate::color;
 use crate::constants;
@@ -10,6 +11,7 @@ use crate::parse;
 use crate::util;
 
 use memmap::Mmap;
+use regex::Regex;
 use std::cell::RefCell;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io;
@@ -189,11 +191,14 @@ impl Additional {
         let mut indices = HashMap::new();
         let mut values = BTreeMap::new();
 
+        // Separator, multiple spaces or a comma
+        let sep = Regex::new(r"\s+|,").unwrap();
+
         for line in io::BufReader::new(gz).lines() {
             if total == 0 {
                 // Header
                 let line_str = line.expect("Error reading line");
-                let tokens: Vec<&str> = line_str.split(',').collect();
+                let tokens: Vec<&str> = sep.split(&line_str).collect();
                 let mut i = 0;
                 for token in tokens {
                     if i == 0 && !token.eq("source_id") && !token.eq("sourceid") {

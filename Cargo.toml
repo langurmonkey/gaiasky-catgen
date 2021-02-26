@@ -15,6 +15,7 @@ memmap ="*"
 fast-float = "*"
 log = "*"
 log4rs = "*"
+regex = "1"
 
 [profile.release]
 lto = true
