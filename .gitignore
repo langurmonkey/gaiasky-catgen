@@ -4,5 +4,5 @@ gaiasky-catgen
 data
 .idea
 .gradle
-catalogs-*
+./catalogs-*
 /log
