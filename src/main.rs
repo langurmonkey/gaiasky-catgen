@@ -26,6 +26,7 @@ mod load;
 mod lod;
 mod math;
 mod parse;
+mod tests;
 mod util;
 mod write;
 mod xmatch;

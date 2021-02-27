@@ -800,11 +800,7 @@ impl Loader {
         } else {
             for entry in &self.additional {
                 if entry.has_col(col_id) {
-                    let d = entry.get(col_id, source_id);
-                    match d {
-                        Some(val) => return Some(val),
-                        None => return None,
-                    }
+                    return entry.get(col_id, source_id);
                 }
             }
             None
@@ -833,7 +829,7 @@ impl Loader {
     fn has_additional(&self, col_id: ColId, source_id: i64) -> bool {
         let val = self.get_additional(col_id, source_id);
         match val {
-            Some(v) => !v.is_nan() && !v.is_finite(),
+            Some(v) => v.is_finite(),
             None => false,
         }
     }
