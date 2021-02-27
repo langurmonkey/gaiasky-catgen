@@ -13,7 +13,7 @@ use crate::util;
 use memmap::Mmap;
 use regex::Regex;
 use std::cell::RefCell;
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{HashMap, HashSet};
 use std::io;
 use std::io::{BufRead, Read};
 use std::path::Path;
@@ -23,7 +23,7 @@ use flate2::read::GzDecoder;
 use glob::glob;
 use na::base::Vector3;
 
-use data::Particle;
+use data::{LargeLongMap, Particle};
 
 #[allow(non_camel_case_types, dead_code)]
 #[derive(Copy, Debug, Clone, Eq, PartialEq, Hash)]
@@ -157,7 +157,7 @@ impl ColId {
  **/
 pub struct Additional {
     pub indices: HashMap<String, usize>,
-    pub values: BTreeMap<i64, Vec<f64>>,
+    pub values: LargeLongMap<Vec<f64>>,
 }
 
 impl Additional {
@@ -189,7 +189,7 @@ impl Additional {
         let gz = GzDecoder::new(&mmap[..]);
 
         let mut indices = HashMap::new();
-        let mut values = BTreeMap::new();
+        let mut values = LargeLongMap::new(50);
 
         // Separator, multiple spaces or a comma
         let sep = Regex::new(r"\s+|,").unwrap();
@@ -251,7 +251,7 @@ impl Additional {
     }
 
     pub fn len(&self) -> usize {
-        self.values.len()
+        self.values.size
     }
     pub fn has_col(&self, col_id: ColId) -> bool {
         self.indices.contains_key(col_id.to_str())
@@ -263,7 +263,7 @@ impl Additional {
                 .indices
                 .get(col_id.to_str())
                 .expect("Error: could not get index");
-            let sid = self.values.get(&source_id);
+            let sid = self.values.get(source_id);
             if sid.is_some() {
                 let v = sid.unwrap().get(index);
                 if v.is_some() {

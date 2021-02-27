@@ -311,6 +311,11 @@ impl<T> LargeLongMap<T> {
     }
 
     #[allow(dead_code)]
+    pub fn insert(&mut self, key: i64, value: T) {
+        self.put(key, value)
+    }
+
+    #[allow(dead_code)]
     pub fn put(&mut self, key: i64, value: T) {
         let idx: usize = (key % self.n_maps as i64) as usize;
         self.maps
