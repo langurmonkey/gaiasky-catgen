@@ -556,7 +556,6 @@ impl Loader {
         if !has_geodist && plx <= 0.0 && self.allow_negative_plx {
             plx = 0.04;
         } else if !must_load && !self.accept_parallax(has_geodist, appmag, plx, plx_e) {
-            log::info!("NO PLX");
             return None;
         }
 
@@ -566,7 +565,6 @@ impl Loader {
         let ruwe_val: f32 = self.get_ruwe(source_id, sruwe);
         // RUWE test
         if !must_load && !self.accept_ruwe(ruwe_val) {
-            log::info!("NO RUWE");
             return None;
         }
         if ruwe_val.is_finite() {
@@ -577,11 +575,6 @@ impl Loader {
         // we accept all
         let has_geodist_star = self.has_additional(ColId::geodist, source_id);
         if !(must_load || !has_geodist || (has_geodist && has_geodist_star)) {
-            log::info!(
-                "NO GEODIST (has_geo: {}, has_geo_sid: {})",
-                has_geodist,
-                has_geodist_star
-            );
             return None;
         }
 
@@ -589,16 +582,13 @@ impl Loader {
         let mut dist_pc: f64 = 1000.0 / plx;
         let geodist_pc = self.get_geodistance(source_id);
         dist_pc = if geodist_pc > 0.0 {
-            log::info!("Geodist: {}", geodist_pc);
             geodist_pc
         } else {
-            log::info!("Dist: {}", dist_pc);
             dist_pc
         };
 
         // Distance test
         if !must_load && !self.accept_distance(dist_pc) {
-            log::info!("NO DIST");
             return None;
         }
         let dist: f64 = dist_pc * constants::PC_TO_U;
