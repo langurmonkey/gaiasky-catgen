@@ -1,4 +1,5 @@
 extern crate argparse;
+extern crate procinfo;
 
 use std::{
     cmp::Ordering,
@@ -26,6 +27,7 @@ mod data;
 mod load;
 mod lod;
 mod math;
+mod mem;
 mod parse;
 mod tests;
 mod util;
@@ -198,6 +200,8 @@ fn main() {
     // Log arguments
     log::info!("{:?}", args);
 
+    mem::log_mem();
+
     // Make sure input exists
     assert!(input_path.exists(), "Input directory does not exist");
     assert!(input_path.is_dir(), "Input directory is not a directory");
@@ -218,6 +222,7 @@ fn main() {
                 }
             }
         }
+        mem::log_mem();
 
         //
         // GAIA - Load Gaia DRx catalog, the columns come from CLI arguments
@@ -248,6 +253,7 @@ fn main() {
             list_gaia.len(),
             time_gaia,
         );
+        mem::log_mem();
 
         //
         // HIP - For hipparcos we only support the columns in that order
@@ -282,6 +288,7 @@ fn main() {
                 time_hip
             );
         }
+        mem::log_mem();
 
         //
         // Merge Gaia and Hipparcos
@@ -394,6 +401,7 @@ fn main() {
 
         // Drop hip lists
         std::mem::drop(list_hip);
+        mem::log_mem();
 
         log::info!("{} stars in the final list", main_list.len());
         let time_load = start.elapsed();
@@ -417,6 +425,7 @@ fn main() {
             len_before - main_list.len(),
             args.distpc_cap
         );
+        mem::log_mem();
 
         log::info!("Sorting list by magnitude with {} objects", main_list.len());
         main_list.sort_by(|a, b| {
@@ -427,6 +436,7 @@ fn main() {
             }
         });
         log::info!("List sorted in {:?}", start_gen.elapsed());
+        mem::log_mem();
 
         let time_gen = start_gen.elapsed();
 
@@ -446,6 +456,7 @@ fn main() {
             start_gen.elapsed()
         );
         octree.print();
+        mem::log_mem();
 
         //
         // Write tree and particles
@@ -458,6 +469,7 @@ fn main() {
         write::write_particles_mmap(&octree, main_list, &args.output);
         let time_write = start_write.elapsed();
 
+        mem::log_mem();
         // Star counts per magnitude
         log::info!("");
         log::info!("=========================");

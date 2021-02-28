@@ -16,6 +16,7 @@ fast-float = "*"
 log = "*"
 log4rs = "*"
 regex = "1"
+procinfo = "0.4"
 
 [profile.release]
 lto = true
