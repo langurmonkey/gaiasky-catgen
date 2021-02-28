@@ -573,14 +573,14 @@ impl Loader {
 
         // If we have geometric distances, we only accept stars which have one, otherwise
         // we accept all
-        let has_geodist_star = self.has_additional(ColId::geodist, source_id);
+        let geodist_pc = self.get_geodistance(source_id);
+        let has_geodist_star = geodist_pc > 0.0;
         if !(must_load || !has_geodist || (has_geodist && has_geodist_star)) {
             return None;
         }
 
         // Distance
         let mut dist_pc: f64 = 1000.0 / plx;
-        let geodist_pc = self.get_geodistance(source_id);
         dist_pc = if geodist_pc > 0.0 {
             geodist_pc
         } else {
@@ -661,10 +661,17 @@ impl Loader {
         }
 
         // Absolute magnitude
-        let absmag = appmag - 5.0 * (if dist_pc <= 0.0 { 10.0 } else { dist_pc }).log10() + 5.0;
+        let absmag = appmag
+            - 5.0
+                * f64::log10(if !dist_pc.is_finite() || dist_pc <= 0.0 {
+                    10.0
+                } else {
+                    dist_pc
+                })
+            + 5.0;
 
         // Size
-        let pseudo_l = 10.0_f64.powf(-0.4 * absmag);
+        let pseudo_l = f64::powf(10.0, -0.4 * absmag);
         let size_fac = constants::PC_TO_M * constants::M_TO_U * 0.15;
         let size: f32 = f64::min(pseudo_l.powf(0.45) * size_fac, 1e10) as f32;
 

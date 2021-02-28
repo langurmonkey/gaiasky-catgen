@@ -1,6 +1,7 @@
 extern crate argparse;
 
 use std::{
+    cmp::Ordering,
     collections::{HashMap, HashSet},
     path,
 };
@@ -418,7 +419,13 @@ fn main() {
         );
 
         log::info!("Sorting list by magnitude with {} objects", main_list.len());
-        main_list.sort_by(|a, b| a.absmag.partial_cmp(&b.absmag).unwrap());
+        main_list.sort_by(|a, b| {
+            let order = a.absmag.partial_cmp(&b.absmag);
+            match order {
+                Some(val) => val,
+                None => Ordering::Equal,
+            }
+        });
         log::info!("List sorted in {:?}", start_gen.elapsed());
 
         let time_gen = start_gen.elapsed();
