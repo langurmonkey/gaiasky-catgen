@@ -580,11 +580,11 @@ impl Loader {
         }
 
         // Distance
-        let mut dist_pc: f64 = 1000.0 / plx;
+        let dist_pc: f64;
         dist_pc = if geodist_pc > 0.0 {
             geodist_pc
         } else {
-            dist_pc
+            1000.0 / plx
         };
 
         // Distance test
@@ -752,7 +752,7 @@ impl Loader {
     }
 
     fn accept_distance(&self, dist_pc: f64) -> bool {
-        dist_pc <= self.distpc_cap
+        dist_pc.is_finite() && dist_pc <= self.distpc_cap
     }
 
     fn get_geodistance(&self, source_id: i64) -> f64 {
