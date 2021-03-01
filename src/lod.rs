@@ -518,6 +518,7 @@ impl Octree {
         self.nodes_idx.borrow_mut().insert(0, 0);
     }
 
+    #[allow(dead_code)]
     pub fn count_nodes(&self) -> usize {
         let mut count: usize = 0;
         for node in self.nodes.borrow().iter() {
