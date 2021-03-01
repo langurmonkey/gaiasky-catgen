@@ -8,10 +8,10 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +482 src/main.rs
+badd +450 src/main.rs
 badd +264 src/data.rs
-badd +14 src/write.rs
-badd +60 src/color.rs
+badd +381 src/write.rs
+badd +1 src/color.rs
 badd +1 src/xmatch.rs
 badd +1 Cargo.toml
 badd +623 src/lod.rs
@@ -20,12 +20,11 @@ badd +19 src/math.rs
 badd +1 ~/.ssh/config
 badd +8 src/log.rs
 badd +1 src/util.rs
-badd +0 src/parse.rs
+badd +1 src/parse.rs
 argglobal
 %argdel
 $argadd src/main.rs
 set stal=2
-tabnew
 tabnew
 tabnew
 tabnew
@@ -81,12 +80,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 487 - ((21 * winheight(0) + 18) / 37)
+let s:l = 227 - ((36 * winheight(0) + 18) / 37)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 487
-normal! 023|
+keepjumps 227
+normal! 026|
 lcd ~/Projects/gaiasky-catgen
 tabnext
 edit ~/Projects/gaiasky-catgen/src/util.rs
@@ -240,38 +239,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 81 - ((23 * winheight(0) + 18) / 37)
+let s:l = 259 - ((24 * winheight(0) + 18) / 37)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 81
-normal! 012|
-lcd ~/Projects/gaiasky-catgen
-tabnext
-edit ~/Projects/gaiasky-catgen/src/color.rs
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-argglobal
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-silent! normal! zE
-let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 18) / 37)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 1
-normal! 016|
+keepjumps 259
+normal! 027|
 lcd ~/Projects/gaiasky-catgen
 tabnext
 edit ~/Projects/gaiasky-catgen/src/xmatch.rs
@@ -324,7 +297,7 @@ keepjumps exe s:l
 normal! zt
 keepjumps 18
 normal! 0
-tabnext 5
+tabnext 8
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0&& getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf

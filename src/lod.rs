@@ -98,8 +98,10 @@ impl Octree {
 
                 if !self.has_node(octant_id) {
                     // Octree node does not exist yet, create it
-                    octant_i = self.create_octant(x, y, z, level);
-                    octree_node_num += 1;
+                    let (oc_i, n_cre) = self.create_octant(x, y, z, level);
+                    octree_node_num += n_cre;
+
+                    octant_i = oc_i;
                 } else {
                     octant_i = self.get_node(octant_id);
                 }
@@ -178,7 +180,6 @@ impl Octree {
 
                         // Mark deleted
                         node.deleted.set(true);
-                        octree_node_num -= 1;
 
                         merged_objects += node_objects_count;
                         merged_nodes += 1;
@@ -191,6 +192,7 @@ impl Octree {
             merged_nodes,
             merged_objects
         );
+        octree_node_num -= merged_nodes;
         log::info!("GENERATION (2st round): {} nodes", octree_node_num);
 
         // User-defined post-process
@@ -241,7 +243,6 @@ impl Octree {
 
                             // Mark deleted
                             node.deleted.set(true);
-                            octree_node_num -= 1;
 
                             merged_objects_pp += node_objects_count;
                             merged_nodes_pp += 1;
@@ -254,6 +255,7 @@ impl Octree {
             log::info!("    Merged nodes:    {}", merged_nodes_pp);
             log::info!("    Merged objects:  {}", merged_objects_pp);
 
+            octree_node_num -= merged_nodes_pp;
             log::info!("GENERATION (final round): {} nodes", octree_node_num);
         }
 
@@ -344,13 +346,14 @@ impl Octree {
     /**
      * Creates a new octant with the given parameters
      **/
-    pub fn create_octant(&self, x: f64, y: f64, z: f64, level: u32) -> usize {
+    pub fn create_octant(&self, x: f64, y: f64, z: f64, level: u32) -> (usize, usize) {
         let mut min: Vec3 = Vec3 {
             x: 0.0,
             y: 0.0,
             z: 0.0,
         };
 
+        let mut n_created: usize = 0;
         // start at root, which is always 0
         let mut current_i: usize = 0;
         let mut current = OctantId(0);
@@ -416,6 +419,7 @@ impl Octree {
                     .get(current_i)
                     .unwrap()
                     .add_child(idx, node_id);
+                n_created += 1;
             }
             current = self
                 .nodes
@@ -427,7 +431,7 @@ impl Octree {
             current_i = *self.nodes_idx.borrow().get(&current.0).unwrap();
         }
 
-        current_i
+        (current_i, n_created)
     }
 
     /**
@@ -512,6 +516,16 @@ impl Octree {
         self.nodes.borrow_mut().push(root);
         // Add root to index, id: 0, idx: 0
         self.nodes_idx.borrow_mut().insert(0, 0);
+    }
+
+    pub fn count_nodes(&self) -> usize {
+        let mut count: usize = 0;
+        for node in self.nodes.borrow().iter() {
+            if !node.deleted.get() {
+                count += 1;
+            }
+        }
+        count
     }
 
     pub fn print(&self) {
