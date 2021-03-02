@@ -17,6 +17,7 @@ use log4rs::append::file::FileAppender;
 use log4rs::config::Config as LogConfig;
 use log4rs::config::{Appender, Root};
 use log4rs::encode::pattern::PatternEncoder;
+use regex::Regex;
 use std::fs;
 use std::time::Instant;
 
@@ -208,6 +209,7 @@ fn main() {
 
     if args.input.len() > 0 {
         let start = Instant::now();
+
         // Load Hip-Gaia cross-match file
         // All stars with Hip counter-part are added to the
         // must_load list, which is later passed into the loader
@@ -228,6 +230,7 @@ fn main() {
         // GAIA - Load Gaia DRx catalog, the columns come from CLI arguments
         //
         let loader_gaia = load::Loader::new(
+            Regex::new(r"\s+|,").unwrap(),
             args.file_num_cap,
             args.star_num_cap,
             args.plx_zeropoint,
@@ -242,6 +245,7 @@ fn main() {
             &args.additional,
             &args.columns,
         );
+
         // Actually load the catalog
         let start_gaia = Instant::now();
         let list_gaia = loader_gaia
@@ -259,8 +263,9 @@ fn main() {
         // HIP - For hipparcos we only support the columns in that order
         //
         let loader_hip = load::Loader::new(
+            Regex::new(r",").unwrap(),
             1,
-            5000000,
+            50000000,
             0.0,
             args.ruwe_cap,
             1e9,

@@ -281,6 +281,8 @@ impl Additional {
 }
 
 pub struct Loader {
+    // Regular expression to separate values in file
+    pub sep: Regex,
     // Maximum number of files to load in a directory
     pub max_files: i32,
     // Maximum number of records to load per file
@@ -315,6 +317,7 @@ pub struct Loader {
 
 impl Loader {
     pub fn new(
+        sep: Regex,
         max_files: i32,
         max_records: i32,
         plx_zeropoint: f64,
@@ -353,6 +356,7 @@ impl Loader {
         }
 
         Loader {
+            sep,
             max_files,
             max_records,
             plx_zeropoint,
@@ -483,8 +487,7 @@ impl Loader {
 
     // Parses a line using self.indices
     fn parse_line(&self, line: String) -> Option<Particle> {
-        let sep = Regex::new(r"\s+|,").unwrap();
-        let tokens: Vec<&str> = sep.split(&line).collect();
+        let tokens: Vec<&str> = self.sep.split(&line).collect();
 
         self.create_particle(
             tokens.get(self.get_index(&ColId::source_id)),
