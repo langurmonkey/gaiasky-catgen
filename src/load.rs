@@ -540,7 +540,7 @@ impl Loader {
         steff: Option<&&str>,
     ) -> Option<Particle> {
         // First, check if we accept it given the current constraints
-        let mut plx: f64 = parse::parse_f64(splx) + self.plx_zeropoint;
+        let mut plx: f64 = parse::parse_f64(splx) - self.plx_zeropoint;
         let plx_e: f64 = parse::parse_f64(splx_e);
         let mut appmag: f64 = parse::parse_f64(sappmag);
 
