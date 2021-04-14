@@ -7,7 +7,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +264 src/main.rs
+badd +151 src/main.rs
 badd +264 src/data.rs
 badd +381 src/write.rs
 badd +1 src/color.rs
@@ -41,7 +41,7 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 19 - ((18 * winheight(0) + 27) / 55)
+let s:l = 19 - ((18 * winheight(0) + 21) / 43)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -65,7 +65,7 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 151 - ((0 * winheight(0) + 27) / 55)
+let s:l = 151 - ((0 * winheight(0) + 18) / 37)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -89,12 +89,12 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 100 - ((52 * winheight(0) + 27) / 55)
+let s:l = 43 - ((42 * winheight(0) + 21) / 43)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-100
-normal! 024|
+43
+normal! 0
 lcd ~/Projects/gaiasky-catgen
 tabedit ~/Projects/gaiasky-catgen/src/lod.rs
 set splitbelow splitright
@@ -113,12 +113,12 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 27) / 55)
+let s:l = 274 - ((0 * winheight(0) + 21) / 43)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 021|
+274
+normal! 0
 lcd ~/Projects/gaiasky-catgen
 tabedit ~/Projects/gaiasky-catgen/src/load.rs
 set splitbelow splitright
@@ -137,12 +137,12 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 27) / 55)
+let s:l = 43 - ((42 * winheight(0) + 21) / 43)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
+43
+normal! 013|
 lcd ~/Projects/gaiasky-catgen
 tabedit ~/Projects/gaiasky-catgen/src/parse.rs
 set splitbelow splitright
@@ -161,7 +161,7 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 27) / 55)
+let s:l = 1 - ((0 * winheight(0) + 21) / 43)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -185,7 +185,7 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 266 - ((0 * winheight(0) + 27) / 55)
+let s:l = 266 - ((0 * winheight(0) + 21) / 43)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -209,11 +209,11 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 224 - ((1 * winheight(0) + 27) / 55)
+let s:l = 355 - ((15 * winheight(0) + 21) / 43)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-224
+355
 normal! 017|
 lcd ~/Projects/gaiasky-catgen
 tabedit ~/Projects/gaiasky-catgen/src/xmatch.rs
@@ -233,7 +233,7 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 24 - ((23 * winheight(0) + 27) / 55)
+let s:l = 24 - ((18 * winheight(0) + 21) / 43)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -257,14 +257,14 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 18 - ((17 * winheight(0) + 27) / 55)
+let s:l = 18 - ((13 * winheight(0) + 21) / 43)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 18
 normal! 0
 lcd ~/Projects/gaiasky-catgen
-tabnext 5
+tabnext 2
 set stal=1
 if exists('s:wipebuf') && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
