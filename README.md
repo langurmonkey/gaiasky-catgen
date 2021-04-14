@@ -1,7 +1,7 @@
 Gaia Sky LOD catalog generator
 ==============================
 
-This project contains a re-implementation of the Gaia Sky LOD catalog generation in Rust. This is currently a WIP. A full (Java) implementation can be found in the main [Gaia Sky repository](https://gitlab.com/langurmonkey/gaiasky).
+This project contains a re-implementation of the Gaia Sky LOD catalog generation in Rust. This version runs faster and consumes much less memory than its Java counterpart. The original Java implementation can be found in the main [Gaia Sky repository](https://gitlab.com/langurmonkey/gaiasky/-/tree/master/core/src/gaiasky/data/octreegen).
 
 Build
 -----
