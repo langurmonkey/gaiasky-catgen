@@ -55,6 +55,7 @@ pub enum ColId {
     ebp_min_rp,
     ruwe,
     geodist,
+    fidelity,
 }
 
 impl ColId {
@@ -84,6 +85,7 @@ impl ColId {
             ColId::ag => "ag",
             ColId::ebp_min_rp => "ebp_min_rp",
             ColId::geodist => "geodist",
+            ColId::fidelity => "fidelity_v1",
             _ => "*none*",
         }
     }
@@ -146,6 +148,9 @@ impl ColId {
             "ag" => Some(ColId::ag),
             "ebp_min_rp" => Some(ColId::ebp_min_rp),
             "geodist" => Some(ColId::geodist),
+            "fidelity" => Some(ColId::fidelity),
+            "fidelity_v1" => Some(ColId::fidelity),
+            "fidelity_v2" => Some(ColId::fidelity),
             _ => None,
         }
     }
@@ -164,35 +169,56 @@ pub struct Additional {
 }
 
 impl Additional {
+    pub fn empty() -> Self {
+        let indices = HashMap::new();
+        let values = LargeLongMap::new(50);
+        Additional { indices, values }
+    }
+
     /**
-     * Loads a new batch of additional columns from the given file
+     * Loads a new batch of additional columns from the given file(s)
      **/
     pub fn new(file: &&str) -> Option<Self> {
         log::info!("Loading additional columns from {}", file);
+        Self::load_dir(file)
+    }
 
-        let path = Path::new(file);
+    fn load_dir(dir: &str) -> Option<Self> {
+        let path = Path::new(dir);
         if path.exists() {
-            if path.is_file() && file.ends_with(".gz") {
-                return Additional::load_file(file);
+            let mut addit: Self = Self::empty();
+            if path.is_file() && dir.ends_with(".gz") {
+                addit.load_file(dir);
+                return Some(addit);
             } else {
-                log::error!("Path is not a gzipped file: {}", file);
-                return None;
+                // glob directory
+                let mut dir_glob: String = String::from(dir);
+                dir_glob.push_str("/*");
+                let mut count: u32 = 0;
+                for entry in glob(&dir_glob).expect("Error reading glob pattern") {
+                    match entry {
+                        Ok(path) => {
+                            addit.load_file(path.to_str().expect("Error: path not valid"));
+                            count += 1;
+                        }
+                        Err(e) => log::error!("Error: {:?}", e),
+                    }
+                }
+                log::info!("Additional directory loaded ({}):  {} files", dir, count);
+                return Some(addit);
             }
         } else {
-            log::error!("Path does not exist: {}", file);
+            log::error!("Path does not exist: {}", dir);
             return None;
         }
     }
 
-    fn load_file(file: &str) -> Option<Self> {
+    fn load_file(&mut self, file: &str) {
         let mut total: u64 = 0;
         // Read csv.gz using GzDecoder
         let f = File::open(file).expect("Error: file not found");
         let mmap = unsafe { Mmap::map(&f).expect(&format!("Error mapping file {}", file)) };
         let gz = GzDecoder::new(&mmap[..]);
-
-        let mut indices = HashMap::new();
-        let mut values = LargeLongMap::new(50);
 
         // Separator, multiple spaces or a comma
         let sep = Regex::new(r"\s+|,").unwrap();
@@ -210,10 +236,10 @@ impl Additional {
                             token,
                             ColId::source_id.to_str()
                         );
-                        return None;
+                        return;
                     }
-                    if i > 0 && !indices.contains_key(token) {
-                        indices.insert(token.to_string(), i - 1);
+                    if i > 0 && !self.indices.contains_key(token) {
+                        self.indices.insert(token.to_string(), i - 1);
                     }
                     i += 1;
                 }
@@ -241,12 +267,10 @@ impl Additional {
                         }
                     }
                 }
-                values.insert(source_id, vals);
+                self.values.insert(source_id, vals);
             }
             total += 1;
         }
-
-        Some(Additional { indices, values })
     }
 
     pub fn n_cols(&self) -> usize {
@@ -521,6 +545,13 @@ impl Loader {
         }
     }
 
+    fn parse_get(&self, source_id: i64, col_id: ColId, token: Option<&&str>) -> f64 {
+        match self.get_additional(col_id, source_id) {
+            Some(value) => return value,
+            None => return parse::parse_f64(token),
+        }
+    }
+
     fn create_particle(
         &self,
         ssource_id: Option<&&str>,
@@ -542,15 +573,25 @@ impl Loader {
         sebp_min_rp: Option<&&str>,
         steff: Option<&&str>,
     ) -> Option<Particle> {
-        // First, check if we accept it given the current constraints
-        let mut plx: f64 = parse::parse_f64(splx) - self.plx_zeropoint;
-        let plx_e: f64 = parse::parse_f64(splx_e);
-        let mut appmag: f64 = parse::parse_f64(sappmag);
-
-        let has_geodist = self.has_additional_col(ColId::geodist);
-
         // Source ID
         let mut source_id: i64 = parse::parse_i64(ssource_id);
+
+        // First, check if we accept it given the current constraints
+
+        // Parallax:
+        // If it comes from additional, just take it (already zero point-corrected)
+        // Otherwise, apply zero point
+        let mut plx: f64 = match self.get_additional(ColId::plx, source_id) {
+            Some(val) => val,
+            None => parse::parse_f64(splx) - self.plx_zeropoint,
+        };
+        let plx_e: f64 = parse::parse_f64(splx_e);
+        let mut appmag: f64 = self.parse_get(source_id, ColId::gmag, sappmag);
+
+        let has_fidelity = self.has_additional_col(ColId::fidelity);
+        let has_geodist = self.has_additional_col(ColId::geodist);
+        let other_criteria = has_fidelity || has_geodist;
+
         let hip: i32 = parse::parse_i32(ship_id);
         if source_id == 0 {
             source_id = hip as i64;
@@ -558,10 +599,15 @@ impl Loader {
 
         let must_load = self.must_load_particle(source_id);
 
+        // Fidelity test
+        if has_fidelity && !self.accept_fidelity(source_id) {
+            return None;
+        }
+
         // Parallax test
         if !has_geodist && plx <= 0.0 && self.allow_negative_plx {
             plx = 0.04;
-        } else if !must_load && !self.accept_parallax(has_geodist, appmag, plx, plx_e) {
+        } else if !must_load && !self.accept_parallax(other_criteria, appmag, plx, plx_e) {
             return None;
         }
 
@@ -742,9 +788,9 @@ impl Loader {
         })
     }
 
-    fn accept_parallax(&self, has_geodist: bool, appmag: f64, plx: f64, plx_e: f64) -> bool {
+    fn accept_parallax(&self, other_criteria: bool, appmag: f64, plx: f64, plx_e: f64) -> bool {
         // If geometric distances are present, always accept, we use distances directly regardless of parallax
-        if has_geodist {
+        if other_criteria {
             return true;
         }
 
@@ -759,6 +805,14 @@ impl Loader {
 
     fn accept_distance(&self, dist_pc: f64) -> bool {
         dist_pc.is_finite() && dist_pc <= self.distpc_cap
+    }
+
+    fn accept_fidelity(&self, source_id: i64) -> bool {
+        let fidelity = self.get_additional(ColId::fidelity, source_id);
+        match fidelity {
+            Some(d) => return d > 0.5,
+            None => false,
+        }
     }
 
     fn get_geodistance(&self, source_id: i64) -> f64 {
