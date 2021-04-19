@@ -67,7 +67,7 @@ impl Octree {
         let mut depth: u32 = 0;
         let mut cat_idx = 0;
         let cat_size = list.len();
-        for level in 0..=18 {
+        for level in 0..=19 {
             log::info!(
                 "Generating level {} ({} stars left)",
                 level,
@@ -140,7 +140,7 @@ impl Octree {
                 break;
             }
         }
-        if depth == 18 && cat_idx < cat_size {
+        if depth == 19 && cat_idx < cat_size {
             log::info!(
                 "WARN: Maximum depth reached ({}) and there are still {} stars left!",
                 depth,
@@ -316,8 +316,7 @@ impl Octree {
             return OctantId(0);
         }
         let mut min = self.nodes.borrow().get(0).unwrap().min.copy();
-        let max = self.nodes.borrow().get(0).unwrap().max.copy();
-        let mut hs = (max.x - min.x) / 2.0;
+        let mut hs = self.nodes.borrow().get(0).unwrap().size.x / 2.0;
         let mut id: String = String::new();
         for _ in 1..=level {
             if x <= min.x + hs {
@@ -357,6 +356,7 @@ impl Octree {
                     }
                 }
             }
+            // One level down, halve new half size
             hs = hs / 2.0;
         }
         OctantId(parse::parse_i64(Some(&&id[..])))
@@ -429,9 +429,10 @@ impl Octree {
                 let y = min.y + nhs;
                 let z = min.z + nhs;
 
+                // Find out the ID of the node given its position and level
                 let node_id = self.position_octant_id(x, y, z, l);
                 if self.nodes_idx.borrow().contains_key(&node_id.0) {
-                    panic!("Node {} already exists!!!", node_id.0);
+                    panic!("Node {} already exists, can't happen here!!!", node_id.0);
                 }
                 self.add_new_node(node_id, x, y, z, nhs, l, Some(current));
                 self.nodes
