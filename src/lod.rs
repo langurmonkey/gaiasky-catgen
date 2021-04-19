@@ -8,8 +8,8 @@ use std::collections::HashMap;
 use std::fmt;
 
 /**
- * An octree contains a root
- * and a map
+ * An octree contains a root node,
+ * an index and an array of nodes.
  **/
 pub struct Octree {
     pub max_part: usize,
@@ -52,8 +52,8 @@ impl Octree {
     }
 
     /**
-     * Generates a new octree with the given list
-     * of stars and parameters. The list must be
+     * Generates a the octree with the given list
+     * of stars. The list must be
      * sorted by magnitude beforehand. Returns the
      * number of octants in the octree, the number
      * of stars actually added (i.e. not skipped
@@ -67,7 +67,7 @@ impl Octree {
         let mut depth: u32 = 0;
         let mut cat_idx = 0;
         let cat_size = list.len();
-        for level in 0..25 {
+        for level in 0..=18 {
             log::info!(
                 "Generating level {} ({} stars left)",
                 level,
@@ -139,6 +139,13 @@ impl Octree {
                 // All stars added -> FINISHED
                 break;
             }
+        }
+        if depth == 18 && cat_idx < cat_size {
+            log::info!(
+                "WARN: Maximum depth reached ({}) and there are still {} stars left!",
+                depth,
+                cat_size - cat_idx
+            );
         }
         log::info!(
             "GENERATION (1st round): {} nodes, {} stars",
@@ -449,7 +456,8 @@ impl Octree {
 
     /**
      * Computes the maximum axis-aligned bounding box
-     * containing all the particles in the list.
+     * containing all the particles in the list and
+     * sets up the root node of this octree.
      **/
     fn start_generation(&self, list: &Vec<Particle>) {
         log::info!("Starting generation of octree");
