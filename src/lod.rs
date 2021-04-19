@@ -98,7 +98,7 @@ impl Octree {
 
                 if !self.has_node(octant_id) {
                     // Octree node does not exist yet, create it
-                    let (oc_i, n_cre) = self.create_octant(x, y, z, level);
+                    let (oc_i, n_cre) = self.create_octant(octant_id, x, y, z, level);
                     octree_node_num += n_cre;
 
                     octant_i = oc_i;
@@ -363,9 +363,16 @@ impl Octree {
     }
 
     /**
-     * Creates a new octant with the given parameters
+     * Creates a new octant for the star at the given position and level
      **/
-    pub fn create_octant(&self, x: f64, y: f64, z: f64, level: u32) -> (usize, usize) {
+    pub fn create_octant(
+        &self,
+        octant_id: OctantId,
+        x: f64,
+        y: f64,
+        z: f64,
+        level: u32,
+    ) -> (usize, usize) {
         let mut min: Vec3 = Vec3 {
             x: 0.0,
             y: 0.0,
@@ -450,6 +457,14 @@ impl Octree {
                 .get_child(idx)
                 .expect("OctantId does not exist!");
             current_i = *self.nodes_idx.borrow().get(&current.0).unwrap();
+        }
+        if octant_id.0 != (current_i as i64) {
+            // The node should have the id octant_id!
+            log::error!(
+                "The expected octant id and the final octant id are not equal: {} != {}",
+                octant_id.0,
+                current_i
+            );
         }
 
         (current_i, n_created)
