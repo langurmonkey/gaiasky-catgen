@@ -145,6 +145,13 @@ impl Octree {
             octree_node_num,
             octree_star_num
         );
+        // Actually count nodes and stars to see if they match
+        let (ncomputedstars, ncomputednodes) = self.nodes.borrow()[0].compute_numbers(&self);
+        log::info!(
+            "COMPUTED NUMBERS: {} nodes, {} stars",
+            ncomputednodes,
+            ncomputedstars
+        );
 
         // Remove empty nodes by floating up objects
         let mut merged_nodes: usize = 0;
@@ -406,6 +413,7 @@ impl Octree {
                 }
             }
 
+            // If node does not exist in child list, create it
             if !self.nodes.borrow().get(current_i).unwrap().has_child(idx) {
                 // Create kid
                 let nhs: f64 = hs / 2.0;
@@ -500,6 +508,7 @@ impl Octree {
             num_objects: Cell::new(0),
             num_objects_rec: Cell::new(0),
             num_children: Cell::new(0),
+            num_children_rec: Cell::new(0),
 
             deleted: Cell::new(false),
 
@@ -572,6 +581,7 @@ pub struct Octant {
     pub num_objects: Cell<i32>,
     pub num_objects_rec: Cell<i32>,
     pub num_children: Cell<i32>,
+    pub num_children_rec: Cell<i32>,
 
     pub deleted: Cell<bool>,
 
@@ -616,6 +626,7 @@ impl Octant {
             num_objects: Cell::new(0),
             num_objects_rec: Cell::new(0),
             num_children: Cell::new(0),
+            num_children_rec: Cell::new(0),
 
             deleted: Cell::new(false),
 
@@ -693,32 +704,34 @@ impl Octant {
      * Computes the number of objects and the number of children nodes
      * recursively, sets the attributes and returns them.
      **/
-    pub fn compute_numbers(&self, octree: &Octree) -> i32 {
+    pub fn compute_numbers(&self, octree: &Octree) -> (i32, i32) {
         let mut num_objects_rec = self.get_num_objects();
         self.num_objects.set(num_objects_rec);
 
-        let mut num_children = 0;
+        let mut num_children_rec = 0;
         for ch in 0..8 {
             if self.has_child(ch) {
-                num_children += 1;
+                num_children_rec += 1;
             }
         }
-        self.num_children.set(num_children);
+        self.num_children.set(num_children_rec);
 
         // Recursively count objects
         for i in 0..8 {
             if self.children.borrow()[i].is_some() {
                 let id = self.children.borrow()[i].unwrap();
                 let idx = *octree.nodes_idx.borrow().get(&id.0).unwrap();
-                let objs = octree.nodes.borrow()[idx].compute_numbers(octree);
+                let (objs, ch) = octree.nodes.borrow()[idx].compute_numbers(octree);
 
                 num_objects_rec += objs;
+                num_children_rec += ch;
             }
         }
 
         self.num_objects_rec.set(num_objects_rec);
+        self.num_children_rec.set(num_children_rec);
 
-        num_objects_rec
+        (num_objects_rec, num_children_rec)
     }
 
     pub fn get_num_objects(&self) -> i32 {
