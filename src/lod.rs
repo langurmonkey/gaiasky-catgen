@@ -109,6 +109,7 @@ impl Octree {
                 // Add star to octant
                 let added_num = self.nodes.borrow().get(octant_i).unwrap().add_obj(cat_idx);
 
+                // Update max depth
                 if level > depth {
                     depth = level;
                 }
@@ -139,7 +140,11 @@ impl Octree {
                 break;
             }
         }
-        log::info!("GENERATION (1st round): {} nodes", octree_node_num);
+        log::info!(
+            "GENERATION (1st round): {} nodes, {} stars",
+            octree_node_num,
+            octree_star_num
+        );
 
         // Remove empty nodes by floating up objects
         let mut merged_nodes: usize = 0;
