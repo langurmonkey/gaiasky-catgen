@@ -618,12 +618,14 @@ impl Loader {
             return None;
         }
 
-        // Parallax test
-        if !has_geodist && plx <= 0.0 && self.allow_negative_plx {
-            plx = 0.04;
-        } else if !must_load && !self.accept_parallax(other_criteria, appmag, plx, plx_e) {
-            self.rejected_plx += 1;
-            return None;
+        // Parallax test, only if there are no geo-distances
+        if !has_geodist {
+            if plx <= 0.0 && self.allow_negative_plx {
+                plx = 0.04;
+            } else if !must_load && !self.accept_parallax(other_criteria, appmag, plx, plx_e) {
+                self.rejected_plx += 1;
+                return None;
+            }
         }
 
         // Extra attributes
@@ -813,7 +815,7 @@ impl Loader {
             return true;
         }
 
-        if !appmag.is_finite() {
+        if !appmag.is_finite() || !plx.is_finite() {
             return false;
         } else if appmag < 13.1 {
             return plx >= 0.0 && plx_e < plx * self.plx_err_bright && plx_e < self.plx_err_cap;
@@ -877,9 +879,9 @@ impl Loader {
         match self.get_additional(col_id, source_id) {
             Some(val) => {
                 if val.is_finite() {
-                    orelse
-                } else {
                     val
+                } else {
+                    orelse
                 }
             }
             None => orelse,
