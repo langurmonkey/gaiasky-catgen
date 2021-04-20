@@ -600,7 +600,10 @@ impl Loader {
         // If it comes from additional, just take it (already zero point-corrected)
         // Otherwise, apply zero point
         let mut plx: f64 = match self.get_additional(ColId::plx, source_id) {
-            Some(val) => val,
+            Some(val) => {
+                log::info!("plx additional val: {}", val);
+                val
+            }
             None => parse::parse_f64(splx) - self.plx_zeropoint,
         };
         let plx_e: f64 = parse::parse_f64(splx_e);
