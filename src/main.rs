@@ -47,7 +47,7 @@ fn main() {
         output: "".to_string(),
         max_part: 100000,
         ruwe_cap: f32::NAN,
-        distpc_cap: 5.0e5,
+        distpc_cap: 1.0e5,
         plx_err_faint: 10.0,
         plx_err_bright: 10.0,
         plx_zeropoint: 0.0,
