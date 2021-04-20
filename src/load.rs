@@ -562,13 +562,6 @@ impl Loader {
         }
     }
 
-    fn parse_get(&self, source_id: i64, col_id: ColId, token: Option<&&str>) -> f64 {
-        match self.get_additional(col_id, source_id) {
-            Some(value) => return value,
-            None => return parse::parse_f64(token),
-        }
-    }
-
     fn create_particle(
         &mut self,
         ssource_id: Option<&&str>,
@@ -599,15 +592,14 @@ impl Loader {
         // Parallax:
         // If it comes from additional, just take it (already zero point-corrected)
         // Otherwise, apply zero point
-        let mut plx: f64 = match self.get_additional(ColId::plx, source_id) {
-            Some(val) => {
-                log::info!("plx additional val: {}", val);
-                val
-            }
-            None => parse::parse_f64(splx) - self.plx_zeropoint,
-        };
+        let mut plx: f64 = self.get_attribute_or_else(
+            ColId::plx,
+            source_id,
+            parse::parse_f64(splx) - self.plx_zeropoint,
+        );
         let plx_e: f64 = parse::parse_f64(splx_e);
-        let mut appmag: f64 = self.parse_get(source_id, ColId::gmag, sappmag);
+        let mut appmag: f64 =
+            self.get_attribute_or_else(ColId::gmag, source_id, parse::parse_f64(sappmag));
 
         let has_fidelity = self.has_additional_col(ColId::fidelity);
         let has_geodist = self.has_additional_col(ColId::geodist);
@@ -875,6 +867,22 @@ impl Loader {
                 }
                 None => f32::NAN,
             }
+        }
+    }
+
+    // Get side-loaded attributes, or .
+    // If it comes from additional, just take it (already zero point-corrected)
+    // Otherwise, apply zero point
+    fn get_attribute_or_else(&self, col_id: ColId, source_id: i64, orelse: f64) -> f64 {
+        match self.get_additional(ColId::plx, source_id) {
+            Some(val) => {
+                if val.is_finite() {
+                    orelse
+                } else {
+                    val
+                }
+            }
+            None => orelse,
         }
     }
 
