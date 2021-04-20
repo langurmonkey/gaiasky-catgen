@@ -1,11 +1,20 @@
 use crate::constants;
 use crate::data;
-use crate::parse;
 
+use base_custom::BaseCustom;
 use data::{BoundingBox, Particle, Vec3};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::fmt;
+
+/**
+ * The MAX_DEPTH is determined by the octant IDs. Since
+ * they must be uniquely identifiable given a level and a position.
+ * We use octal numbers for the id, always preceded by 1, and then each
+ * level has the index of the child in the level's position. Converted
+ * to decimal (i64), this gives us 20 digits to work with.
+ **/
+const MAX_DEPTH: u32 = 20;
 
 /**
  * An octree contains a root node,
@@ -17,6 +26,9 @@ pub struct Octree {
     pub child_count: usize,
     pub parent_count: usize,
     pub distpc_cap: f64,
+
+    // Base for octant ids (octal)
+    pub base: BaseCustom<char>,
 
     // From octantId to index in nodes vector
     pub nodes_idx: RefCell<HashMap<i64, usize>>,
@@ -45,6 +57,8 @@ impl Octree {
             parent_count,
             distpc_cap,
 
+            // octal base
+            base: BaseCustom::<char>::new("01234567".chars().collect()),
             nodes_idx: RefCell::new(HashMap::new()),
             nodes: RefCell::new(Vec::new()),
             root: None,
@@ -67,7 +81,7 @@ impl Octree {
         let mut depth: u32 = 0;
         let mut cat_idx = 0;
         let cat_size = list.len();
-        for level in 0..=19 {
+        for level in 0..=MAX_DEPTH {
             log::info!(
                 "Generating level {} ({} stars left)",
                 level,
@@ -135,7 +149,7 @@ impl Octree {
                 break;
             }
         }
-        if depth == 19 && cat_idx < cat_size {
+        if depth == MAX_DEPTH && cat_idx < cat_size {
             log::info!(
                 ":: WARN: Maximum depth reached ({}) and there are still {} stars left!",
                 depth,
@@ -326,48 +340,53 @@ impl Octree {
             return None;
         }
 
+        // Always start with 1 for level 0
+        id.push('1');
+
         for _ in 1..=level {
             if x <= min.x + hs {
                 if y <= min.y + hs {
                     if z <= min.z + hs {
-                        id.push('1');
+                        id.push('0');
                         // min stays the same
                     } else {
                         min.set(min.x, min.y, min.z + hs);
-                        id.push('2');
+                        id.push('1');
                     }
                 } else {
                     if z <= min.z + hs {
                         min.set(min.x, min.y + hs, min.z);
-                        id.push('3');
+                        id.push('2');
                     } else {
                         min.set(min.x, min.y + hs, min.z + hs);
-                        id.push('4');
+                        id.push('3');
                     }
                 }
             } else {
                 if y <= min.y + hs {
                     if z <= min.z + hs {
                         min.set(min.x + hs, min.y, min.z);
-                        id.push('5');
+                        id.push('4');
                     } else {
                         min.set(min.x + hs, min.y, min.z + hs);
-                        id.push('6');
+                        id.push('5');
                     }
                 } else {
                     if z <= min.z + hs {
                         min.set(min.x + hs, min.y + hs, min.z);
-                        id.push('7');
+                        id.push('6');
                     } else {
                         min.set(min.x + hs, min.y + hs, min.z + hs);
-                        id.push('8');
+                        id.push('7');
                     }
                 }
             }
             // One level down, halve new half size
             hs = hs / 2.0;
         }
-        Some(OctantId(parse::parse_i64(Some(&&id[..]))))
+        // Convert octal to decimal
+        let dec: i64 = self.base.decimal(id) as i64;
+        Some(OctantId(dec))
     }
 
     /**

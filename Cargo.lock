@@ -49,6 +49,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 
 [[package]]
+name = "base_custom"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11618f234905abd75cc842f4eaeb0fbbaaa457eb0752fa46f8c22d44e3497dd2"
+
+[[package]]
 name = "bitflags"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -134,6 +140,7 @@ name = "gaiasky-catgen"
 version = "0.1.0"
 dependencies = [
  "argparse",
+ "base_custom",
  "fast-float",
  "flate2",
  "glob",

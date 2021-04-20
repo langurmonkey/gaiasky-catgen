@@ -1,4 +1,5 @@
 extern crate argparse;
+extern crate base_custom;
 extern crate procinfo;
 
 use std::{
