@@ -874,7 +874,7 @@ impl Loader {
     // If it comes from additional, just take it (already zero point-corrected)
     // Otherwise, apply zero point
     fn get_attribute_or_else(&self, col_id: ColId, source_id: i64, orelse: f64) -> f64 {
-        match self.get_additional(ColId::plx, source_id) {
+        match self.get_additional(col_id, source_id) {
             Some(val) => {
                 if val.is_finite() {
                     orelse
