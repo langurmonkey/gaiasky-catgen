@@ -42,7 +42,7 @@ pub fn write_metadata(octree: &Octree, output_dir: &str) {
             // Skip deleted
             continue;
         }
-        f.write_all(&(node.id.0 as i32).to_be_bytes())
+        f.write_all(&(node.id.0 as i64).to_be_bytes())
             .expect("Error writing");
         f.write_all(&(node.centre.x as f32).to_be_bytes())
             .expect("Error writing");

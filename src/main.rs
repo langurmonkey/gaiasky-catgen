@@ -54,6 +54,7 @@ fn main() {
         plx_zeropoint: 0.0,
         mag_corrections: true,
         postprocess: false,
+        dry_run: false,
         child_count: 100,
         parent_count: 1000,
         file_num_cap: -1,
@@ -163,11 +164,16 @@ fn main() {
             Store,
             "Maximum number of stars to be processed per file",
         );
+        ap.refer(&mut args.dry_run).add_option(
+            &["--dryrun"],
+            StoreTrue,
+            "Dry run, do not write anything",
+        );
         ap.parse_args_or_exit();
     }
 
     // Clean output directory
-    if path::Path::new(&args.output).exists() {
+    if !args.dry_run && path::Path::new(&args.output).exists() {
         fs::remove_dir_all(&args.output).expect("Error cleaning output directory");
     }
 
@@ -423,10 +429,16 @@ fn main() {
         //
         let start_gen = Instant::now();
         let len_before = main_list.len();
+        let mut n_close_stars: u64 = 0;
+        // Remove stars with distance > dist_cap
         main_list.retain(|s| {
             let dist_pc: f64 = (s.x * s.x + s.y * s.y + s.z * s.z).sqrt() * constants::U_TO_PC;
+            if dist_pc <= 5.0 {
+                n_close_stars += 1;
+            }
             dist_pc <= args.distpc_cap
         });
+        log::info!("Found {} close stars! (dist <= 5 pc)", n_close_stars);
         log::info!(
             "Removed {} stars due to being too far (cap = {} pc)",
             len_before - main_list.len(),
@@ -472,8 +484,11 @@ fn main() {
 
         // Write
         let main_list_len = main_list.len() as f32;
-        write::write_metadata(&octree, &args.output);
-        write::write_particles_mmap(&octree, main_list, &args.output);
+        if !args.dry_run {
+            // Write only if not dry_run
+            write::write_metadata(&octree, &args.output);
+            write::write_particles_mmap(&octree, main_list, &args.output);
+        }
         let time_write = start_write.elapsed();
 
         mem::log_mem();
@@ -537,9 +552,10 @@ fn main() {
             util::nice_time(time_gen)
         );
         log::info!(
-            "Writing: {:.2}s ({})",
+            "Writing: {:.2}s ({}) {}",
             time_write.as_millis() as f64 / 1000.0,
-            util::nice_time(time_write)
+            util::nice_time(time_write),
+            if args.dry_run { "--dry-run" } else { "" }
         );
         log::info!(
             "Total: {:.2}s ({})",

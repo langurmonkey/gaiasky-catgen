@@ -828,7 +828,7 @@ impl Loader {
     }
 
     fn accept_distance(&self, dist_pc: f64) -> bool {
-        dist_pc.is_finite() && dist_pc <= self.distpc_cap
+        dist_pc.is_finite()
     }
 
     fn accept_fidelity(&self, source_id: i64) -> bool {

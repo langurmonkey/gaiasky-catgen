@@ -246,6 +246,7 @@ pub struct Config {
     pub columns: String,
     pub file_num_cap: i32,
     pub star_num_cap: i32,
+    pub dry_run: bool,
 }
 
 impl fmt::Debug for Config {
@@ -269,6 +270,7 @@ impl fmt::Debug for Config {
             .field("columns", &self.columns)
             .field("file_num_cap", &self.file_num_cap)
             .field("star_num_cap", &self.star_num_cap)
+            .field("dry_run", &self.dry_run)
             .finish()
     }
 }
