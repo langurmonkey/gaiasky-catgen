@@ -77,23 +77,18 @@ impl Octree {
                 // Add stars to nodes until we reach max_part
                 let star = list.get(cat_idx).expect("Error getting star");
 
-                // Check if star is too far
-                let dist = (star.x * star.x + star.y * star.y + star.z * star.z).sqrt();
-                if dist * constants::U_TO_PC > self.distpc_cap {
-                    log::info!(
-                        "Star {} discarded due to being too far ({} pc)",
-                        star.id,
-                        dist * constants::U_TO_PC
-                    );
-                    cat_idx += 1;
-                    continue;
-                }
-
                 let x = star.x;
                 let y = star.y;
                 let z = star.z;
 
-                let octant_id = self.position_octant_id(x, y, z, level);
+                let octant_id_op = self.position_octant_id(x, y, z, level);
+                if octant_id_op.is_none() {
+                    // Out of bounds!
+                    // Discarded due to being outside the root
+                    continue;
+                }
+
+                let octant_id = octant_id_op.unwrap();
                 let octant_i: usize;
 
                 if !self.has_node(octant_id) {
@@ -142,20 +137,20 @@ impl Octree {
         }
         if depth == 19 && cat_idx < cat_size {
             log::info!(
-                "WARN: Maximum depth reached ({}) and there are still {} stars left!",
+                ":: WARN: Maximum depth reached ({}) and there are still {} stars left!",
                 depth,
                 cat_size - cat_idx
             );
         }
         log::info!(
-            "GENERATION (1st round): {} nodes, {} stars",
+            ":: GENERATION (1st round): {} nodes, {} stars",
             octree_node_num,
             octree_star_num
         );
         // Actually count nodes and stars to see if they match
         let (ncomputedstars, ncomputednodes) = self.nodes.borrow()[0].compute_numbers(&self);
         log::info!(
-            "COMPUTED NUMBERS: {} nodes, {} stars",
+            ":: COMPUTED NUMBERS: {} nodes, {} stars",
             ncomputednodes,
             ncomputedstars
         );
@@ -212,7 +207,11 @@ impl Octree {
             merged_objects
         );
         octree_node_num -= merged_nodes;
-        log::info!("GENERATION (2st round): {} nodes", octree_node_num);
+        log::info!(
+            ":: GENERATION (2st round): {} nodes, {} stars",
+            octree_node_num,
+            octree_star_num
+        );
 
         // User-defined post-process
         if self.postprocess {
@@ -270,12 +269,16 @@ impl Octree {
                 }
             }
 
-            log::info!("POSTPROCESS STATS:");
-            log::info!("    Merged nodes:    {}", merged_nodes_pp);
-            log::info!("    Merged objects:  {}", merged_objects_pp);
+            log::info!(":: POSTPROCESS STATS:");
+            log::info!("   - Merged nodes:    {}", merged_nodes_pp);
+            log::info!("   - Merged objects:  {}", merged_objects_pp);
 
             octree_node_num -= merged_nodes_pp;
-            log::info!("GENERATION (final round): {} nodes", octree_node_num);
+            log::info!(
+                ":: GENERATION (final round): {} nodes, {} stars",
+                octree_node_num,
+                octree_star_num
+            );
         }
 
         // Compute numbers
@@ -311,13 +314,18 @@ impl Octree {
         new_idx
     }
 
-    pub fn position_octant_id(&self, x: f64, y: f64, z: f64, level: u32) -> OctantId {
+    pub fn position_octant_id(&self, x: f64, y: f64, z: f64, level: u32) -> Option<OctantId> {
         if level == 0 {
-            return OctantId(0);
+            return Some(OctantId(0));
         }
         let mut min = self.nodes.borrow().get(0).unwrap().min.copy();
         let mut hs = self.nodes.borrow().get(0).unwrap().size.x / 2.0;
         let mut id: String = String::new();
+
+        if !self.nodes.borrow().get(0).unwrap().contains(x, y, z) {
+            return None;
+        }
+
         for _ in 1..=level {
             if x <= min.x + hs {
                 if y <= min.y + hs {
@@ -359,7 +367,7 @@ impl Octree {
             // One level down, halve new half size
             hs = hs / 2.0;
         }
-        OctantId(parse::parse_i64(Some(&&id[..])))
+        Some(OctantId(parse::parse_i64(Some(&&id[..]))))
     }
 
     /**
@@ -385,50 +393,56 @@ impl Octree {
         let mut current = OctantId(0);
         for l in 1..=level {
             let hs: f64 = self.nodes.borrow().get(current_i).unwrap().size.x / 2.0;
-            let idx;
+            let ch_idx;
 
             let cmin = self.nodes.borrow().get(current_i).unwrap().min;
 
             if x <= cmin.x + hs {
                 if y <= cmin.y + hs {
                     if z <= cmin.z + hs {
-                        idx = 0;
+                        ch_idx = 0;
                         min.set_from(&cmin);
                     } else {
-                        idx = 1;
+                        ch_idx = 1;
                         min.set(cmin.x, cmin.y, cmin.z + hs);
                     }
                 } else {
                     if z <= cmin.z + hs {
-                        idx = 2;
+                        ch_idx = 2;
                         min.set(cmin.x, cmin.y + hs, cmin.z);
                     } else {
-                        idx = 3;
+                        ch_idx = 3;
                         min.set(cmin.x, cmin.y + hs, cmin.z + hs);
                     }
                 }
             } else {
                 if y <= cmin.y + hs {
                     if z <= cmin.z + hs {
-                        idx = 4;
+                        ch_idx = 4;
                         min.set(cmin.x + hs, cmin.y, cmin.z);
                     } else {
-                        idx = 5;
+                        ch_idx = 5;
                         min.set(cmin.x + hs, cmin.y, cmin.z + hs);
                     }
                 } else {
                     if z <= cmin.z + hs {
-                        idx = 6;
+                        ch_idx = 6;
                         min.set(cmin.x + hs, cmin.y + hs, cmin.z);
                     } else {
-                        idx = 7;
+                        ch_idx = 7;
                         min.set(cmin.x + hs, cmin.y + hs, cmin.z + hs);
                     }
                 }
             }
 
             // If node does not exist in child list, create it
-            if !self.nodes.borrow().get(current_i).unwrap().has_child(idx) {
+            if !self
+                .nodes
+                .borrow()
+                .get(current_i)
+                .unwrap()
+                .has_child(ch_idx)
+            {
                 // Create kid
                 let nhs: f64 = hs / 2.0;
 
@@ -437,7 +451,9 @@ impl Octree {
                 let z = min.z + nhs;
 
                 // Find out the ID of the node given its position and level
-                let node_id = self.position_octant_id(x, y, z, l);
+                let node_id_op = self.position_octant_id(x, y, z, l);
+                let node_id = node_id_op.unwrap();
+
                 if self.nodes_idx.borrow().contains_key(&node_id.0) {
                     panic!("Node {} already exists, can't happen here!!!", node_id.0);
                 }
@@ -446,7 +462,7 @@ impl Octree {
                     .borrow()
                     .get(current_i)
                     .unwrap()
-                    .add_child(idx, node_id);
+                    .add_child(ch_idx, node_id);
                 n_created += 1;
             }
             current = self
@@ -454,16 +470,20 @@ impl Octree {
                 .borrow()
                 .get(current_i)
                 .unwrap()
-                .get_child(idx)
+                .get_child(ch_idx)
                 .expect("OctantId does not exist!");
             current_i = *self.nodes_idx.borrow().get(&current.0).unwrap();
         }
-        if octant_id.0 != (current_i as i64) {
+        if octant_id.0 != current.0 {
             // The node should have the id octant_id!
             log::error!(
-                "The expected octant id and the final octant id are not equal: {} != {}",
+                "The expected and final octant id are not equal: {} != {} (x:{}, y:{}, z:{}, l:{})",
                 octant_id.0,
-                current_i
+                current.0,
+                x,
+                y,
+                z,
+                level
             );
         }
 

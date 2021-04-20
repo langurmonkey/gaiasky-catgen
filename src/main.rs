@@ -47,7 +47,7 @@ fn main() {
         output: "".to_string(),
         max_part: 100000,
         ruwe_cap: f32::NAN,
-        distpc_cap: 1.0e6,
+        distpc_cap: 5.0e5,
         plx_err_faint: 10.0,
         plx_err_bright: 10.0,
         plx_zeropoint: 0.0,
@@ -229,7 +229,7 @@ fn main() {
         //
         // GAIA - Load Gaia DRx catalog, the columns come from CLI arguments
         //
-        let loader_gaia = load::Loader::new(
+        let mut loader_gaia = load::Loader::new(
             Regex::new(r"\s+|,").unwrap(),
             args.file_num_cap,
             args.star_num_cap,
@@ -251,6 +251,7 @@ fn main() {
         let list_gaia = loader_gaia
             .load_dir(&args.input)
             .expect("Error loading Gaia data");
+        loader_gaia.report_rejected();
         let time_gaia = start_gaia.elapsed();
         log::info!(
             "{} particles loaded form Gaia in {:?}",
@@ -262,7 +263,7 @@ fn main() {
         //
         // HIP - For hipparcos we only support the columns in that order
         //
-        let loader_hip = load::Loader::new(
+        let mut loader_hip = load::Loader::new(
             Regex::new(r",").unwrap(),
             1,
             50000000,

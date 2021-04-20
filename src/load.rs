@@ -340,6 +340,15 @@ pub struct Loader {
     pub coord: coord::Coord,
     // Star counts per magnitude
     pub counts_per_mag: RefCell<[u32; 22]>,
+
+    // Counts
+    pub total_processed: u64,
+    pub total_loaded: u64,
+    pub rejected_dist: u64,
+    pub rejected_geodist: u64,
+    pub rejected_fidelity: u64,
+    pub rejected_plx: u64,
+    pub rejected_ruwe: u64,
 }
 
 impl Loader {
@@ -399,10 +408,18 @@ impl Loader {
             indices,
             coord: coord::Coord::new(),
             counts_per_mag: RefCell::new([0; 22]),
+
+            total_processed: 0,
+            total_loaded: 0,
+            rejected_dist: 0,
+            rejected_geodist: 0,
+            rejected_fidelity: 0,
+            rejected_plx: 0,
+            rejected_ruwe: 0,
         }
     }
 
-    pub fn load_dir(&self, dir: &str) -> Result<Vec<Particle>, &str> {
+    pub fn load_dir(&mut self, dir: &str) -> Result<Vec<Particle>, &str> {
         let mut list: Vec<Particle> = Vec::new();
         let mut i = 0;
 
@@ -443,7 +460,7 @@ impl Loader {
     // The format is hard-coded for now, with csv.gz being in eDR3 format,
     // and csv being in hipparcos format.
     pub fn load_file(
-        &self,
+        &mut self,
         file: &str,
         list: &mut Vec<Particle>,
         file_num: usize,
@@ -513,7 +530,7 @@ impl Loader {
     }
 
     // Parses a line using self.indices
-    fn parse_line(&self, line: String) -> Option<Particle> {
+    fn parse_line(&mut self, line: String) -> Option<Particle> {
         let tokens: Vec<&str> = self.sep.split(&line).collect();
 
         self.create_particle(
@@ -553,7 +570,7 @@ impl Loader {
     }
 
     fn create_particle(
-        &self,
+        &mut self,
         ssource_id: Option<&&str>,
         ship_id: Option<&&str>,
         snames: Option<&&str>,
@@ -573,6 +590,7 @@ impl Loader {
         sebp_min_rp: Option<&&str>,
         steff: Option<&&str>,
     ) -> Option<Particle> {
+        self.total_processed += 1;
         // Source ID
         let mut source_id: i64 = parse::parse_i64(ssource_id);
 
@@ -601,6 +619,7 @@ impl Loader {
 
         // Fidelity test
         if has_fidelity && !self.accept_fidelity(source_id) {
+            self.rejected_fidelity += 1;
             return None;
         }
 
@@ -608,6 +627,7 @@ impl Loader {
         if !has_geodist && plx <= 0.0 && self.allow_negative_plx {
             plx = 0.04;
         } else if !must_load && !self.accept_parallax(other_criteria, appmag, plx, plx_e) {
+            self.rejected_plx += 1;
             return None;
         }
 
@@ -617,6 +637,7 @@ impl Loader {
         let ruwe_val: f32 = self.get_ruwe(source_id, sruwe);
         // RUWE test
         if !must_load && !self.accept_ruwe(ruwe_val) {
+            self.rejected_ruwe += 1;
             return None;
         }
         if ruwe_val.is_finite() {
@@ -628,6 +649,7 @@ impl Loader {
         let geodist_pc = self.get_geodistance(source_id);
         let has_geodist_star = geodist_pc > 0.0;
         if !(must_load || !has_geodist || (has_geodist && has_geodist_star)) {
+            self.rejected_geodist += 1;
             return None;
         }
 
@@ -641,6 +663,7 @@ impl Loader {
 
         // Distance test
         if !must_load && !self.accept_distance(dist_pc) {
+            self.rejected_dist += 1;
             return None;
         }
         let dist: f64 = dist_pc * constants::PC_TO_U;
@@ -767,6 +790,7 @@ impl Loader {
         let appmag_clamp = f64::clamp(appmag, 0.0, 21.0) as usize;
         self.counts_per_mag.borrow_mut()[appmag_clamp] += 1;
 
+        self.total_loaded += 1;
         Some(Particle {
             x: pos.x,
             y: pos.y,
@@ -889,5 +913,30 @@ impl Loader {
             Some(v) => v.is_finite(),
             None => false,
         }
+    }
+
+    pub fn report_rejected(&self) {
+        log::info!(
+            "::: TOTAL PROCESSED/LOADED: {}/{}",
+            self.total_processed,
+            self.total_loaded
+        );
+        log::info!(
+            "   - Rejected due to parallax (criteria/negative): {}",
+            self.rejected_plx
+        );
+        log::info!(
+            "   - Rejected due to distance (infinite/cap): {}",
+            self.rejected_dist
+        );
+        log::info!(
+            "   - Rejected due to geo-distance (not present): {}",
+            self.rejected_geodist
+        );
+        log::info!(
+            "   - Rejected due to fidelity (criteria): {}",
+            self.rejected_fidelity
+        );
+        log::info!("Rejected due to ruwe (criteria): {}", self.rejected_ruwe);
     }
 }
