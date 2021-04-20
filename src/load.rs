@@ -937,6 +937,9 @@ impl Loader {
             "   - Rejected due to fidelity (criteria): {}",
             self.rejected_fidelity
         );
-        log::info!("Rejected due to ruwe (criteria): {}", self.rejected_ruwe);
+        log::info!(
+            "   - Rejected due to ruwe (criteria): {}",
+            self.rejected_ruwe
+        );
     }
 }
