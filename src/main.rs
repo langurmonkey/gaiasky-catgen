@@ -499,7 +499,7 @@ fn main() {
         log::info!("============");
         log::info!("Octants: {}", num_octants);
         log::info!("Particles: {}", num_stars);
-        log::info!("Depth: {}", depth);
+        log::info!("Depth: {}", depth + 1);
 
         for level in 0..=depth {
             let mut level_octants: usize = 0;
