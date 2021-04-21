@@ -55,6 +55,7 @@ fn main() {
         mag_corrections: true,
         postprocess: false,
         dry_run: false,
+        debug: false,
         child_count: 100,
         parent_count: 1000,
         file_num_cap: -1,
@@ -74,16 +75,16 @@ fn main() {
             argparse::Print(env!("CARGO_PKG_VERSION").to_string()),
             "Print version information",
         );
-        ap.refer(&mut args.input).add_option(
-            &["-i", "--input"],
-            Store,
-            "Location of the input catalog",
-        );
-        ap.refer(&mut args.output).add_option(
-            &["-o", "--output"],
-            Store,
-            "Output folder. Defaults to system temp",
-        );
+        ap.refer(&mut args.input)
+            .add_option(&["-i", "--input"], Store, "Location of the input catalog")
+            .required();
+        ap.refer(&mut args.output)
+            .add_option(
+                &["-o", "--output"],
+                Store,
+                "Output folder. Defaults to system temp. If --dryrun is present, this location is used to store the log",
+            )
+            .required();
         ap.refer(&mut args.max_part).add_option(
             &["--maxpart"],
             Store,
@@ -169,6 +170,8 @@ fn main() {
             StoreTrue,
             "Dry run, do not write anything",
         );
+        ap.refer(&mut args.debug)
+            .add_option(&["-d", "--debug"], StoreTrue, "Set log to debug");
         ap.parse_args_or_exit();
     }
 
@@ -180,11 +183,16 @@ fn main() {
     let input_path = path::Path::new(&args.input);
 
     // Init logging
+    let logfile = format!("{}/log", args.output);
+    if args.dry_run && path::Path::new(&logfile).exists() {
+        // Delete log
+        fs::remove_file(&logfile).expect("Error deleting log file");
+    }
     let logfile = FileAppender::builder()
         .encoder(Box::new(PatternEncoder::new(
             "{d(%Y%m%d %H:%M:%S)} - {l} - {m}\n",
         )))
-        .build(format!("{}/log", args.output))
+        .build(&logfile)
         .expect("Error creating file appender");
     let console = ConsoleAppender::builder()
         .encoder(Box::new(PatternEncoder::new(
@@ -199,7 +207,11 @@ fn main() {
             Root::builder()
                 .appender("logfile")
                 .appender("console")
-                .build(LevelFilter::Info),
+                .build(if args.debug {
+                    LevelFilter::Debug
+                } else {
+                    LevelFilter::Info
+                }),
         )
         .expect("Error building logger config");
 

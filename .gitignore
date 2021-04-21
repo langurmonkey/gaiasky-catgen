@@ -4,6 +4,7 @@ gaiasky-catgen
 data
 .idea
 .gradle
+.vscode
 ./catalogs-*
 /log
 *.vim

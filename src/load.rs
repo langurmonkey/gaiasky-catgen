@@ -270,6 +270,9 @@ impl Additional {
                 self.values.insert(source_id, vals);
             }
             total += 1;
+            if total % 100000 == 0 {
+                log::debug!("   object {}", total);
+            }
         }
     }
 
@@ -788,6 +791,9 @@ impl Loader {
         self.counts_per_mag.borrow_mut()[appmag_clamp] += 1;
 
         self.total_loaded += 1;
+        if self.total_loaded % 100000 == 0 {
+            log::debug!("   object {}", self.total_loaded);
+        }
         Some(Particle {
             x: pos.x,
             y: pos.y,
@@ -813,9 +819,7 @@ impl Loader {
         // If geometric distances are present, always accept, we use distances directly regardless of parallax
         if other_criteria {
             return true;
-        }
-
-        if !appmag.is_finite() || !plx.is_finite() {
+        } else if !appmag.is_finite() || !plx.is_finite() {
             return false;
         } else if appmag < 13.1 {
             return plx >= 0.0 && plx_e < plx * self.plx_err_bright && plx_e < self.plx_err_cap;
