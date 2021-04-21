@@ -66,10 +66,10 @@ pub fn write_metadata(octree: &Octree, output_dir: &str) {
         for i in 0..8_usize {
             // Children
             if node.has_child(i) {
-                f.write_all(&(node.get_child(i).unwrap().0 as i32).to_be_bytes())
+                f.write_all(&(node.get_child(i).unwrap().0 as i64).to_be_bytes())
                     .expect("Error writing");
             } else {
-                f.write_all(&(-1 as i32).to_be_bytes())
+                f.write_all(&(-1 as i64).to_be_bytes())
                     .expect("Error writing");
             }
         }

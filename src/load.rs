@@ -606,7 +606,6 @@ impl Loader {
 
         let has_fidelity = self.has_additional_col(ColId::fidelity);
         let has_geodist = self.has_additional_col(ColId::geodist);
-        let other_criteria = has_fidelity || has_geodist;
 
         let hip: i32 = parse::parse_i32(ship_id);
         if source_id == 0 {
@@ -633,7 +632,7 @@ impl Loader {
                     self.rejected_plx += 1;
                     return None;
                 }
-            } else if !must_load && !self.accept_parallax(other_criteria, appmag, plx, plx_e) {
+            } else if !must_load && !self.accept_parallax(has_geodist, appmag, plx, plx_e) {
                 self.rejected_plx += 1;
                 return None;
             }
@@ -823,9 +822,9 @@ impl Loader {
         })
     }
 
-    fn accept_parallax(&self, other_criteria: bool, appmag: f64, plx: f64, plx_e: f64) -> bool {
+    fn accept_parallax(&self, geodist_present: bool, appmag: f64, plx: f64, plx_e: f64) -> bool {
         // If geometric distances are present, always accept, we use distances directly regardless of parallax
-        if other_criteria {
+        if geodist_present {
             return true;
         } else if !appmag.is_finite() || !plx.is_finite() {
             return false;
