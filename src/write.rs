@@ -32,6 +32,13 @@ pub fn write_metadata(octree: &Octree, output_dir: &str) {
         .open(format!("{}/{}", output_dir, "metadata.bin"))
         .expect("Error: file not found");
 
+    // Token to identify version annotation
+    f.write_all(&(-1 as i32).to_be_bytes())
+        .expect("Error writing");
+    // Version 1
+    f.write_all(&(1 as i32).to_be_bytes())
+        .expect("Error writing");
+
     // Number of nodes
     f.write_all(&(num_nodes).to_be_bytes())
         .expect("Error writing");
