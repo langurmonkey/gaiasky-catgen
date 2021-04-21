@@ -87,6 +87,8 @@ impl Octree {
                 level,
                 cat_size - cat_idx
             );
+            let mut n_octants_created_level: usize = 0;
+            let mut n_stars_added_level: usize = 0;
             while cat_idx < cat_size {
                 // Add stars to nodes until we reach max_part
                 let star = list.get(cat_idx).expect("Error getting star");
@@ -108,6 +110,7 @@ impl Octree {
                 if !self.has_node(octant_id) {
                     // Octree node does not exist yet, create it
                     let (oc_i, n_cre) = self.create_octant(octant_id, x, y, z, level);
+                    n_octants_created_level += 1;
                     octree_node_num += n_cre;
 
                     octant_i = oc_i;
@@ -116,7 +119,8 @@ impl Octree {
                 }
 
                 // Add star to octant
-                let added_num = self.nodes.borrow().get(octant_i).unwrap().add_obj(cat_idx);
+                let total_node_stars = self.nodes.borrow().get(octant_i).unwrap().add_obj(cat_idx);
+                n_stars_added_level += 1;
 
                 // Update max depth
                 if level > depth {
@@ -132,17 +136,26 @@ impl Octree {
                     let progress = String::from_utf8(vec![35; n_fill]).unwrap();
                     let bg = String::from_utf8(vec![45; 20 - n_fill]).unwrap();
 
-                    println!(
+                    log::debug!(
                         "{}{}   {:.3}% ({}/{})",
-                        progress, bg, pct, cat_idx, cat_size
+                        progress,
+                        bg,
+                        pct,
+                        cat_idx,
+                        cat_size
                     );
                 }
 
-                if added_num >= self.max_part {
+                if total_node_stars >= self.max_part {
                     // Next level
                     break;
                 }
             }
+            log::info!(
+                "   -> created {} octants for {} stars",
+                n_octants_created_level,
+                n_stars_added_level
+            );
 
             if cat_idx >= cat_size {
                 // All stars added -> FINISHED
@@ -728,7 +741,7 @@ impl Octant {
 
     pub fn print(&self, parent_idx: usize, octree: &Octree) {
         // 32 is the UTF-8 code for whitespace
-        println!(
+        log::debug!(
             "{}{}:L{} id:{} Obj(own/rec):({}/{}) Nchld:{}",
             String::from_utf8(vec![32; (self.level * 2) as usize]).unwrap(),
             parent_idx,

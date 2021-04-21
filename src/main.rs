@@ -53,6 +53,7 @@ fn main() {
         plx_err_bright: 10.0,
         plx_zeropoint: 0.0,
         mag_corrections: true,
+        allow_negative_plx: false,
         postprocess: false,
         dry_run: false,
         debug: false,
@@ -109,6 +110,11 @@ fn main() {
             &["-c", "--skipmagcorrections"],
             StoreFalse,
             "Skip magnitude and color corrections for extinction and reddening",
+        );
+        ap.refer(&mut args.allow_negative_plx).add_option(
+            &["--allownegativeplx"],
+            StoreTrue,
+            "Allow negative parallaxes (and set them to 0.04 mas, or 25 Kpc) for Gaia stars",
         );
         ap.refer(&mut args.postprocess).add_option(
             &["-p", "--postprocess"],
@@ -259,7 +265,7 @@ fn main() {
             args.plx_err_bright,
             1.0,
             args.mag_corrections,
-            false,
+            args.allow_negative_plx,
             Some(must_load),
             &args.additional,
             &args.columns,
@@ -450,7 +456,7 @@ fn main() {
             }
             dist_pc <= args.distpc_cap
         });
-        log::info!("Found {} close stars! (dist <= 5 pc)", n_close_stars);
+        log::info!("Found {} close stars! (dist <= 5 pc)", n_close_stars,);
         log::info!(
             "Removed {} stars due to being too far (cap = {} pc)",
             len_before - main_list.len(),

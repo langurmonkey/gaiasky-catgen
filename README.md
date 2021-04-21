@@ -42,7 +42,8 @@ Optional arguments:
   -h,--help             Show this help message and exit
   -v,--version          Print version information
   -i,--input INPUT      Location of the input catalog
-  -o,--output OUTPUT    Output folder. Defaults to system temp
+  -o,--output OUTPUT    Output folder. Defaults to system temp. If --dryrun is
+                        present, this location is used to store the log
   --maxpart MAXPART     Maximum number of objects in an octant
   --plxerrfaint PLXERRFAINT
                         Parallax error factor for faint stars (gmag>=13.1),
@@ -50,9 +51,13 @@ Optional arguments:
   --plxerrbright PLXERRBRIGHT
                         Parallax error factor for bright stars (gmag<13.1),
                         where filter [plx_err/plx < plxerrbright] is enforced
+  --plxzeropoint PLXZEROPOINT
+                        Parallax zero point
   -c,--skipmagcorrections
                         Skip magnitude and color corrections for extinction and
                         reddening
+  --allownegativeplx    Allow negative parallaxes (and set them to 0.04 mas, or
+                        25 Kpc) for Gaia stars
   -p,--postprocess      Post-process tree so that low-count nodes are merged
                         with their parents. See --childcount and --parentcount
                         for more info
@@ -83,4 +88,8 @@ Optional arguments:
                         --plxerrbright are ignored.
   --columns COLUMNS     Comma-separated list of column names, in order, of the
                         Gaia catalog
-                                                                                                                                                                                                                                                                                                                ```
+  --filescap FILESCAP   Maximum number of input files to be processed
+  --starscap STARSCAP   Maximum number of stars to be processed per file
+  --dryrun              Dry run, do not write anything
+  -d,--debug            Set log to debug
+```

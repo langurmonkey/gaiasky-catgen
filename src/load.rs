@@ -623,8 +623,16 @@ impl Loader {
 
         // Parallax test, only if there are no geo-distances
         if !has_geodist {
-            if plx <= 0.0 && self.allow_negative_plx {
-                plx = 0.04;
+            if plx <= 0.0 {
+                // If parallax is negative...
+                if self.allow_negative_plx {
+                    // If allow negative, just set to positive
+                    plx = 0.04;
+                } else {
+                    // Otherwise, fail
+                    self.rejected_plx += 1;
+                    return None;
+                }
             } else if !must_load && !self.accept_parallax(other_criteria, appmag, plx, plx_e) {
                 self.rejected_plx += 1;
                 return None;

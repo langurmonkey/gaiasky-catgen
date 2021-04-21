@@ -238,6 +238,7 @@ pub struct Config {
     pub plx_err_bright: f64,
     pub plx_zeropoint: f64,
     pub mag_corrections: bool,
+    pub allow_negative_plx: bool,
     pub postprocess: bool,
     pub child_count: usize,
     pub parent_count: usize,
@@ -263,6 +264,7 @@ impl fmt::Debug for Config {
             .field("plx_err_bright", &self.plx_err_bright)
             .field("plx_zeropoint", &self.plx_zeropoint)
             .field("mag_corrections", &self.mag_corrections)
+            .field("allow_negative_plx", &self.allow_negative_plx)
             .field("postprocess", &self.postprocess)
             .field("child_count", &self.child_count)
             .field("parent_count", &self.parent_count)
