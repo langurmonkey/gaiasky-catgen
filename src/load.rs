@@ -952,8 +952,13 @@ impl Loader {
         if !bp.is_finite() || !rp.is_finite() {
             return f64::NAN;
         } else {
-            //return -2.5*f64::log10(f64::pow(10.0,((25.3385-bp))/2.5))+f64::pow(10.0,((24.7479-rp))/2.5)))+25.6874;
-            return f64::NAN;
+            // jordan email (Thu, 22 Apr 2021 12:35:11 )
+            // gmag = -2.5*log10(10.0**((25.3385-phot_bp_mean_mag)/2.5)+10.0**((24.7479-phot_rp_mean_mag)/2.5))+25.6874
+            return -2.5
+                * f64::log10(
+                    10.0_f64.powf((25.3385 - bp) / 2.5) + 10.0_f64.powf((24.7479 - rp) / 2.5),
+                )
+                + 25.6874;
         }
     }
 
