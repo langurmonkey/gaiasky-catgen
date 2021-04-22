@@ -601,8 +601,17 @@ impl Loader {
             parse::parse_f64(splx) - self.plx_zeropoint,
         );
         let plx_e: f64 = parse::parse_f64(splx_e);
+
+        // Gmag: additional, else column, else use bp and rp
         let mut appmag: f64 =
             self.get_attribute_or_else(ColId::gmag, source_id, parse::parse_f64(sappmag));
+        if !appmag.is_finite() {
+            if sbp.is_some() && srp.is_some() {
+                let bp: f64 = parse::parse_f64(sbp);
+                let rp: f64 = parse::parse_f64(srp);
+                appmag = self.gmag_from_xp(bp, rp);
+            }
+        }
 
         let has_fidelity = self.has_additional_col(ColId::fidelity);
         let has_geodist = self.has_additional_col(ColId::geodist);
@@ -936,6 +945,15 @@ impl Loader {
         match val {
             Some(v) => v.is_finite(),
             None => false,
+        }
+    }
+
+    fn gmag_from_xp(&self, bp: f64, rp: f64) -> f64 {
+        if !bp.is_finite() || !rp.is_finite() {
+            return f64::NAN;
+        } else {
+            //return -2.5*f64::log10(f64::pow(10.0,((25.3385-bp))/2.5))+f64::pow(10.0,((24.7479-rp))/2.5)))+25.6874;
+            return f64::NAN;
         }
     }
 
