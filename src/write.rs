@@ -95,6 +95,7 @@ pub fn write_metadata(octree: &Octree, output_dir: &str) {
 #[allow(dead_code)]
 pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
     let mut file_num = 0;
+    let n_files = octree.nodes.borrow().len();
     for node in octree.nodes.borrow().iter() {
         if node.deleted.get() {
             // Skip deleted
@@ -104,10 +105,10 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
         let particles_dir = format!("{}/particles", output_dir);
         std::fs::create_dir_all(Path::new(&particles_dir))
             .expect(&format!("Error creating directory: {}", particles_dir));
-        let file_path = format!("{}/{}.bin", particles_dir, id_str);
+        let file_path = format!("{}.bin", id_str);
         log::info!(
-            "{}: Writing {} particles of node {} to {}",
-            file_num,
+            "{:.1}% .. Writing {} particles of node {} to {}",
+            (n_files as f32 / file_num as f32) * 100.0,
             node.num_objects.get(),
             node.id.0,
             file_path

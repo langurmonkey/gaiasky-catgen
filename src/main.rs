@@ -448,20 +448,29 @@ fn main() {
         let start_gen = Instant::now();
         let len_before = main_list.len();
         let mut n_close_stars: u64 = 0;
+        let mut n_gmag_nan: u64 = 0;
         // Remove stars with distance > dist_cap
         main_list.retain(|s| {
             let dist_pc: f64 = (s.x * s.x + s.y * s.y + s.z * s.z).sqrt() * constants::U_TO_PC;
-            if dist_pc <= 5.0 {
-                n_close_stars += 1;
+            let retain = dist_pc <= args.distpc_cap;
+            if !retain {
+                if dist_pc <= 5.0 {
+                    n_close_stars += 1;
+                }
+                if !s.appmag.is_finite() {
+                    n_gmag_nan += 1;
+                }
             }
-            dist_pc <= args.distpc_cap
+            retain
         });
-        log::info!("Found {} close stars! (dist <= 5 pc)", n_close_stars,);
         log::info!(
             "Removed {} stars due to being too far (cap = {} pc)",
             len_before - main_list.len(),
             args.distpc_cap
         );
+        log::info!("Found {} close stars! (dist <= 5 pc)", n_close_stars,);
+        log::info!("Found {} with non-finite Gmag!", n_gmag_nan,);
+
         mem::log_mem();
 
         log::info!("Sorting list by magnitude with {} objects", main_list.len());

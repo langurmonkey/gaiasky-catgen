@@ -190,7 +190,7 @@ impl Octree {
         for level in (0..=depth).rev() {
             for node in nodes.iter() {
                 if !node.deleted.get()
-                    && !node.has_kids()
+                    && !node.has_kids(self)
                     && node.level == level
                     && node.parent.is_some()
                 {
@@ -255,7 +255,7 @@ impl Octree {
             for level in (0..=depth).rev() {
                 for node in nodes.iter() {
                     if !node.deleted.get()
-                        && !node.has_kids()
+                        && !node.has_kids(self)
                         && node.level == level
                         && node.parent.is_some()
                     {
@@ -752,14 +752,18 @@ impl Octant {
             self.num_children.get(),
         );
 
-        if self.has_kids() {
+        if self.has_kids(octree) {
+            let b = self.children.borrow();
             for i in 0..8 {
-                let b = self.children.borrow();
                 let c = b[i];
                 match c {
                     Some(child) => {
                         let idx = *octree.nodes_idx.borrow().get(&child.0).unwrap();
-                        octree.nodes.borrow().get(idx).unwrap().print(i, octree)
+                        let nodes = octree.nodes.borrow();
+                        let node = nodes.get(idx).unwrap();
+                        if !node.deleted.get() {
+                            node.print(i, octree)
+                        }
                     }
                     None => (),
                 }
@@ -767,10 +771,16 @@ impl Octant {
         }
     }
 
-    fn has_kids(&self) -> bool {
+    fn has_kids(&self, octree: &Octree) -> bool {
         for i in 0..8 {
-            if self.children.borrow()[i].is_some() {
-                return true;
+            let ch = self.children.borrow()[i];
+            if ch.is_some() {
+                let child_id = ch.unwrap();
+                let idx = *octree.nodes_idx.borrow().get(&child_id.0).unwrap();
+                // If not deleted, we have children!
+                if !octree.nodes.borrow().get(idx).unwrap().deleted.get() {
+                    return true;
+                }
             }
         }
         false
