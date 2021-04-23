@@ -95,7 +95,8 @@ pub fn write_metadata(octree: &Octree, output_dir: &str) {
 #[allow(dead_code)]
 pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
     let mut file_num = 0;
-    let n_files = octree.nodes.borrow().len();
+    let mut written = 1;
+    let n_files = octree.nodes.borrow()[0].num_children_rec.get();
     for node in octree.nodes.borrow().iter() {
         if node.deleted.get() {
             // Skip deleted
@@ -107,8 +108,10 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
             .expect(&format!("Error creating directory: {}", particles_dir));
         let file_path = format!("{}.bin", id_str);
         log::info!(
-            "{:.1}% .. Writing {} particles of node {} to {}",
-            (n_files as f32 / file_num as f32) * 100.0,
+            "{}/{} ({:.1}%): Writing {} particles of node {} to {}",
+            written,
+            n_files,
+            (written as f32 / n_files as f32) * 100.0,
             node.num_objects.get(),
             node.id.0,
             file_path
@@ -190,6 +193,7 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
             }
         }
         file_num += 1;
+        written += 1;
     }
     log::info!("Written {} particle files", file_num);
 }
@@ -197,6 +201,8 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
 #[allow(dead_code)]
 pub fn write_particles_mmap(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
     let mut file_num = 0;
+    let mut written = 1;
+    let n_files = octree.nodes.borrow()[0].num_children_rec.get();
     for node in octree.nodes.borrow().iter() {
         if node.deleted.get() {
             // Skip deleted
@@ -241,13 +247,15 @@ pub fn write_particles_mmap(octree: &Octree, list: Vec<Particle>, output_dir: &s
         std::fs::create_dir_all(Path::new(&particles_dir))
             .expect(&format!("Error creating directory: {}", particles_dir));
         let file_path = format!("{}/{}.bin", particles_dir, id_str);
+        let file_name = format!("{}.bin", id_str);
         log::info!(
-            "{}: Writing {} particles of node {} to {} ({} bytes)",
-            file_num,
+            "{}/{} ({:.1}%): Writing {} particles of node {} to {}",
+            written,
+            n_files,
+            (written as f32 / n_files as f32) * 100.0,
             node.num_objects.get(),
             node.id.0,
-            file_path,
-            size
+            file_name
         );
 
         let f = OpenOptions::new()
@@ -388,6 +396,7 @@ pub fn write_particles_mmap(octree: &Octree, list: Vec<Particle>, output_dir: &s
         }
         mmap.flush().expect("Error flushing memory map");
         file_num += 1;
+        written += 1;
     }
     log::info!("Written {} particle files", file_num);
 }

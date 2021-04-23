@@ -237,7 +237,7 @@ pub struct Config {
     pub plx_err_faint: f64,
     pub plx_err_bright: f64,
     pub plx_zeropoint: f64,
-    pub mag_corrections: bool,
+    pub mag_corrections: u8,
     pub allow_negative_plx: bool,
     pub postprocess: bool,
     pub child_count: usize,

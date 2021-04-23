@@ -8,7 +8,7 @@ use std::{
     path,
 };
 
-use argparse::{ArgumentParser, Store, StoreFalse, StoreTrue};
+use argparse::{ArgumentParser, Store, StoreTrue};
 
 use constants::NEGATIVE_DIST;
 use data::Config;
@@ -52,7 +52,7 @@ fn main() {
         plx_err_faint: 10.0,
         plx_err_bright: 10.0,
         plx_zeropoint: 0.0,
-        mag_corrections: true,
+        mag_corrections: 2,
         allow_negative_plx: false,
         postprocess: false,
         dry_run: false,
@@ -107,9 +107,9 @@ fn main() {
             "Parallax zero point",
         );
         ap.refer(&mut args.mag_corrections).add_option(
-            &["-c", "--skipmagcorrections"],
-            StoreFalse,
-            "Skip magnitude and color corrections for extinction and reddening",
+            &["-c", "--magcorrections"],
+            Store,
+            "Set the level of magnitude and color corrections (extinction and reddening). 0 for no corrections at all, 1 for corrections only if values are in catalog, 2 to use analytical methods",
         );
         ap.refer(&mut args.allow_negative_plx).add_option(
             &["--allownegativeplx"],

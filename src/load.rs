@@ -66,7 +66,7 @@ impl ColId {
             ColId::names => "names",
             ColId::ra => "ra",
             ColId::dec => "dec",
-            ColId::plx => "plx",
+            ColId::plx => "pllx",
             ColId::ra_err => "ra_err",
             ColId::dec_err => "dec_err",
             ColId::plx_err => "plx_err",
@@ -330,7 +330,10 @@ pub struct Loader {
     // Cap on the parallax error (stars with larger plx_err are discarded)
     pub plx_err_cap: f64,
     // Whether to apply mag corrections
-    pub mag_corrections: bool,
+    // 0 - no corrections
+    // 1 - only if ag and ebr_min_rp are in the catalog
+    // 2 - also use analytical alternatives
+    pub mag_corrections: u8,
     // If set to true, negative parallaxes will be transformed to the default 0.04 arcsec value
     pub allow_negative_plx: bool,
     // Must-load star ids
@@ -354,6 +357,7 @@ pub struct Loader {
     pub rejected_ruwe: u64,
 }
 
+#[allow(dead_code)]
 impl Loader {
     pub fn new(
         sep: Regex,
@@ -365,7 +369,7 @@ impl Loader {
         plx_err_faint: f64,
         plx_err_bright: f64,
         plx_err_cap: f64,
-        mag_corrections: bool,
+        mag_corrections: u8,
         allow_negative_plx: bool,
         must_load: Option<HashSet<i64>>,
         additional_str: &str,
@@ -472,6 +476,10 @@ impl Loader {
         let mut total: usize = 0;
         let mut loaded: usize = 0;
         let mut skipped: usize = 0;
+        // Skip weird files
+        if !(file.ends_with(".gz") || file.ends_with(".csv") || file.ends_with(".txt")) {
+            return;
+        }
         let is_gz = file.ends_with(".gz") || file.ends_with(".gzip");
         let f = File::open(file).expect("Error: file not found");
         let mmap = unsafe { Mmap::map(&f).expect(&format!("Error mapping file {}", file)) };
@@ -727,27 +735,20 @@ impl Loader {
         );
 
         // Apparent magnitudes
-        let mut ag: f64 = parse::parse_f64(sag);
-        let pos_gal: Vector3<f64> = Vector3::new(pos.x, pos.y, pos.z);
-        self.coord.eq_gal.transform_vector(&pos_gal);
+        let mut ag: f64 = self.get_attribute_or_else(ColId::ag, source_id, parse::parse_f64(sag));
+        let pos_eq: Vector3<f64> = Vector3::new(pos.x, pos.y, pos.z);
+        let pos_gal: Vector3<f64> = self.coord.eq_gal.transform_vector(&pos_eq);
         let pos_gal_sph = util::cartesian_to_spherical(pos_gal.x, pos_gal.y, pos_gal.z);
         let b = pos_gal_sph.y;
-        let magcorraux = dist_pc.min(150.0 / b.sin().abs());
+        let magcorraux = f64::min(dist_pc, 150.0 / b.sin().abs());
 
-        if self.mag_corrections {
-            if !ag.is_finite() {
-                // Analytical extinction, cap to 3.2
-                let ag_analytical: f64 = f64::min(3.2, magcorraux * 5.9e-4);
-                if self.has_additional_col(ColId::ag) {
-                    ag = self
-                        .get_additional(ColId::ag, source_id)
-                        .unwrap_or(ag_analytical);
-                } else {
-                    ag = ag_analytical;
-                }
-            }
+        // Analytical extinction, cap to 3.2
+        if self.mag_corrections == 2 && !ag.is_finite() {
+            ag = f64::min(3.2, magcorraux * 5.9e-4);
         }
-        if ag.is_finite() {
+
+        // Apply only if mag_corrections > 0
+        if self.mag_corrections > 0 && ag.is_finite() {
             appmag -= ag;
         }
 
@@ -767,20 +768,30 @@ impl Loader {
         let size: f32 = f64::min(pseudo_l.powf(0.45) * size_fac, 1e10) as f32;
 
         // Color
-        let mut ebr: f64 = parse::parse_f64(sebp_min_rp);
-        if self.mag_corrections {
-            if !self.has_col(ColId::ebp_min_rp) || ebr.is_finite() {
-                // Analytical reddening, cap to 1.6
-                let ebr_analytical = f64::min(1.6, magcorraux * 2.9e-4);
-                if self.has_additional(ColId::ebp_min_rp, source_id) {
-                    ebr = self
-                        .get_additional(ColId::ebp_min_rp, source_id)
-                        .unwrap_or(ebr_analytical);
+        let pebr =
+            self.get_attribute_or_else(ColId::ebp_min_rp, source_id, parse::parse_f64(sebp_min_rp));
+        let ebr: f64 = match self.mag_corrections {
+            // No corrections
+            0 => 0.0,
+            // Only form catalog
+            1 => {
+                if pebr.is_finite() {
+                    pebr
                 } else {
-                    ebr = ebr_analytical;
+                    0.0
                 }
             }
-        }
+            // From catalog, if not, analytical
+            2 => {
+                if pebr.is_finite() {
+                    pebr
+                } else {
+                    f64::min(1.6, magcorraux * 2.9e-4)
+                }
+            }
+            // Default is zero
+            _ => 0.0,
+        };
 
         let col_idx: f64;
         let mut teff: f64 = parse::parse_f64(steff);
