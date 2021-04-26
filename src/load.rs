@@ -849,9 +849,9 @@ impl Loader {
         } else if !appmag.is_finite() || !plx.is_finite() {
             return false;
         } else if appmag < 13.1 {
-            return plx >= 0.0 && plx / plx_e > self.plx_err_bright && plx_e < self.plx_err_cap;
+            return plx >= 0.0 && plx_e < plx * self.plx_err_bright && plx_e < self.plx_err_cap;
         } else {
-            return plx >= 0.0 && plx / plx_e > self.plx_err_faint && plx_e < self.plx_err_cap;
+            return plx >= 0.0 && plx_e < plx * self.plx_err_faint && plx_e < self.plx_err_cap;
         }
     }
 
