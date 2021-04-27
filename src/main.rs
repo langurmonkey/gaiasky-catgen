@@ -235,6 +235,42 @@ fn main() {
     if args.input.len() > 0 {
         let start = Instant::now();
 
+        //
+        // HIP - For hipparcos we only support the columns in that order
+        //
+        let mut loader_hip = load::Loader::new(
+            Regex::new(r",").unwrap(),
+            1,
+            50000000,
+            0.0,
+            args.ruwe_cap,
+            1e9,
+            1000.0,
+            1000.0,
+            1000.0,
+            args.mag_corrections,
+            true,
+            None,
+            "",
+            "hip,names,ra,dec,plx,plx_err,pmra,pmdec,gmag,col_idx",
+        );
+        // Actually load hipparcos
+        let mut list_hip = Vec::new();
+        if args.hip.len() > 0 {
+            println!("Load hip: {}", &args.hip);
+            let start_hip = Instant::now();
+            list_hip = loader_hip
+                .load_dir(&args.hip)
+                .expect("Error loading HIP data");
+            let time_hip = start_hip.elapsed();
+            log::info!(
+                "{} particles loaded form HIP in {:?}",
+                list_hip.len(),
+                time_hip
+            );
+        }
+        mem::log_mem();
+
         // Load Hip-Gaia cross-match file
         // All stars with Hip counter-part are added to the
         // must_load list, which is later passed into the loader
@@ -283,42 +319,6 @@ fn main() {
             list_gaia.len(),
             time_gaia,
         );
-        mem::log_mem();
-
-        //
-        // HIP - For hipparcos we only support the columns in that order
-        //
-        let mut loader_hip = load::Loader::new(
-            Regex::new(r",").unwrap(),
-            1,
-            50000000,
-            0.0,
-            args.ruwe_cap,
-            1e9,
-            1000.0,
-            1000.0,
-            1000.0,
-            args.mag_corrections,
-            true,
-            None,
-            "",
-            "hip,names,ra,dec,plx,plx_err,pmra,pmdec,gmag,col_idx",
-        );
-        // Actually load hipparcos
-        let mut list_hip = Vec::new();
-        if args.hip.len() > 0 {
-            println!("Load hip: {}", &args.hip);
-            let start_hip = Instant::now();
-            list_hip = loader_hip
-                .load_dir(&args.hip)
-                .expect("Error loading HIP data");
-            let time_hip = start_hip.elapsed();
-            log::info!(
-                "{} particles loaded form HIP in {:?}",
-                list_hip.len(),
-                time_hip
-            );
-        }
         mem::log_mem();
 
         //
