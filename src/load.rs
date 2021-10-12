@@ -765,7 +765,7 @@ impl Loader {
         // Size
         let pseudo_l = f64::powf(10.0, -0.4 * absmag);
         let size_fac = constants::PC_TO_M * constants::M_TO_U * 0.15;
-        let size: f32 = f64::min(pseudo_l.powf(0.45) * size_fac, 1e10) as f32;
+        let size: f32 = f64::min(pseudo_l.powf(0.5) * size_fac, 1e10) as f32;
 
         // Color
         let pebr =
