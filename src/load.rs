@@ -56,6 +56,7 @@ pub enum ColId {
     ruwe,
     geodist,
     fidelity,
+    dist_phot,
 }
 
 impl ColId {
@@ -86,6 +87,7 @@ impl ColId {
             ColId::ebp_min_rp => "ebp_min_rp",
             ColId::geodist => "geodist",
             ColId::fidelity => "fidelity_v1",
+            ColId::dist_phot => "dist_phot",
             _ => "*none*",
         }
     }
@@ -151,6 +153,8 @@ impl ColId {
             "fidelity" => Some(ColId::fidelity),
             "fidelity_v1" => Some(ColId::fidelity),
             "fidelity_v2" => Some(ColId::fidelity),
+            "distance_gspphot" => Some(ColId::dist_phot),
+            "dist_phot" => Some(ColId::dist_phot),
             _ => None,
         }
     }
