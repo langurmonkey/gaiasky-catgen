@@ -1,0 +1,136 @@
+{
+    "catalogs": [
+        {
+            "name": "default",
+            "additional": "$DATA_LOC/data/ag-e/dr3/edr3-ag-e.csv.gz",
+            "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+            "distcap": 100000,
+            "maxpart": 120000,
+            "plxerrbright": 0.2,
+            "plxerrfaint": 0.015,
+            "plxzeropoint": -0.017,
+            "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
+        },
+        {
+            "name": "small",
+            "additional": "$DATA_LOC/data/ag-e/dr3/edr3-ag-e.csv.gz",
+            "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+            "distcap": 100000,
+            "maxpart": 120000,
+            "plxerrbright": 0.1,
+            "plxerrfaint": 0.005,
+            "plxzeropoint": -0.017,
+            "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
+        },
+        {
+            "name": "medium",
+            "additional": "$DATA_LOC/data/ag-e/dr3/edr3-ag-e.csv.gz",
+            "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+            "distcap": 100000,
+            "maxpart": 120000,
+            "plxerrbright": 0.3,
+            "plxerrfaint": 0.05,
+            "plxzeropoint": -0.017,
+            "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
+        },
+        {
+            "name": "large",
+            "additional": "$DATA_LOC/data/ag-e/dr3/edr3-ag-e.csv.gz",
+            "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+            "distcap": 100000,
+            "maxpart": 120000,
+            "plxerrbright": 0.5,
+            "plxerrfaint": 0.125,
+            "plxzeropoint": -0.017,
+            "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
+        },
+        {
+            "name": "verylarge",
+            "additional": "$DATA_LOC/data/ag-e/dr3/edr3-ag-e.csv.gz",
+            "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+            "distcap": 100000,
+            "maxpart": 120000,
+            "childcount": 300,
+            "parentcount": 5000,
+            "plxerrbright": 0.5,
+            "plxerrfaint": 0.5,
+            "plxzeropoint": -0.017,
+            "postprocess": null,
+            "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
+        },
+        {
+            "name": "extralarge",
+            "additional": "$DATA_LOC/data/ag-e/dr3/edr3-ag-e.csv.gz",
+            "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+            "distcap": 100000,
+            "maxpart": 120000,
+            "childcount": 500,
+            "parentcount": 5000,
+            "plxerrbright": 0.95,
+            "plxerrfaint": 0.95,
+            "plxzeropoint": -0.017,
+            "postprocess": null,
+            "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
+        },
+        {
+            "name": "bright",
+            "additional": "$DATA_LOC/data/ag-e/dr3/edr3-ag-e.csv.gz",
+            "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+            "distcap": 100000,
+            "maxpart": 120000,
+            "plxerrbright": 0.9,
+            "plxerrfaint": 0.01,
+            "plxzeropoint": -0.017,
+            "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
+        },
+        {
+            "name": "ruwe",
+            "additional": "$DATA_LOC/data/ag-e/dr3/edr3-ag-e.csv.gz",
+            "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+            "distcap": 100000,
+            "maxpart": 120000,
+            "childcount": 200,
+            "parentcount": 5000,
+            "plxzeropoint": -0.017,
+            "postprocess": null,
+            "ruwe": 1.4,
+            "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
+        },
+        {
+            "name": "full",
+            "additional": "$DATA_LOC/data/ag-e/dr3/edr3-ag-e.csv.gz,$DR_BASE/geo_distances/geodistances.csv.gz",
+            "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+            "distcap": 100000,
+            "maxpart": 120000,
+            "childcount": 500,
+            "parentcount": 5000,
+            "plxzeropoint": -0.017,
+            "postprocess": null,
+            "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
+        },
+        {
+            "name": "fidelity",
+            "additional": "$DATA_LOC/data/ag-e/dr3/edr3-ag-e.csv.gz,$DR_BASE/fidelity/fidelities.csv.gz",
+            "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+            "distcap": 200000,
+            "maxpart": 200000,
+            "plxerrbright": 0.5,
+            "plxerrfaint": 0.5,
+            "childcount": 1000,
+            "parentcount": 10000,
+            "postprocess": null,
+            "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
+        },
+        {
+            "name": "fidelity-bayesian",
+            "additional": "$DATA_LOC/data/ag-e/dr3/edr3-ag-e.csv.gz,$DR_BASE/fidelity/fidelities.csv.gz,$DR_BASE/geo_distances/geodistances.csv.gz",
+            "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+            "distcap": 300000,
+            "maxpart": 120000,
+            "childcount": 1000,
+            "parentcount": 10000,
+            "postprocess": null,
+            "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
+        }
+    ]
+}

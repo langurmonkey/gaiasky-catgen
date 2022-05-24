@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# Generates DR3 (int6) catalogs
+
+# Get script path
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  GSDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$GSDIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+GSDIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
+
+# Locations
+LOGS_LOC="$GSDIR/log/dr3"
+DATA_LOC="$HOME/gaiadata"
+DR_BASE="$DATA_LOC/dr3"
+DR_LOC="$DR_BASE/int6"
+CATALOG_NAME="dr3"
+INPUT="$DR_LOC/csv"
+OUTPUT="$DR_LOC/out-rs"
+
+# Definition file
+CATDEF="$GSDIR/conf/catalogs-dr3.json"
+
+# Column names (see ColId)
+COLS="sourceid,ra,dec,pllx,ra_err,dec_err,pllx_err,pmra,pmdec,radvel,gmag,bpmag,rpmag,ruwe,ref_epoch,radvel_err,dist_phot"
+
+source bin/catalogs-gen.sh
