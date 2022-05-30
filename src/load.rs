@@ -7,6 +7,7 @@ use crate::color;
 use crate::constants;
 use crate::coord;
 use crate::data;
+use crate::mem;
 use crate::parse;
 use crate::util;
 
@@ -206,6 +207,9 @@ impl Additional {
                         Ok(path) => {
                             addit.load_file(path.to_str().expect("Error: path not valid"));
                             count += 1;
+                            if count % 10 == 0 {
+                                mem::log_mem();
+                            }
                         }
                         Err(e) => log::error!("Error: {:?}", e),
                     }
