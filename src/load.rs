@@ -398,6 +398,7 @@ impl Loader {
                     token
                 );
                 additional.push(add);
+                mem::log_mem();
             }
         }
 
