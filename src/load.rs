@@ -542,7 +542,7 @@ impl Loader {
         match self.indices.get(col_id) {
             Some(value) => *value,
             // Set out of range so that tokens.get() produces None
-            None => 5000,
+            None => 50000,
         }
     }
 
@@ -557,6 +557,7 @@ impl Loader {
             tokens.get(self.get_index(&ColId::ra)),
             tokens.get(self.get_index(&ColId::dec)),
             tokens.get(self.get_index(&ColId::plx)),
+            tokens.get(self.get_index(&ColId::dist_phot)),
             tokens.get(self.get_index(&ColId::plx_err)),
             tokens.get(self.get_index(&ColId::pmra)),
             tokens.get(self.get_index(&ColId::pmdec)),
@@ -587,6 +588,7 @@ impl Loader {
         sra: Option<&&str>,
         sdec: Option<&&str>,
         splx: Option<&&str>,
+        sdist_phot: Option<&&str>,
         splx_e: Option<&&str>,
         spmra: Option<&&str>,
         spmdec: Option<&&str>,
@@ -630,6 +632,13 @@ impl Loader {
         let has_fidelity = self.has_additional_col(ColId::fidelity);
         let has_geodist = self.has_additional_col(ColId::geodist);
 
+        // Distance: photometric distance is in catalog
+        let dist_phot = if sdist_phot.is_some() {
+            parse::parse_f64(sdist_phot)
+        } else {
+            -1.0
+        };
+
         let hip: i32 = parse::parse_i32(ship_id);
         if source_id == 0 {
             source_id = hip as i64;
@@ -643,8 +652,8 @@ impl Loader {
             return None;
         }
 
-        // Parallax test, only if there are no geo-distances
-        if !has_geodist {
+        // Parallax test, only if there are no distances
+        if !has_geodist && dist_phot <= 0.0 {
             if plx <= 0.0 {
                 // If parallax is negative...
                 if self.allow_negative_plx {
@@ -685,7 +694,9 @@ impl Loader {
 
         // Distance
         let dist_pc: f64;
-        dist_pc = if geodist_pc > 0.0 {
+        dist_pc = if dist_phot > 0.0 {
+            dist_phot
+        } else if geodist_pc > 0.0 {
             geodist_pc
         } else {
             1000.0 / plx
