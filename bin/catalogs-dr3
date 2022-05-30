@@ -18,7 +18,7 @@ DR_BASE="$DATA_LOC/dr3"
 DR_LOC="$DR_BASE/int6"
 CATALOG_NAME="dr3"
 INPUT="$DR_LOC/csv"
-OUTPUT="$DR_LOC/out-rs"
+OUTPUT="$DR_LOC/out"
 
 # Definition file
 CATDEF="$GSDIR/conf/catalogs-dr3.json"
