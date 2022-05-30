@@ -652,8 +652,8 @@ impl Loader {
             return None;
         }
 
-        // Parallax test, only if there are no distances
-        if !has_geodist && dist_phot <= 0.0 {
+        // Parallax test, only if there are no geo_distances
+        if !has_geodist {
             if plx <= 0.0 {
                 // If parallax is negative...
                 if self.allow_negative_plx {
