@@ -642,7 +642,7 @@ impl Loader {
         let has_geodist = self.has_additional_col(ColId::geodist);
 
         // Distance: photometric distance is in catalog
-        let dist_phot = if self.use_phot_dist && sdist_phot.is_some() {
+        let dist_phot = if sdist_phot.is_some() {
             parse::parse_f64(sdist_phot)
         } else {
             -1.0
@@ -663,7 +663,7 @@ impl Loader {
 
         // Parallax test, only if there are no geo_distances
         // and we are not using photometric distances or it is invalid.
-        if !has_geodist && dist_phot <= 0.0 {
+        if !has_geodist && (!self.use_phot_dist || dist_phot <= 0.0) {
             if plx <= 0.0 {
                 // If parallax is negative...
                 if self.allow_negative_plx {

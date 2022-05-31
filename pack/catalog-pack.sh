@@ -21,7 +21,7 @@ echo "$me ./000_20190213_dr2-verysmall dr2-verysmall 'DR2 - very small' 'Gaia DR
 SCRIPT_FILE=$(readlink -f "$0")
 SCRIPT_DIR=$(dirname $SCRIPT_FILE)
 
-if [ "$#" -ne 6 ]; then
+if [ "$#" -ne 7 ]; then
 	usage
 	exit 1
 fi
