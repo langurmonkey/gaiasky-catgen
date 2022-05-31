@@ -8,6 +8,9 @@
       "maxpart": 120000,
       "plxerrbright": 0.2,
       "plxerrfaint": 0.015,
+      "postprocess": null,
+      "childcount": 200,
+      "parentcount": 2000,
       "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
     },
     {
@@ -46,11 +49,11 @@
       "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
       "distcap": 100000,
       "maxpart": 120000,
-      "childcount": 300,
-      "parentcount": 5000,
       "plxerrbright": 0.5,
       "plxerrfaint": 0.5,
       "postprocess": null,
+      "childcount": 300,
+      "parentcount": 5000,
       "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
     },
     {
@@ -59,11 +62,11 @@
       "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
       "distcap": 100000,
       "maxpart": 120000,
-      "childcount": 500,
-      "parentcount": 5000,
       "plxerrbright": 0.95,
       "plxerrfaint": 0.95,
       "postprocess": null,
+      "childcount": 500,
+      "parentcount": 5000,
       "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
     },
     {
@@ -82,10 +85,10 @@
       "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
       "distcap": 100000,
       "maxpart": 120000,
+      "ruwe": 1.4,
+      "postprocess": null,
       "childcount": 200,
       "parentcount": 5000,
-      "postprocess": null,
-      "ruwe": 1.4,
       "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
     },
     {
@@ -94,9 +97,9 @@
       "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
       "distcap": 100000,
       "maxpart": 120000,
+      "postprocess": null,
       "childcount": 500,
       "parentcount": 5000,
-      "postprocess": null,
       "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
     },
     {
@@ -107,9 +110,9 @@
       "maxpart": 200000,
       "plxerrbright": 0.5,
       "plxerrfaint": 0.5,
+      "postprocess": null,
       "childcount": 1000,
       "parentcount": 10000,
-      "postprocess": null,
       "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
     },
     {
@@ -119,9 +122,9 @@
       "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
       "distcap": 300000,
       "maxpart": 120000,
+      "postprocess": null,
       "childcount": 1000,
       "parentcount": 10000,
-      "postprocess": null,
       "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
     }
   ]
