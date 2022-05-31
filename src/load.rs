@@ -57,7 +57,7 @@ pub enum ColId {
     ruwe,
     geodist,
     fidelity,
-    dist_phot,
+    phot_dist,
 }
 
 impl ColId {
@@ -88,7 +88,7 @@ impl ColId {
             ColId::ebp_min_rp => "ebp_min_rp",
             ColId::geodist => "geodist",
             ColId::fidelity => "fidelity_v1",
-            ColId::dist_phot => "dist_phot",
+            ColId::phot_dist => "phot_dist",
             _ => "*none*",
         }
     }
@@ -156,8 +156,9 @@ impl ColId {
             "fidelity" => Some(ColId::fidelity),
             "fidelity_v1" => Some(ColId::fidelity),
             "fidelity_v2" => Some(ColId::fidelity),
-            "distance_gspphot" => Some(ColId::dist_phot),
-            "dist_phot" => Some(ColId::dist_phot),
+            "distance_gspphot" => Some(ColId::phot_dist),
+            "dist_phot" => Some(ColId::phot_dist),
+            "phot_dist" => Some(ColId::phot_dist),
             _ => None,
         }
     }
@@ -566,7 +567,7 @@ impl Loader {
             tokens.get(self.get_index(&ColId::ra)),
             tokens.get(self.get_index(&ColId::dec)),
             tokens.get(self.get_index(&ColId::plx)),
-            tokens.get(self.get_index(&ColId::dist_phot)),
+            tokens.get(self.get_index(&ColId::phot_dist)),
             tokens.get(self.get_index(&ColId::plx_err)),
             tokens.get(self.get_index(&ColId::pmra)),
             tokens.get(self.get_index(&ColId::pmdec)),
@@ -597,7 +598,7 @@ impl Loader {
         sra: Option<&&str>,
         sdec: Option<&&str>,
         splx: Option<&&str>,
-        sdist_phot: Option<&&str>,
+        sphot_dist: Option<&&str>,
         splx_e: Option<&&str>,
         spmra: Option<&&str>,
         spmdec: Option<&&str>,
@@ -641,9 +642,9 @@ impl Loader {
         let has_fidelity = self.has_additional_col(ColId::fidelity);
         let has_geodist = self.has_additional_col(ColId::geodist);
 
-        // Distance: photometric distance is in catalog
-        let dist_phot = if self.use_phot_dist && sdist_phot.is_some() {
-            parse::parse_f64(sdist_phot)
+        // Distance: photometric distance is in catalog.
+        let phot_dist = if self.use_phot_dist && sphot_dist.is_some() {
+            parse::parse_f64(sphot_dist)
         } else {
             -1.0
         };
@@ -655,22 +656,22 @@ impl Loader {
 
         let must_load = self.must_load_particle(source_id);
 
-        // Fidelity test
+        // Fidelity test.
         if has_fidelity && !self.accept_fidelity(source_id) {
             self.rejected_fidelity += 1;
             return None;
         }
 
         // Parallax test, only if there are no geo_distances
-        // and we are not using photometric distances or it is invalid.
-        if !has_geodist && dist_phot <= 0.0 {
+        // and we are not using photometric distances (or phot_dist is invalid).
+        if !has_geodist && !self.use_phot_dist {
             if plx <= 0.0 {
                 // If parallax is negative...
                 if self.allow_negative_plx {
-                    // If allow negative, just set to positive
+                    // If allow negative, just set to default positive value (25 kpc).
                     plx = 0.04;
                 } else {
-                    // Otherwise, fail
+                    // Otherwise, skip.
                     self.rejected_plx += 1;
                     return None;
                 }
@@ -694,7 +695,7 @@ impl Loader {
         }
 
         // If we have geometric distances, we only accept stars which have one, otherwise
-        // we accept all
+        // we accept all.
         let geodist_pc = self.get_geodistance(source_id);
         let has_geodist_star = geodist_pc > 0.0;
         if !(must_load || !has_geodist || (has_geodist && has_geodist_star)) {
@@ -704,8 +705,8 @@ impl Loader {
 
         // Distance
         let dist_pc: f64;
-        dist_pc = if dist_phot > 0.0 {
-            dist_phot
+        dist_pc = if phot_dist > 0.0 {
+            phot_dist
         } else if geodist_pc > 0.0 {
             geodist_pc
         } else {
@@ -883,7 +884,7 @@ impl Loader {
     }
 
     fn accept_distance(&self, dist_pc: f64) -> bool {
-        dist_pc.is_finite()
+        dist_pc.is_finite() && dist_pc > 0.0
     }
 
     fn accept_fidelity(&self, source_id: i64) -> bool {
@@ -1011,7 +1012,7 @@ impl Loader {
             self.rejected_plx
         );
         log::info!(
-            "   - Rejected due to distance (infinite/cap): {}",
+            "   - Rejected due to distance (infinite/neg/cap): {}",
             self.rejected_dist
         );
         log::info!(

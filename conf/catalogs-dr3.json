@@ -118,15 +118,15 @@
       "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
     },
     {
-      "name": "fidelity-photdist",
-      "additional": "$DR_BASE/fidelity/fidelities.csv.gz",
-      "photdist": null,
+      "name": "photdist",
+      "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
       "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
-      "distcap": 300000,
+      "photdist": null,
+      "distcap": 200000,
       "maxpart": 120000,
       "postprocess": null,
-      "childcount": 1000,
-      "parentcount": 10000,
+      "childcount": 800,
+      "parentcount": 8000,
       "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
     }
   ]
