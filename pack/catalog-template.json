@@ -1,24 +1,27 @@
 {
-    "key": "<KEY>",
-    "name": "<NAME>",
-    "version": <VERSION>,
-    "type": "catalog-lod",
-    "mingsversion": 30200,
-    "description": "<DESCRIPTION>",
-    "releasenotes": "<NOTES>",
-    "link": "http://gaia.ari.uni-heidelberg.de/gaiasky/files/autodownload/",
-    "size": <SIZE_BYTES>,
-    "nobjects": <NOBJECTS>,
-    "files": [
-        "catalog-<KEY>.json",
-        "catalog/<KEY>/metadata.bin",
-        "catalog/<KEY>/particles/" 
-    ],
-    "data": [
+  "key": "<KEY>",
+  "name": "<NAME>",
+  "version": <VERSION>,
+  "type": "catalog-lod",
+  "mingsversion": 30200,
+  "description": "<DESCRIPTION>",
+  "releasenotes": "<NOTES>",
+  "link": "http://gaia.ari.uni-heidelberg.de/gaiasky/files/repository/",
+  "size": <SIZE_BYTES>,
+  "nobjects": <NOBJECTS>,
+  "files": [
+    "catalog-<KEY>.json",
+    "catalog/<KEY>/metadata.bin",
+    "catalog/<KEY>/particles/"
+  ],
+  "data": [
     {
-        "loader": "gaiasky.data.group.OctreeGroupLoader",
-        "files": [ "data/catalog/<KEY>/particles/", "data/catalog/<KEY>/metadata.bin" ],
-        "epoch": <EPOCH>
+      "loader": "gaiasky.data.group.OctreeGroupLoader",
+      "files": [
+        "data/catalog/<KEY>/particles/",
+        "data/catalog/<KEY>/metadata.bin"
+      ],
+      "epoch": <EPOCH>
     }
-    ]
+  ]
 }
