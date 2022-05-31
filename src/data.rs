@@ -232,13 +232,20 @@ pub struct Config {
     pub output: String,
     pub hip: String,
     pub max_part: usize,
+    // limit ruwe value.
     pub ruwe_cap: f32,
+    // limit distance in parsecs.
     pub distpc_cap: f64,
+    // ignore parallax cuts and use all stars with photometric distances.
+    pub photdist: bool,
+    // parallax error threshold for faint stars (gmag >= 13.1), where plx_err/plx < plx_err_faint.
     pub plx_err_faint: f64,
+    // parallax error threshold for bright stars (gmag < 13.1), where plx_err/plx < plx_err_bright.
     pub plx_err_bright: f64,
     pub plx_zeropoint: f64,
     pub mag_corrections: u8,
     pub allow_negative_plx: bool,
+    // post-process the octree to try to flatten it.
     pub postprocess: bool,
     pub child_count: usize,
     pub parent_count: usize,

@@ -49,6 +49,7 @@ fn main() {
         max_part: 100000,
         ruwe_cap: f32::NAN,
         distpc_cap: 1.0e5,
+        photdist: false,
         plx_err_faint: 10.0,
         plx_err_bright: 10.0,
         plx_zeropoint: 0.0,
@@ -74,82 +75,87 @@ fn main() {
         ap.add_option(
             &["-v", "--version"],
             argparse::Print(env!("CARGO_PKG_VERSION").to_string()),
-            "Print version information",
+            "Print version information.",
         );
         ap.refer(&mut args.input)
-            .add_option(&["-i", "--input"], Store, "Location of the input catalog")
+            .add_option(&["-i", "--input"], Store, "Location of the input catalog.")
             .required();
         ap.refer(&mut args.output)
             .add_option(
                 &["-o", "--output"],
                 Store,
-                "Output folder. Defaults to system temp. If --dryrun is present, this location is used to store the log",
+                "Output folder. Defaults to system temp. If --dryrun is present, this location is used to store the log.",
             )
             .required();
         ap.refer(&mut args.max_part).add_option(
             &["--maxpart"],
             Store,
-            "Maximum number of objects in an octant",
+            "Maximum number of objects in an octant.",
         );
         ap.refer(&mut args.plx_err_faint).add_option(
             &["--plxerrfaint"],
             Store,
-            "Parallax error factor for faint stars (gmag>=13.1), where filter [plx_err/plx < plxerrfaint] is enforced",
+            "Parallax error threshold for faint stars (gmag>=13.1), where filter [plx_err/plx < plxerrfaint] is enforced.",
         );
         ap.refer(&mut args.plx_err_bright).add_option(
             &["--plxerrbright"],
             Store,
-            "Parallax error factor for bright stars (gmag<13.1), where filter [plx_err/plx < plxerrbright] is enforced",
+            "Parallax error threshold for bright stars (gmag<13.1), where filter [plx_err/plx < plxerrbright] is enforced.",
         );
         ap.refer(&mut args.plx_zeropoint).add_option(
             &["--plxzeropoint"],
             Store,
-            "Parallax zero point",
+            "Parallax zero point, so that plx_effective = plx_catalog - plx_zeropoint. Defaults to 0.",
         );
         ap.refer(&mut args.mag_corrections).add_option(
             &["-c", "--magcorrections"],
             Store,
-            "Set the level of magnitude and color corrections (extinction and reddening). 0 for no corrections at all, 1 for corrections only if values are in catalog, 2 to use analytical methods",
+            "Set the level of magnitude and color corrections (extinction and reddening). 0 for no corrections at all, 1 for corrections only if values are in catalog, 2 to use analytical methods.",
         );
         ap.refer(&mut args.allow_negative_plx).add_option(
             &["--allownegativeplx"],
             StoreTrue,
-            "Allow negative parallaxes (and set them to 0.04 mas, or 25 Kpc) for Gaia stars",
+            "Allow negative parallaxes (and set them to 0.04 mas, or 25 Kpc) for Gaia stars.",
         );
         ap.refer(&mut args.postprocess).add_option(
             &["-p", "--postprocess"],
             StoreTrue,
-            "Post-process tree so that low-count nodes are merged with their parents. See --childcount and --parentcount for more info",
+            "Post-process tree so that low-count nodes are merged with their parents. See --childcount and --parentcount for more info.",
         );
         ap.refer(&mut args.child_count).add_option(
             &["--childcount"],
             Store,
-            "If --postprocess is on, children nodes with less than --childcount objects and whose parent has less than --parentcount objects will be merged with their parent. Defaults to 100",
+            "If --postprocess is on, children nodes with less than --childcount objects and whose parent has less than --parentcount objects will be merged with their parent. Defaults to 100.",
         );
         ap.refer(&mut args.parent_count).add_option(
             &["--parentcount"],
             Store,
-            "If --postprocess is on, children nodes with less than --childcount objects and whose parent has less than --parentcount objects will be merged with their parent. Defaults to 1000",
+            "If --postprocess is on, children nodes with less than --childcount objects and whose parent has less than --parentcount objects will be merged with their parent. Defaults to 1000.",
         );
         ap.refer(&mut args.hip).add_option(
             &["--hip"],
             Store,
-            "Absolute or relative location of the Hipparcos catalog (only csv supported)",
+            "Absolute or relative location of the Hipparcos catalog (only csv supported).",
         );
         ap.refer(&mut args.distpc_cap).add_option(
             &["--distcap"],
             Store,
-            "Maximum distance in parsecs. Stars beyond this limit are ignored",
+            "Maximum distance in parsecs. Stars beyond this limit are ignored.",
+        );
+        ap.refer(&mut args.photdist).add_option(
+            &["--photdist"],
+            StoreTrue,
+            "Use photometric distances from the catalog if available, and ignore the parallax thresholds.",
         );
         ap.refer(&mut args.additional).add_option(
             &["--additional"],
             Store,
-            "Comma-separated list of files or folders with optionally gzipped csv files containing additional columns (matched by id) of the main catalog. The first column must contain the Gaia source_id",
+            "Comma-separated list of files or folders with optionally gzipped csv files containing additional columns (matched by id) of the main catalog. The first column must contain the Gaia source_id.",
         );
         ap.refer(&mut args.xmatch).add_option(
             &["--xmatchfile"],
             Store,
-            "Crossmatch file between Gaia and Hipparcos, containing two columns: source_id and hip",
+            "Crossmatch file between Gaia and Hipparcos, containing two columns: source_id and hip.",
         );
         ap.refer(&mut args.ruwe_cap).add_option(
             &["--ruwe"],
@@ -159,31 +165,34 @@ fn main() {
         ap.refer(&mut args.columns).add_option(
             &["--columns"],
             Store,
-            "Comma-separated list of column names, in order, of the Gaia catalog",
+            "Comma-separated list of column names, in order, of the Gaia catalog.",
         );
         ap.refer(&mut args.file_num_cap).add_option(
             &["--filescap"],
             Store,
-            "Maximum number of input files to be processed",
+            "Maximum number of input files to be processed.",
         );
         ap.refer(&mut args.star_num_cap).add_option(
             &["--starscap"],
             Store,
-            "Maximum number of stars to be processed per file",
+            "Maximum number of stars to be processed per file.",
         );
         ap.refer(&mut args.dry_run).add_option(
             &["--dryrun"],
             StoreTrue,
-            "Dry run, do not write anything",
+            "Dry run, do not write anything.",
         );
-        ap.refer(&mut args.debug)
-            .add_option(&["-d", "--debug"], StoreTrue, "Set log to debug");
+        ap.refer(&mut args.debug).add_option(
+            &["-d", "--debug"],
+            StoreTrue,
+            "Set log to debug level.",
+        );
         ap.parse_args_or_exit();
     }
 
     // Clean output directory
     if !args.dry_run && path::Path::new(&args.output).exists() {
-        fs::remove_dir_all(&args.output).expect("Error cleaning output directory");
+        fs::remove_dir_all(&args.output).expect("Error cleaning output directory.");
     }
 
     let input_path = path::Path::new(&args.input);
@@ -192,7 +201,7 @@ fn main() {
     let logfile = format!("{}/log", args.output);
     if args.dry_run && path::Path::new(&logfile).exists() {
         // Delete log
-        fs::remove_file(&logfile).expect("Error deleting log file");
+        fs::remove_file(&logfile).expect("Error deleting log file.");
     }
     let logfile = FileAppender::builder()
         .encoder(Box::new(PatternEncoder::new(
@@ -221,7 +230,7 @@ fn main() {
         )
         .expect("Error building logger config");
 
-    log4rs::init_config(config).expect("Error initializing logger");
+    log4rs::init_config(config).expect("Error initializing logger.");
 
     // Log arguments
     log::info!("{:?}", args);
@@ -229,8 +238,8 @@ fn main() {
     mem::log_mem();
 
     // Make sure input exists
-    assert!(input_path.exists(), "Input directory does not exist");
-    assert!(input_path.is_dir(), "Input directory is not a directory");
+    assert!(input_path.exists(), "Input directory does not exist.");
+    assert!(input_path.is_dir(), "Input directory is not a directory.");
 
     if args.input.len() > 0 {
         let start = Instant::now();
@@ -248,6 +257,7 @@ fn main() {
             1000.0,
             1000.0,
             1000.0,
+            false,
             args.mag_corrections,
             true,
             None,
@@ -261,7 +271,7 @@ fn main() {
             let start_hip = Instant::now();
             list_hip = loader_hip
                 .load_dir(&args.hip)
-                .expect("Error loading HIP data");
+                .expect("Error loading HIP data.");
             let time_hip = start_hip.elapsed();
             log::info!(
                 "{} particles loaded form HIP in {:?}",
@@ -300,6 +310,7 @@ fn main() {
             args.plx_err_faint,
             args.plx_err_bright,
             1.0,
+            args.photdist,
             args.mag_corrections,
             args.allow_negative_plx,
             Some(must_load),
@@ -423,7 +434,7 @@ fn main() {
             }
         }
         log::info!(
-            "{} hits ({} gaia wins, {} hip wins), {} no-hits",
+            "{} hits ({} gaia wins, {} hip wins), {} no-hits.",
             hit,
             gaia_wins,
             hip_wins,
@@ -434,7 +445,7 @@ fn main() {
         std::mem::drop(list_hip);
         mem::log_mem();
 
-        log::info!("{} stars in the final list", main_list.len());
+        log::info!("{} stars in the final list.", main_list.len());
         let time_load = start.elapsed();
 
         if main_list.is_empty() {
@@ -464,16 +475,19 @@ fn main() {
             retain
         });
         log::info!(
-            "Removed {} stars due to being too far (cap = {} pc)",
+            "Removed {} stars due to being too far (cap = {} pc).",
             len_before - main_list.len(),
             args.distpc_cap
         );
-        log::info!("Found {} close stars! (dist <= 5 pc)", n_close_stars,);
+        log::info!("Found {} close stars! (dist <= 5 pc).", n_close_stars,);
         log::info!("Found {} with non-finite Gmag!", n_gmag_nan,);
 
         mem::log_mem();
 
-        log::info!("Sorting list by magnitude with {} objects", main_list.len());
+        log::info!(
+            "Sorting list by magnitude with {} objects.",
+            main_list.len()
+        );
         main_list.sort_by(|a, b| {
             let order = a.absmag.partial_cmp(&b.absmag);
             match order {
@@ -481,7 +495,7 @@ fn main() {
                 None => Ordering::Equal,
             }
         });
-        log::info!("List sorted in {:?}", start_gen.elapsed());
+        log::info!("List sorted in {:?}.", start_gen.elapsed());
         mem::log_mem();
 
         let time_gen = start_gen.elapsed();
@@ -495,7 +509,7 @@ fn main() {
         );
         let (num_octants, num_stars, depth) = octree.generate_octree(&main_list);
         log::info!(
-            "Octree generated with {} octants and {} stars ({} skipped) in {:?}",
+            "Octree generated with {} octants and {} stars ({} skipped) in {:?}.",
             num_octants,
             num_stars,
             main_list.len() - num_stars,
