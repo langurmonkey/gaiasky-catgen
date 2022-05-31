@@ -16,5 +16,5 @@ Usage: catalog-pack.sh LOCATION KEY NAME DESCRIPTION RELEASENOTES EPOCH VERSION
     VERSION      The version number.
 
 Example:
-catalog-pack.sh ./000_20190213_dr2-verysmall dr2-verysmall 'DR2 - very small' 'Gaia DR2 very small: 5%\/0.5% bright\/faint parallax relative error.' 'Release notes.' 2015.5 3
+catalog-pack.sh ./000-20220531-dr3-default dr3-default 'DR3 default' 'Gaia DR3 default: 20%\/1.5% bright\/faint parallax relative error.' '- Contains Hipparcos stars.\\n- When available, photometric distances are used.\\n- Parallaxes are using the corrected terms.' 2016.0 0
 ```

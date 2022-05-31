@@ -14,7 +14,7 @@ echo "	EPOCH         The reference epoch."
 echo "	VERSION       The version number."
 echo
 echo "Example:"
-echo "$me ./000_20190213_dr2-verysmall dr2-verysmall 'DR2 - very small' 'Gaia DR2 very small: 5%\\/0.5% bright\\/faint parallax relative error.' 'Introduced DR2 data.\\n- New catalogs.\\n- New flavor.' 2015.5 3"
+echo "$me gscatalogpack ./000-20220531-dr3-default dr3-default 'DR3 default' 'Gaia DR3 default: 20%\/1.5% bright\/faint parallax relative error.' '- Contains Hipparcos stars.\\n- When available, photometric distances are used.\\n- Parallaxes are using the corrected terms.' 2016.0 0"
 }
 
 
