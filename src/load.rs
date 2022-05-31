@@ -471,7 +471,7 @@ impl Loader {
                     Err(e) => log::error!("Error: {:?}", e),
                 }
                 i += 1;
-                if count % 10 == 0 {
+                if i % 10 == 0 {
                     mem::log_mem();
                 }
             }
