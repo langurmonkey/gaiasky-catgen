@@ -92,8 +92,7 @@
       "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
     },
     {
-      "name": "full",
-      "photdist": null,
+      "name": "geodist",
       "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
       "distcap": 100000,
       "maxpart": 120000,

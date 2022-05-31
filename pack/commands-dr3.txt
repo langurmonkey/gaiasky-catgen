@@ -1,0 +1,39 @@
+# Default
+
+gscatalogpack ./000-20220531-dr3-default dr3-default 'DR3 default' 'Gaia DR3 default: stars with up to 20%\/1.5% bright\/faint parallax relative error.' '- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening terms are applied to magnitudes and colors.' 2016.0 0
+
+# Small
+
+gscatalogpack ./001-20220531-dr3-small dr3-small 'DR3 small' 'Gaia DR3 small: stars with up to 10%\/0.5% bright\/faint parallax relative error.' '- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening terms are applied to magnitudes and colors.' 2016.0 0
+
+# Medium
+
+gscatalogpack ./002-20220531-dr3-medium dr3-medium 'DR3 medium' 'Gaia DR3 medium: stars with up to 30%\/5% bright\/faint parallax relative error.' '- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening terms are applied to magnitudes and colors.' 2016.0 0
+
+# Large
+
+gscatalogpack ./003-20220531-dr3-large dr3-large 'DR3 large' 'Gaia DR3 large: stars with up to 50%\/12.5% bright\/faint parallax relative error.' '- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening terms are applied to magnitudes and colors.' 2016.0 0
+
+# Very Large
+
+gscatalogpack ./004-20220531-dr3-verylarge dr3-verylarge 'DR3 verylarge' 'Gaia DR3 verylarge: stars with up to 50% parallax relative error.' '- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening terms are applied to magnitudes and colors.' 2016.0 0
+
+# Extra Large
+
+gscatalogpack ./005-20220531-dr3-extralarge dr3-extralarge 'DR3 extralarge' 'Gaia DR3 extralarge: stars with up to 95% parallax relative error.' '- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening terms are applied to magnitudes and colors.' 2016.0 0
+
+# Bright
+
+gscatalogpack ./006-20220531-dr3-bright dr3-bright 'DR3 bright' 'Gaia DR3 bright: stars with up to 90%\/1% bright\/faint parallax relative error.' '- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening terms are applied to magnitudes and colors.' 2016.0 0
+
+# RUWE
+
+gscatalogpack ./007-20220531-dr3-ruwe dr3-ruwe 'DR3 ruwe' 'Gaia DR3 ruwe: stars for which the RUWE (re-normalized unit weight error) is <= 1.4.' '- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening terms are applied to magnitudes and colors.' 2016.0 0
+
+# Geodsit
+
+gscatalogpack ./008-20220531-dr3-geodist dr3-geodist 'DR3 geodist' 'Gaia DR3 geodist: stars with bayesian distances by Bailer-Jones et. al.' '- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are from Bayler-Jones et.al.\\n- Extinction and reddening terms are applied to magnitudes and colors.' 2016.0 0
+
+# Fidelity
+
+gscatalogpack ./009-20220531-dr3-fidelity dr3-fidelity 'DR3 fidelity' 'Gaia DR3 fidelity: stars for which the fidelity value is > 0.5.' '- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Extinction and reddening terms are applied to magnitudes and colors.' 2016.0 0
