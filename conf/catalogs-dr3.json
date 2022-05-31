@@ -9,8 +9,8 @@
       "plxerrbright": 0.2,
       "plxerrfaint": 0.015,
       "postprocess": null,
-      "childcount": 200,
-      "parentcount": 2000,
+      "childcount": 25,
+      "parentcount": 1000,
       "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
     },
     {
@@ -41,6 +41,9 @@
       "maxpart": 120000,
       "plxerrbright": 0.5,
       "plxerrfaint": 0.125,
+      "postprocess": null,
+      "childcount": 25,
+      "parentcount": 1000,
       "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
     },
     {
