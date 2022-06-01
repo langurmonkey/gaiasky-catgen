@@ -40,4 +40,4 @@ gscatalogpack ./009-20220531-dr3-fidelity dr3-fidelity 'DR3 fidelity' 'Gaia DR3 
 
 # Photdist
 
-gscatalogpack ./009-20220531-dr3-photdist dr3-photdist 'DR3 photometric distances' 'Gaia DR3 photometric distances: stars with photometric distances from GSP-Phot Aeneas best library using BP/RP spectra.' '- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are from the distance_gspphot column in the archive.\\n- Extinction and reddening terms are applied to magnitudes and colors.' 2016.0 0
+gscatalogpack ./010-20220531-dr3-photdist dr3-photdist 'DR3 photometric distances' 'Gaia DR3 photometric distances: stars with photometric distances from GSP-Phot Aeneas best library using BP/RP spectra.' '- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are from the distance_gspphot column in the archive.\\n- Extinction and reddening terms are applied to magnitudes and colors.' 2016.0 0
