@@ -41,7 +41,7 @@ VERSION=$7
 # Link is optional
 if [ "$#" -eq 7 ]; then
   # Default link to the repository.
-  LINK="https://gaia.ari.uni-heidelberg.de/gaiasky/files/repository"
+  LINK="https:\/\/gaia.ari.uni-heidelberg.de\/gaiasky\/files\/repository"
 else
   LINK=$8
 fi
@@ -90,6 +90,7 @@ echo "SIZE:         $SIZE_BYTES bytes"
 echo "NOBJECTS:     $NOBJECTS"
 echo "EPOCH:        $EPOCH"
 echo "VERSION:      $VERSION"
+echo "LINK:         $LINK"
 
 # CREATE AND MOVE CATALOG
 mkdir -p $CATALOG
