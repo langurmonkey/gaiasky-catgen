@@ -361,9 +361,13 @@ pub struct Loader {
     pub total_processed: u64,
     pub total_loaded: u64,
     pub rejected_dist: u64,
+    pub rejected_dist_inf: u64,
+    pub rejected_dist_neg: u64,
     pub rejected_geodist: u64,
     pub rejected_fidelity: u64,
     pub rejected_plx: u64,
+    pub rejected_plx_crit: u64,
+    pub rejected_plx_neg: u64,
     pub rejected_ruwe: u64,
 }
 
@@ -432,9 +436,13 @@ impl Loader {
             total_processed: 0,
             total_loaded: 0,
             rejected_dist: 0,
+            rejected_dist_inf: 0,
+            rejected_dist_neg: 0,
             rejected_geodist: 0,
             rejected_fidelity: 0,
             rejected_plx: 0,
+            rejected_plx_crit: 0,
+            rejected_plx_neg: 0,
             rejected_ruwe: 0,
         }
     }
@@ -673,10 +681,12 @@ impl Loader {
                 } else {
                     // Otherwise, skip.
                     self.rejected_plx += 1;
+                    self.rejected_plx_neg += 1;
                     return None;
                 }
-            } else if !must_load && !self.accept_parallax(has_geodist, appmag, plx, plx_e) {
+            } else if !must_load && !self.accept_parallax(appmag, plx, plx_e) {
                 self.rejected_plx += 1;
+                self.rejected_plx_crit += 1;
                 return None;
             }
         }
@@ -705,10 +715,18 @@ impl Loader {
 
         // Distance
         let dist_pc: f64;
-        dist_pc = if phot_dist > 0.0 {
-            phot_dist
-        } else if geodist_pc > 0.0 {
-            geodist_pc
+        dist_pc = if self.use_phot_dist {
+            if phot_dist > 0.0 {
+                phot_dist
+            } else {
+                -1.0
+            }
+        } else if has_geodist {
+            if geodist_pc > 0.0 {
+                geodist_pc
+            } else {
+                -1.0
+            }
         } else {
             1000.0 / plx
         };
@@ -716,6 +734,14 @@ impl Loader {
         // Distance test
         if !must_load && !self.accept_distance(dist_pc) {
             self.rejected_dist += 1;
+
+            if !dist_pc.is_finite() {
+                self.rejected_dist_inf += 1;
+            }
+            if dist_pc <= 0.0 {
+                self.rejected_dist_neg += 1;
+            }
+
             return None;
         }
         let dist: f64 = dist_pc * constants::PC_TO_U;
@@ -870,11 +896,8 @@ impl Loader {
         })
     }
 
-    fn accept_parallax(&self, geodist_present: bool, appmag: f64, plx: f64, plx_e: f64) -> bool {
-        // If geometric distances are present, always accept, we use distances directly regardless of parallax
-        if geodist_present {
-            return true;
-        } else if !appmag.is_finite() || !plx.is_finite() {
+    fn accept_parallax(&self, appmag: f64, plx: f64, plx_e: f64) -> bool {
+        if !appmag.is_finite() || !plx.is_finite() {
             return false;
         } else if appmag < 13.1 {
             return plx >= 0.0 && plx_e < plx * self.plx_err_bright && plx_e < self.plx_err_cap;
@@ -884,6 +907,8 @@ impl Loader {
     }
 
     fn accept_distance(&self, dist_pc: f64) -> bool {
+        // Accept if it is finite, it is greater than zero.
+        // The distance cap check happens after the cross-match with Hipparcos.
         dist_pc.is_finite() && dist_pc > 0.0
     }
 
@@ -1003,18 +1028,19 @@ impl Loader {
 
     pub fn report_rejected(&self) {
         log::info!(
-            "::: TOTAL PROCESSED/LOADED: {}/{}",
-            self.total_processed,
-            self.total_loaded
+            "::: TOTAL LOADED/PROCESSED: {}/{}",
+            self.total_loaded,
+            self.total_processed
         );
         log::info!(
             "   - Rejected due to parallax (criteria/negative): {}",
             self.rejected_plx
         );
-        log::info!(
-            "   - Rejected due to distance (infinite/neg/cap): {}",
-            self.rejected_dist
-        );
+        log::info!("            - criteria: {}", self.rejected_plx_crit);
+        log::info!("            - negative: {}", self.rejected_plx_neg);
+        log::info!("   - Rejected due to distance: {}", self.rejected_dist);
+        log::info!("            - infinite: {}", self.rejected_dist_inf);
+        log::info!("            - negative: {}", self.rejected_dist_neg);
         log::info!(
             "   - Rejected due to geo-distance (not present): {}",
             self.rejected_geodist

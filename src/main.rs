@@ -48,7 +48,7 @@ fn main() {
         output: "".to_string(),
         max_part: 100000,
         ruwe_cap: f32::NAN,
-        distpc_cap: 1.0e5,
+        distpc_cap: 1.0e6,
         photdist: false,
         plx_err_faint: 10.0,
         plx_err_bright: 10.0,
@@ -475,7 +475,7 @@ fn main() {
             retain
         });
         log::info!(
-            "Removed {} stars due to being too far (cap = {} pc).",
+            "Rejected {} stars due to being too far (cap = {} pc).",
             len_before - main_list.len(),
             args.distpc_cap
         );
