@@ -25,7 +25,7 @@ corrected terms.' 2016.0 0 'https:\/\/gaia.ari.uni-hedielberg.de'"
 SCRIPT_FILE=$(readlink -f "$0")
 SCRIPT_DIR=$(dirname $SCRIPT_FILE)
 
-if [ "$#" -ne 7 ] || [ "$#" -ne 8 ]; then
+if [ "$#" -ne 7 ] && [ "$#" -ne 8 ]; then
 	usage
 	exit 1
 fi
