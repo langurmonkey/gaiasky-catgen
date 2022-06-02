@@ -3,7 +3,7 @@
 me=`basename "$0"`
 
 function usage() {
-echo "Usage: $me LOCATION KEY NAME DESCRIPTION RELEASENOTES EPOCH VERSION"
+echo "Usage: $me LOCATION KEY NAME DESCRIPTION RELEASENOTES EPOCH VERSION [LINK]"
 echo
 echo "	LOCATION      Location in the file system. Must contain log, metadata.dat, particles."
 echo "	KEY           The dataset key, which is also its file system name (dr2-small)."
@@ -12,16 +12,20 @@ echo "	DESCRIPTION   The description of the dataset."
 echo "	RELEASENOTES  The release notes."
 echo "	EPOCH         The reference epoch."
 echo "	VERSION       The version number."
+echo "	LINK          Optional, the catalog link metadata."
 echo
 echo "Example:"
-echo "$me gscatalogpack ./000-20220531-dr3-default dr3-default 'DR3 default' 'Gaia DR3 default: 20%\/1.5% bright\/faint parallax relative error.' '- Contains Hipparcos stars.\\n- When available, photometric distances are used.\\n- Parallaxes are using the corrected terms.' 2016.0 0"
+echo "$me gscatalogpack ./000-20220531-dr3-default dr3-default 'DR3 default' 'Gaia DR3
+default: 20%\/1.5% bright\/faint parallax relative error.' '- Contains Hipparcos
+stars.\\n- When available, photometric distances are used.\\n- Parallaxes are using the
+corrected terms.' 2016.0 0 'https:\/\/gaia.ari.uni-hedielberg.de'"
 }
 
 
 SCRIPT_FILE=$(readlink -f "$0")
 SCRIPT_DIR=$(dirname $SCRIPT_FILE)
 
-if [ "$#" -ne 7 ]; then
+if [ "$#" -ne 7 ] || [ "$#" -ne 8 ]; then
 	usage
 	exit 1
 fi
@@ -33,6 +37,14 @@ DESCRIPTION=$4
 NOTES=$5
 EPOCH=$6
 VERSION=$7
+
+# Link is optional
+if [ "$#" -eq 7 ]; then
+  # Default link to the repository.
+  LINK="https://gaia.ari.uni-heidelberg.de/gaiasky/files/repository"
+else
+  LINK=$8
+fi
 
 if [ ! -d "$LOCATION" ] || [ ! -d "$LOCATION"/particles ]; then
 	echo "ERROR: location does not exist or it does not contain a dataset: $LOCATION"
@@ -91,6 +103,7 @@ sed -i 's/<VERSION>/'"$VERSION"'/g' $CATALOG_FILE
 sed -i 's/<EPOCH>/'"$EPOCH"'/g' $CATALOG_FILE
 sed -i 's/<DESCRIPTION>/'"$DESCRIPTION"'/g' $CATALOG_FILE
 sed -i 's/<NOTES>/'"$NOTES"'/g' $CATALOG_FILE
+sed -i 's/<LINK>/'"$LINK"'/g' $CATALOG_FILE
 sed -i 's/<SIZE_BYTES>/'"$SIZE_BYTES"'/g' $CATALOG_FILE
 sed -i 's/<NOBJECTS>/'"$NOBJECTS"'/g' $CATALOG_FILE
 
