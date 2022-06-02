@@ -32,11 +32,7 @@ gscatalogpack ./007-20220531-dr3-ruwe dr3-ruwe 'DR3 ruwe' 'Stars for which the R
 
 # Geodsit
 
-gscatalogpack ./008-20220531-dr3-geodist dr3-geodist 'DR3 bayesian distances' 'Contains
-all stars with bayesian distances as determined by Bailer-Jones et. al.' '- Contains
-Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are from
-Bayler-Jones et.al.\\n- Extinction and reddening terms are applied to magnitudes and
-colors.' 2016.0 0 'https:\/\/iopscience.iop.org\/article\/10.3847\/1538-3881\/abd806'
+gscatalogpack ./008-20220531-dr3-geodist dr3-geodist 'DR3 bayesian distances' 'Contains all stars with bayesian distances as determined by Bailer-Jones et. al.' '- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are from Bayler-Jones et.al.\\n- Extinction and reddening terms are applied to magnitudes and colors.' 2016.0 0 'https:\/\/iopscience.iop.org\/article\/10.3847\/1538-3881\/abd806'
 
 # Fidelity
 
