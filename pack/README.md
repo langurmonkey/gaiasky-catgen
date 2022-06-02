@@ -5,16 +5,17 @@ This directory contains a small utility that helps compress and pack the generat
 Here is how to use it:
 
 ```bash
-Usage: catalog-pack.sh LOCATION KEY NAME DESCRIPTION RELEASENOTES EPOCH VERSION
+Usage: catalog-pack.sh LOCATION KEY NAME DESCRIPTION RELEASENOTES EPOCH VERSION [LINK]
 
     LOCATION      Location in the file system. Must contain log, metadata.dat, particles.
     KEY           The dataset key, which is also its file system name (dr2-small).
     NAME          The dataset name (DR2 small).
     DESCRIPTION   The description of the dataset.
     RELEASENOTES  Release notes.
-    EPOCH        The reference epoch.
-    VERSION      The version number.
+    EPOCH         The reference epoch.
+    VERSION       The version number.
+    LINK          Optional. The catalog link metadata.
 
 Example:
-catalog-pack.sh ./000-20220531-dr3-default dr3-default 'DR3 default' 'Gaia DR3 default: 20%\/1.5% bright\/faint parallax relative error.' '- Contains Hipparcos stars.\\n- When available, photometric distances are used.\\n- Parallaxes are using the corrected terms.' 2016.0 0
+catalog-pack.sh ./000-20220531-dr3-default dr3-default 'DR3 default' 'Gaia DR3 default: 20%\/1.5% bright\/faint parallax relative error.' '- Contains Hipparcos stars.\\n- When available, photometric distances are used.\\n- Parallaxes are using the corrected terms.' 2016.0 0 'https\/\/:gaia.ari.uni-heidelberg.de\/gaiasky\/files\/repository\/'
 ```
