@@ -119,7 +119,6 @@
     },
     {
       "name": "photdist",
-      "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
       "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
       "photdist": null,
       "distcap": 500000,
