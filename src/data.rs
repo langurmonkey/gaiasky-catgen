@@ -245,6 +245,8 @@ pub struct Config {
     pub plx_zeropoint: f64,
     pub mag_corrections: u8,
     pub allow_negative_plx: bool,
+    // Put the centre of the octree at the reference system origin (0 0 0).
+    pub centre_origin: bool,
     // post-process the octree to try to flatten it.
     pub postprocess: bool,
     pub child_count: usize,
@@ -273,6 +275,7 @@ impl fmt::Debug for Config {
             .field("mag_corrections", &self.mag_corrections)
             .field("allow_negative_plx", &self.allow_negative_plx)
             .field("photdist", &self.photdist)
+            .field("centre_origin", &self.centre_origin)
             .field("postprocess", &self.postprocess)
             .field("child_count", &self.child_count)
             .field("parent_count", &self.parent_count)

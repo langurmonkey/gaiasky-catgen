@@ -55,6 +55,7 @@ fn main() {
         plx_zeropoint: 0.0,
         mag_corrections: 2,
         allow_negative_plx: false,
+        centre_origin: false,
         postprocess: false,
         dry_run: false,
         debug: false,
@@ -121,6 +122,11 @@ fn main() {
             &["-p", "--postprocess"],
             StoreTrue,
             "Post-process tree so that low-count nodes are merged with their parents. See --childcount and --parentcount for more info.",
+        );
+        ap.refer(&mut args.centre_origin).add_option(
+            &["--centreorigin"],
+            StoreTrue,
+            "Force the centre of the octree to be at the origin of coordinates, (0 0 0).",
         );
         ap.refer(&mut args.child_count).add_option(
             &["--childcount"],
@@ -506,6 +512,7 @@ fn main() {
             args.child_count,
             args.parent_count,
             args.distpc_cap,
+            args.centre_origin,
         );
         let (num_octants, num_stars, depth) = octree.generate_octree(&main_list);
         log::info!(

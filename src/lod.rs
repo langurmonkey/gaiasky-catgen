@@ -26,6 +26,7 @@ pub struct Octree {
     pub child_count: usize,
     pub parent_count: usize,
     pub distpc_cap: f64,
+    pub centre_origin: bool,
 
     // Base for octant ids (octal)
     pub base: BaseCustom<char>,
@@ -49,6 +50,7 @@ impl Octree {
         child_count: usize,
         parent_count: usize,
         distpc_cap: f64,
+        centre_origin: bool,
     ) -> Self {
         Octree {
             max_part,
@@ -56,6 +58,7 @@ impl Octree {
             child_count,
             parent_count,
             distpc_cap,
+            centre_origin,
 
             // octal base
             base: BaseCustom::<char>::new("01234567".chars().collect()),
@@ -66,12 +69,12 @@ impl Octree {
     }
 
     /**
-     * Generates a the octree with the given list
+     * Generates the octree with the given list
      * of stars. The list must be
      * sorted by magnitude beforehand. Returns the
      * number of octants in the octree, the number
      * of stars actually added (i.e. not skipped
-     * due to being too far) and the depth of the tree
+     * due to being too far) and the depth of the tree.
      **/
     pub fn generate_octree(&self, list: &Vec<Particle>) -> (usize, usize, u32) {
         self.start_generation(list);
@@ -526,6 +529,8 @@ impl Octree {
      * Computes the maximum axis-aligned bounding box
      * containing all the particles in the list and
      * sets up the root node of this octree.
+     * If 'self.centre_origin' is true, the centre of the octree is
+     * forcefully put at (0 0 0).
      **/
     fn start_generation(&self, list: &Vec<Particle>) {
         log::info!("Starting generation of octree");
@@ -555,6 +560,20 @@ impl Octree {
             if particle.z > max.z {
                 max.z = particle.z;
             }
+        }
+        if self.centre_origin {
+            // Get the greatest in each dimension
+            let mut gt = Vec3::empty();
+            gt.x = f64::max(f64::abs(min.x), f64::abs(max.x));
+            gt.y = f64::max(f64::abs(min.y), f64::abs(max.y));
+            gt.y = f64::max(f64::abs(min.z), f64::abs(max.z));
+
+            // Set min and max so that they are equal and with different sign.
+            // The centre will fall at the origin (0 0 0).
+            min.x = -gt.x;
+            min.y = -gt.y;
+            min.z = -gt.z;
+            max = gt;
         }
         // The bounding box
         let bx = BoundingBox::from(&min, &max);
