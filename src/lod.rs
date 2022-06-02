@@ -87,7 +87,7 @@ impl Octree {
                 level,
                 cat_size - cat_idx
             );
-            let mut n_octants_created_level: usize = 0;
+            let mut n_octants_created_level: usize = if level == 0 { 1 } else { 0 };
             let mut n_stars_added_level: usize = 0;
             while cat_idx < cat_size {
                 // Add stars to nodes until we reach max_part
