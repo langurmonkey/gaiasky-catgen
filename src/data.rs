@@ -272,6 +272,7 @@ impl fmt::Debug for Config {
             .field("plx_zeropoint", &self.plx_zeropoint)
             .field("mag_corrections", &self.mag_corrections)
             .field("allow_negative_plx", &self.allow_negative_plx)
+            .field("photdist", &self.photdist)
             .field("postprocess", &self.postprocess)
             .field("child_count", &self.child_count)
             .field("parent_count", &self.parent_count)
