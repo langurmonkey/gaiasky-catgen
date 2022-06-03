@@ -124,8 +124,8 @@
       "distcap": 100000,
       "maxpart": 200000,
       "postprocess": null,
-      "childcount": 800,
-      "parentcount": 8000,
+      "childcount": 500,
+      "parentcount": 5000,
       "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
     }
   ]
