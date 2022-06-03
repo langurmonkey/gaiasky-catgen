@@ -469,24 +469,22 @@ fn main() {
         // Remove stars with distance > dist_cap
         main_list.retain(|s| {
             let dist_pc: f64 = (s.x * s.x + s.y * s.y + s.z * s.z).sqrt() * constants::U_TO_PC;
-            let retain = dist_pc <= args.distpc_cap;
-            if !retain {
-                if dist_pc <= 5.0 {
-                    n_close_stars += 1;
-                }
-                if !s.appmag.is_finite() {
-                    n_gmag_nan += 1;
-                }
+            if dist_pc <= 5.0 {
+                n_close_stars += 1;
             }
-            retain
+            if !s.appmag.is_finite() {
+                n_gmag_nan += 1;
+            }
+
+            dist_pc <= args.distpc_cap
         });
         log::info!(
             "Rejected {} stars due to being too far (cap = {} pc).",
             len_before - main_list.len(),
             args.distpc_cap
         );
-        log::info!("Found {} close stars! (dist <= 5 pc).", n_close_stars,);
-        log::info!("Found {} with non-finite Gmag!", n_gmag_nan,);
+        log::info!("   - Found {} close stars (dist <= 5 pc).", n_close_stars,);
+        log::info!("   - Found {} with non-finite Gmag.", n_gmag_nan,);
 
         mem::log_mem();
 
