@@ -26,8 +26,6 @@ fi
 KEY=$1
 DIR=$2
 
-echo $KEY
-
 # Fetch metadata from metadata file.
 
 # Catalog key
