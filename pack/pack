@@ -30,16 +30,23 @@ echo $KEY
 
 # Fetch metadata from metadata file.
 
+# Catalog key
+CATALOG_KEY=$(jq -r ".[] | select(.name==\"$KEY\").metadata.key" $METADATA_FILE)
+
 # Name
 NAME=$(jq -r ".[] | select(.name==\"$KEY\").metadata.name" $METADATA_FILE)
 
 # Description
 DESC=$(jq -r ".[] | select(.name==\"$KEY\").metadata.description" $METADATA_FILE)
+# escape forward slashes and line breaks
 DESC=$(echo $DESC | sed -e 's#/#\\/#g')
+DESC=$(echo $DESC | sed -e 's#\\n#\\\\n#g')
 
 # Release notes
 RN=$(jq -r ".[] | select(.name==\"$KEY\").metadata.releasenotes" $METADATA_FILE)
+# escape forward slashes and line breaks
 RN=$(echo $RN | sed -e 's#/#\\/#g')
+RN=$(echo $RN | sed -e 's#\\n#\\\\n#g')
 
 # Epoch
 EPOCH=$(jq -r ".[] | select(.name==\"$KEY\").metadata.epoch" $METADATA_FILE)
@@ -59,5 +66,5 @@ if [[ "$NAME" == "" || "$DESC" == "" ]]; then
 fi
 
 # Run
-CMD="$SCRIPT_DIR/pack-helper $DIR $KEY '$NAME' '$DESC' '$RN' $EPOCH $VERS $LINK"
+CMD="$SCRIPT_DIR/pack-helper $DIR $CATALOG_KEY '$NAME' '$DESC' '$RN' $EPOCH $VERS $LINK"
 eval $CMD
