@@ -63,12 +63,12 @@ function generate() {
   $( eval $CMD )
 }
 
-NCAT=$(jq '.catalogs | length' $CATDEF)
+NCAT=$(jq '. | length' $CATDEF)
 
 for CURRENT_CATALOG in "${TORUN[@]}"; do
     for ((j=0;j<NCAT;j++)); do
         # Get catalog name
-        NAME=$(jq ".catalogs[$j].name" $CATDEF)
+        NAME=$(jq ".[$j].name" $CATDEF)
         # Remove quotes
         NAME=$(sed -e 's/^"//' -e 's/"$//' <<<"$NAME")
 
@@ -78,13 +78,13 @@ for CURRENT_CATALOG in "${TORUN[@]}"; do
             DSNAME="$jpad-$(date +'%Y%m%d')-$CATALOG_NAME-$NAME"
             echo $DSNAME
             CMD="nohup $GSDIR/target/release/gaiasky-catgen -i $INPUT -o $OUTPUT/$DSNAME/"
-            NATTR=$(jq ".catalogs[$j] | length" $CATDEF)
+            NATTR=$(jq ".[$j] | length" $CATDEF)
             for ((k=0;k<NATTR;k++)); do
-                KEY=$(jq ".catalogs[$j] | keys[$k]" $CATDEF)
+                KEY=$(jq ".[$j] | keys[$k]" $CATDEF)
                 # Remove quotes
                 KEY=$(sed -e 's/^"//' -e 's/"$//' <<<"$KEY")
-                if [ "$KEY" != "name" ]; then
-                    VAL=$(jq ".catalogs[$j].$KEY" $CATDEF)
+                if [ "$KEY" != "name" ] && [ "$KEY" != "metadata" ]; then
+                    VAL=$(jq ".[$j].$KEY" $CATDEF)
                     # Remove quotes
                     VAL=$(sed -e 's/^"//' -e 's/"$//' <<<"$VAL")
                     #echo "$KEY -> $VAL"

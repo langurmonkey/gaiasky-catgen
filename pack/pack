@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+me=`basename "$0"`
+
+
+function usage() {
+echo "Usage: $me KEY DIR"
+echo
+echo "	KEY     The catalog key, as a single word (i.e. 'default')."
+echo "	DIR     Directory containing the generated catalog."
+echo
+echo "Example:"
+echo "$me default ./000-20220531-dr3-default"
+}
+
+SCRIPT_FILE=$(readlink -f "$0")
+SCRIPT_DIR=$(dirname $SCRIPT_FILE)
+GSC_DIR=$(dirname $SCRIPT_DIR)
+METADATA_FILE="$GSC_DIR/conf/catalogs-dr3.json"
+
+if [ "$#" -ne 2 ]; then
+	usage
+	exit 1
+fi
+
+KEY=$1
+DIR=$2
+
+echo $KEY
+
+# Fetch metadata from metadata file.
+
+# Name
+NAME=$(jq -r ".[] | select(.name==\"$KEY\").metadata.name" $METADATA_FILE)
+
+# Description
+DESC=$(jq -r ".[] | select(.name==\"$KEY\").metadata.description" $METADATA_FILE)
+DESC=$(echo $DESC | sed -e 's#/#\\/#g')
+
+# Release notes
+RN=$(jq -r ".[] | select(.name==\"$KEY\").metadata.releasenotes" $METADATA_FILE)
+RN=$(echo $RN | sed -e 's#/#\\/#g')
+
+# Epoch
+EPOCH=$(jq -r ".[] | select(.name==\"$KEY\").metadata.epoch" $METADATA_FILE)
+
+# Version
+VERS=$(jq -r ".[] | select(.name==\"$KEY\").metadata.version" $METADATA_FILE)
+
+# Link
+LINK=$(jq -r ".[] | select(.name==\"$KEY\").metadata.link" $METADATA_FILE)
+if [[ "$LINK" == "null" ]]; then
+  LINK=""
+fi
+
+if [[ "$NAME" == "" || "$DESC" == "" ]]; then
+  echo "Could not retrieve metadata!"
+  exit 1
+fi
+
+# Run
+CMD="pack-helper $DIR $KEY '$NAME' '$DESC' '$RN' $EPOCH $VERS $LINK"
+eval $CMD

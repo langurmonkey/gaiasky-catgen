@@ -1,132 +1,220 @@
-{
-  "catalogs": [
-    {
-      "name": "default",
-      "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
-      "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
-      "distcap": 100000,
-      "maxpart": 120000,
-      "plxerrbright": 0.2,
-      "plxerrfaint": 0.015,
-      "postprocess": null,
-      "childcount": 25,
-      "parentcount": 1000,
-      "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
-    },
-    {
-      "name": "small",
-      "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
-      "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
-      "distcap": 100000,
-      "maxpart": 120000,
-      "plxerrbright": 0.1,
-      "plxerrfaint": 0.005,
-      "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
-    },
-    {
-      "name": "medium",
-      "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
-      "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
-      "distcap": 100000,
-      "maxpart": 120000,
-      "plxerrbright": 0.3,
-      "plxerrfaint": 0.05,
-      "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
-    },
-    {
-      "name": "large",
-      "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
-      "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
-      "distcap": 100000,
-      "maxpart": 120000,
-      "plxerrbright": 0.5,
-      "plxerrfaint": 0.125,
-      "postprocess": null,
-      "childcount": 25,
-      "parentcount": 1000,
-      "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
-    },
-    {
-      "name": "verylarge",
-      "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
-      "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
-      "distcap": 100000,
-      "maxpart": 120000,
-      "plxerrbright": 0.5,
-      "plxerrfaint": 0.5,
-      "postprocess": null,
-      "childcount": 300,
-      "parentcount": 5000,
-      "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
-    },
-    {
-      "name": "extralarge",
-      "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
-      "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
-      "distcap": 100000,
-      "maxpart": 120000,
-      "plxerrbright": 0.95,
-      "plxerrfaint": 0.95,
-      "postprocess": null,
-      "childcount": 500,
-      "parentcount": 5000,
-      "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
-    },
-    {
-      "name": "bright",
-      "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
-      "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
-      "distcap": 100000,
-      "maxpart": 120000,
-      "plxerrbright": 0.9,
-      "plxerrfaint": 0.01,
-      "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
-    },
-    {
-      "name": "ruwe",
-      "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
-      "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
-      "distcap": 100000,
-      "maxpart": 120000,
-      "ruwe": 1.4,
-      "postprocess": null,
-      "childcount": 200,
-      "parentcount": 5000,
-      "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
-    },
-    {
-      "name": "geodist",
-      "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
-      "distcap": 100000,
-      "maxpart": 120000,
-      "postprocess": null,
-      "childcount": 500,
-      "parentcount": 5000,
-      "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
-    },
-    {
-      "name": "fidelity",
-      "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz,$DR_BASE/fidelity/fidelities.csv.gz",
-      "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
-      "distcap": 200000,
-      "maxpart": 200000,
-      "plxerrbright": 0.5,
-      "plxerrfaint": 0.5,
-      "postprocess": null,
-      "childcount": 1000,
-      "parentcount": 10000,
-      "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
-    },
-    {
-      "name": "photdist",
-      "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
-      "photdist": null,
-      "distcap": 100000,
-      "maxpart": 200000,
-      "postprocess": null,
-      "childcount": 300,
-      "parentcount": 3000,
-      "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv"
+[
+  {
+    "name": "default",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
+    "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+    "distcap": 100000,
+    "maxpart": 120000,
+    "plxerrbright": 0.2,
+    "plxerrfaint": 0.015,
+    "postprocess": null,
+    "childcount": 25,
+    "parentcount": 1000,
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
+    "metadata": {
+      "key": "gaia-dr3-default",
+      "name": "Gaia DR3 default",
+      "description": "Good balance between good distances and number of stars. Contains stars with up to 20%/1.5% bright/faint parallax relative error.",
+      "releasenotes": "- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening terms are applied to magnitudes and colors.",
+      "epoch": 2016.0,
+      "version": 0
     }
-  ]
-}
+  },
+  {
+    "name": "small",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
+    "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+    "distcap": 100000,
+    "maxpart": 120000,
+    "plxerrbright": 0.1,
+    "plxerrfaint": 0.005,
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
+    "metadata": {
+      "key": "gaia-dr3-small",
+      "name": "Gaia DR3 small",
+      "description": "The very best stars in DR3, those with up to 10%/0.5% bright/faint parallax relative error.",
+      "releasenotes": "- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening terms are applied to magnitudes and colors.",
+      "epoch": 2016.0,
+      "version": 0
+    }
+  },
+  {
+    "name": "medium",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
+    "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+    "distcap": 100000,
+    "maxpart": 120000,
+    "plxerrbright": 0.3,
+    "plxerrfaint": 0.05,
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
+    "metadata": {
+      "key": "gaia-dr3-medium",
+      "name": "Gaia DR3 medium",
+      "description": "Contains a moderate number of stars, with up to 30%/5% bright/faint parallax relative error.",
+      "releasenotes": "- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening terms are applied to magnitudes and colors.",
+      "epoch": 2016.0,
+      "version": 0
+    }
+  },
+  {
+    "name": "large",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
+    "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+    "distcap": 100000,
+    "maxpart": 120000,
+    "plxerrbright": 0.5,
+    "plxerrfaint": 0.125,
+    "postprocess": null,
+    "childcount": 25,
+    "parentcount": 1000,
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
+    "metadata": {
+      "key": "gaia-dr3-large",
+      "name": "Gaia DR3 large",
+      "description": "Contains a large number of stars, with up to 50%/12.5% bright/faint parallax relative error.",
+      "releasenotes": "- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening terms are applied to magnitudes and colors.",
+      "epoch": 2016.0,
+      "version": 0
+    }
+  },
+  {
+    "name": "verylarge",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
+    "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+    "distcap": 100000,
+    "maxpart": 120000,
+    "plxerrbright": 0.5,
+    "plxerrfaint": 0.5,
+    "postprocess": null,
+    "childcount": 300,
+    "parentcount": 5000,
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
+    "metadata": {
+      "key": "gaia-dr3-verylarge",
+      "name": "Gaia DR3 very large",
+      "description": "Contains a very large number of stars, with up to 50% parallax relative error.",
+      "releasenotes": "- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening terms are applied to magnitudes and colors.",
+      "epoch": 2016.0,
+      "version": 0
+    }
+  },
+  {
+    "name": "extralarge",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
+    "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+    "distcap": 100000,
+    "maxpart": 120000,
+    "plxerrbright": 0.95,
+    "plxerrfaint": 0.95,
+    "postprocess": null,
+    "childcount": 500,
+    "parentcount": 5000,
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
+    "metadata": {
+      "key": "gaia-dr3-extralarge",
+      "name": "Gaia DR3 extra large",
+      "description": "Contains an extremely large number of stars, with up to 95% parallax relative error.",
+      "releasenotes": "- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening terms are applied to magnitudes and colors.",
+      "epoch": 2016.0,
+      "version": 0
+    }
+  },
+  {
+    "name": "bright",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
+    "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+    "distcap": 100000,
+    "maxpart": 120000,
+    "plxerrbright": 0.9,
+    "plxerrfaint": 0.01,
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
+    "metadata": {
+      "key": "gaia-dr3-bright",
+      "name": "Gaia DR3 bright",
+      "description": "Contains most of the brightest stars in DR3, those with up to 90%/1% bright/faint parallax relative error.",
+      "releasenotes": "- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening terms are applied to magnitudes and colors.",
+      "epoch": 2016.0,
+      "version": 0
+    }
+  },
+  {
+    "name": "ruwe",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
+    "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+    "distcap": 100000,
+    "maxpart": 120000,
+    "ruwe": 1.4,
+    "postprocess": null,
+    "childcount": 200,
+    "parentcount": 5000,
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
+    "metadata": {
+      "key": "gaia-dr3-ruwe",
+      "name": "Gaia DR3 RUWE",
+      "description": "Stars for which the RUWE (re-normalized unit weight error) is <= 1.4.",
+      "releasenotes": "- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening terms are applied to magnitudes and colors.",
+      "epoch": 2016.0,
+      "version": 0,
+      "link": "https://gea.esac.esa.int/archive/documentation/GDR2/Gaia_archive/chap_datamodel/sec_dm_main_tables/ssec_dm_ruwe.html"
+    }
+  },
+  {
+    "name": "geodist",
+    "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+    "distcap": 100000,
+    "maxpart": 120000,
+    "postprocess": null,
+    "childcount": 500,
+    "parentcount": 5000,
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
+    "metadata": {
+      "key": "gaia-dr3-geodist",
+      "name": "Gaia DR3 bayesian distances",
+      "description": "Contains all stars with bayesian distances as determined by Bailer-Jones et. al.",
+      "releasenotes": "- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are from Bayler-Jones et.al.\\n- Extinction and reddening terms are applied to magnitudes and colors.",
+      "epoch": 2016.0,
+      "version": 0,
+      "link": "https://iopscience.iop.org/article/10.3847/1538-3881/abd806"
+    }
+  },
+  {
+    "name": "fidelity",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz,$DR_BASE/fidelity/fidelities.csv.gz",
+    "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+    "distcap": 200000,
+    "maxpart": 200000,
+    "plxerrbright": 0.5,
+    "plxerrfaint": 0.5,
+    "postprocess": null,
+    "childcount": 1000,
+    "parentcount": 10000,
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
+    "metadata": {
+      "key": "gaia-dr3-fidelity",
+      "name": "Gaia DR3 fidelity",
+      "description": "Stars for which the fidelity value is > 0.5.",
+      "releasenotes": "- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Extinction and reddening terms are applied to magnitudes and colors.",
+      "epoch": 2016.0,
+      "version": 0
+    }
+  },
+  {
+    "name": "photdist",
+    "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+    "photdist": null,
+    "distcap": 100000,
+    "maxpart": 200000,
+    "postprocess": null,
+    "childcount": 300,
+    "parentcount": 3000,
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
+    "metadata": {
+      "key": "gaia-dr3-photdist",
+      "name": "Gaia DR3 photometric distances",
+      "description": "All stars with photometric distances from GSP-Phot Aeneas best library using BP/RP spectra.",
+      "releasenotes": "- Contains Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are from the distance_gspphot column in the archive.\\n- Extinction and reddening terms are applied to magnitudes and colors.",
+      "epoch": 2016.0,
+      "version": 0
+    }
+  }
+]
