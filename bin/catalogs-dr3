@@ -24,6 +24,6 @@ OUTPUT="$DR_LOC/out"
 CATDEF="$GSDIR/conf/catalogs-dr3.json"
 
 # Column names (see ColId)
-COLS="sourceid,ra,dec,pllx,ra_err,dec_err,pllx_err,pmra,pmdec,radvel,gmag,bpmag,rpmag,ruwe,ref_epoch,radvel_err,dist_phot"
+COLS="sourceid,ra,dec,pllx,ra_err,dec_err,pllx_err,pmra,pmdec,radvel,gmag,bpmag,rpmag,ruwe,ref_epoch,radvel_err,ag,ebp_min_rp,dist_phot"
 
 source bin/catalogs-gen.sh

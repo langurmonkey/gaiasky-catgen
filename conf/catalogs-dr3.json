@@ -121,7 +121,7 @@
       "name": "photdist",
       "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
       "photdist": null,
-      "distcap": 500000,
+      "distcap": 100000,
       "maxpart": 200000,
       "postprocess": null,
       "childcount": 800,
