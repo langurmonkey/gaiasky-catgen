@@ -28,21 +28,21 @@ pub struct Octree {
     pub distpc_cap: f64,
     pub centre_origin: bool,
 
-    // Base for octant ids (octal)
+    // Base for octant ids (octal).
     pub base: BaseCustom<char>,
 
-    // From octantId to index in nodes vector
+    // From octantId to index in nodes vector.
     pub nodes_idx: RefCell<HashMap<i64, usize>>,
     // private data with all octants in the octree
-    // the id of each octant is the index in this list
+    // the id of each octant is the index in this list.
     pub nodes: RefCell<Vec<Octant>>,
-    // Root node index
+    // Root node index.
     pub root: Option<OctantId>,
 }
 
 impl Octree {
     /**
-     * Creates a new empty octree with the given parameters and no nodes
+     * Creates a new empty octree with the given parameters and no nodes.
      **/
     pub fn from_params(
         max_part: usize,
@@ -530,7 +530,7 @@ impl Octree {
      * containing all the particles in the list and
      * sets up the root node of this octree.
      * If 'self.centre_origin' is true, the centre of the octree is
-     * forcefully put at (0 0 0).
+     * forcefully put very close to (0 0 0).
      **/
     fn start_generation(&self, list: &Vec<Particle>) {
         log::info!("Starting generation of octree");
@@ -569,11 +569,11 @@ impl Octree {
             gt.y = f64::max(f64::abs(min.z), f64::abs(max.z));
 
             // Set min and max so that they are equal and with different sign.
-            // The centre will fall at the origin (0 0 0).
+            // The centre will fall close to the origin (0 0 0).
             min.x = -gt.x;
             min.y = -gt.y;
             min.z = -gt.z;
-            max = gt;
+            max = gt + 4.0;
         }
         // The bounding box
         let bx = BoundingBox::from(&min, &max);

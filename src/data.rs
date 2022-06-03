@@ -3,6 +3,8 @@ use crate::load;
 
 use std::collections::HashMap;
 use std::fmt;
+use std::ops::Add;
+use std::ops::Sub;
 
 /**
  * Represents a star. The cartesian
@@ -97,6 +99,35 @@ impl Eq for Vec3 {}
 impl PartialEq for Vec3 {
     fn eq(&self, other: &Self) -> bool {
         self.x == other.x && self.y == other.y && self.z == other.z
+    }
+}
+
+// Overload addition with Vec3.
+impl Add<Vec3> for Vec3 {
+    type Output = Vec3;
+    fn add(self, other: Vec3) -> Vec3 {
+        Vec3::new(self.x + other.x, self.y + other.y, self.z + other.z)
+    }
+}
+// Overload addition with float.
+impl Add<f64> for Vec3 {
+    type Output = Vec3;
+    fn add(self, other: f64) -> Vec3 {
+        Vec3::new(self.x + other, self.y + other, self.z + other)
+    }
+}
+// Overload subtraction with Vec3.
+impl Sub<Vec3> for Vec3 {
+    type Output = Vec3;
+    fn sub(self, other: Vec3) -> Vec3 {
+        Vec3::new(self.x - other.x, self.y - other.y, self.z - other.z)
+    }
+}
+// Overload subtraction with float.
+impl Sub<f64> for Vec3 {
+    type Output = Vec3;
+    fn sub(self, other: f64) -> Vec3 {
+        Vec3::new(self.x - other, self.y - other, self.z - other)
     }
 }
 

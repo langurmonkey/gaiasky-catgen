@@ -126,7 +126,7 @@ fn main() {
         ap.refer(&mut args.centre_origin).add_option(
             &["--centreorigin"],
             StoreTrue,
-            "Force the centre of the octree to be at the origin of coordinates, (0 0 0).",
+            "Force the centre of the octree to be very close to the origin of coordinates, (0 0 0).",
         );
         ap.refer(&mut args.child_count).add_option(
             &["--childcount"],
