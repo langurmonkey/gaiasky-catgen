@@ -160,6 +160,7 @@
   },
   {
     "name": "geodist",
+    "additional": "$DR_BASE/geo_distances/geodistances.csv.gz",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 120000,
