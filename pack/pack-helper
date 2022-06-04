@@ -44,6 +44,7 @@ if [ "$#" -eq 7 ]; then
   LINK="https:\/\/gaia.ari.uni-heidelberg.de\/gaiasky\/files\/repository"
 else
   LINK=$8
+  LINK=$(echo $LINK | sed -e 's#/#\\/#g')
 fi
 
 if [ ! -d "$LOCATION" ] || [ ! -d "$LOCATION"/particles ]; then
