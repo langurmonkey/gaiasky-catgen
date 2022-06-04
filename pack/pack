@@ -56,6 +56,8 @@ VERS=$(jq -r ".[] | select(.name==\"$KEY\").metadata.version" $METADATA_FILE)
 LINK=$(jq -r ".[] | select(.name==\"$KEY\").metadata.link" $METADATA_FILE)
 if [[ "$LINK" == "null" ]]; then
   LINK=""
+else
+  LINK=$(echo $LINK | sed -e 's#/#\\/#g')
 fi
 
 if [[ "$NAME" == "" || "$DESC" == "" ]]; then
