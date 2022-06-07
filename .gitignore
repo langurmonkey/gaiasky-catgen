@@ -7,4 +7,5 @@ data
 .vscode
 ./catalogs-*
 /log
+/bin/*.txt
 *.vim

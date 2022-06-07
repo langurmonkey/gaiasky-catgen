@@ -204,7 +204,7 @@
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "photdist": null,
     "distcap": 100000,
-    "maxpart": 200000,
+    "maxpart": 150000,
     "postprocess": null,
     "childcount": 300,
     "parentcount": 3000,
