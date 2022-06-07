@@ -8,7 +8,6 @@ parser = argparse.ArgumentParser(description="Print the octree structure from a 
 parser.add_argument("src", help="The metadata.bin file.")
 args = parser.parse_args()
 config = vars(args)
-print(config)
 
 metadata = args.src
 
@@ -67,7 +66,9 @@ if metadata.endswith("metadata.bin"):
     with open(metadata, mode='rb') as md:
         fileContent = md.read()
         (marker, version, nnodes) = struct.unpack(">iii", fileContent[:12])
-        print("m%i, v%d, %d nodes" % (marker, version, nnodes))
+        print("File: %s" % metadata)
+        print("maker: %i, version: %d, number of nodes: %d" % (marker, version, nnodes))
+        print()
 
         first = 0
         for i in range(nnodes):

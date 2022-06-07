@@ -7,12 +7,13 @@ parser = argparse.ArgumentParser(description="Print information from generated p
 parser.add_argument("src", help="Source directory where the 'particles_*.bin files are.")
 args = parser.parse_args()
 config = vars(args)
-print(config)
 
 # assign directory
 directory = args.src
 
 
+print("Directory: %s" % directory)
+print()
 
 # iterate over files in
 # that directory
@@ -22,5 +23,5 @@ for filename in os.listdir(directory):
         with open(f, mode='rb') as file:
             fileContent = file.read()
             (marker, version, stars) = struct.unpack(">iii", fileContent[:12])
-            print("%s: %i v%d, %d stars" % (filename, marker, version, stars))
+            print("%s >  mk: %i, v: %d, #stars: %s" % (filename, marker, version, stars))
 
