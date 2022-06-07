@@ -38,28 +38,28 @@ node_size = 8 + 4*6 + 8*8 + 4*4
 
 nodes = {}
 
-def print_node(id: int):
+def print_node(id: int, parent_idx: int):
     n = nodes[id]
     pad = "    " * n.l
-    print("%sL%d: %d > %d/%d objs/rec [%d ch]" % (pad, n.l, n.id, n.n, n.nr, n.nc))
+    print("%s%d:L%d id:%d Obj(own/rec):(%d/%d) Nchld:%d" % (pad, parent_idx, n.l, n.id, n.n, n.nr, n.nc))
 
     if n.nc > 0:
         if n.c1 > 0:
-            print_node(n.c1)
+            print_node(n.c1, 0)
         if n.c2 > 0:
-            print_node(n.c2)
+            print_node(n.c2, 1)
         if n.c3 > 0:
-            print_node(n.c3)
+            print_node(n.c3, 2)
         if n.c4 > 0:
-            print_node(n.c4)
+            print_node(n.c4, 3)
         if n.c5 > 0:
-            print_node(n.c5)
+            print_node(n.c5, 4)
         if n.c6 > 0:
-            print_node(n.c6)
+            print_node(n.c6, 5)
         if n.c7 > 0:
-            print_node(n.c7)
+            print_node(n.c7, 6)
         if n.c8 > 0:
-            print_node(n.c8)
+            print_node(n.c8, 7)
 
 
 if metadata.endswith("metadata.bin"):
@@ -78,4 +78,4 @@ if metadata.endswith("metadata.bin"):
             if i == 0:
                 first = id 
 
-        print_node(first)
+        print_node(first, 0)
