@@ -163,7 +163,7 @@
     "additional": "$DR_BASE/geo_distances/geodistances.csv.gz",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
-    "maxpart": 120000,
+    "maxpart": 150000,
     "postprocess": null,
     "childcount": 500,
     "parentcount": 5000,
