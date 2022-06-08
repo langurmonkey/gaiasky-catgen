@@ -160,7 +160,7 @@ impl ColId {
             "distance_gspphot" => Some(ColId::phot_dist),
             "dist_phot" => Some(ColId::phot_dist),
             "phot_dist" => Some(ColId::phot_dist),
-            "" => None,
+            "empty" => None,
             _ => None,
         }
     }
