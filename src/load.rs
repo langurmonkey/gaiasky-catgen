@@ -369,6 +369,7 @@ pub struct Loader {
     pub rejected_plx_crit: u64,
     pub rejected_plx_neg: u64,
     pub rejected_ruwe: u64,
+    pub rejected_mag: u64,
 }
 
 #[allow(dead_code)]
@@ -444,6 +445,7 @@ impl Loader {
             rejected_plx_crit: 0,
             rejected_plx_neg: 0,
             rejected_ruwe: 0,
+            rejected_mag: 0,
         }
     }
 
@@ -673,7 +675,7 @@ impl Loader {
         // Parallax test, only if there are no geo_distances
         // and we are not using photometric distances (or phot_dist is invalid).
         if !has_geodist && !self.use_phot_dist {
-            if plx <= 0.0 {
+            if plx.is_finite() && plx <= 0.0 {
                 // If parallax is negative...
                 if self.allow_negative_plx {
                     // If allow negative, just set to default positive value (25 kpc).
@@ -685,8 +687,17 @@ impl Loader {
                     return None;
                 }
             } else if !must_load && !self.accept_parallax(appmag, plx, plx_e) {
-                self.rejected_plx += 1;
-                self.rejected_plx_crit += 1;
+                if !appmag.is_finite() {
+                    self.rejected_mag += 1;
+                } else {
+                    self.rejected_plx += 1;
+                    self.rejected_plx_crit += 1;
+                }
+                return None;
+            }
+        } else {
+            if !appmag.is_finite() {
+                self.rejected_mag += 1;
                 return None;
             }
         }
@@ -1038,15 +1049,19 @@ impl Loader {
         );
         log::info!("            - criteria: {}", self.rejected_plx_crit);
         log::info!("            - negative: {}", self.rejected_plx_neg);
+        log::info!(
+            "   - Rejected due to non-finite magnitude: {}",
+            self.rejected_mag
+        );
         log::info!("   - Rejected due to distance: {}", self.rejected_dist);
         log::info!("            - infinite: {}", self.rejected_dist_inf);
-        log::info!("            - negative: {}", self.rejected_dist_neg);
+        log::info!("            - null/negative: {}", self.rejected_dist_neg);
         log::info!(
             "   - Rejected due to geo-distance (not present): {}",
             self.rejected_geodist
         );
         log::info!(
-            "   - Rejected due to fidelity (criteria): {}",
+            "   - Rejected due to fidelity (criteria/): {}",
             self.rejected_fidelity
         );
         log::info!(

@@ -36,6 +36,8 @@ elif os.path.isfile(input):
             fileContent = f.read()
             (marker, version, stars) = struct.unpack(">iii", fileContent[:12])
             print("%s >  mk: %i, v: %d, #stars: %s" % (filename, marker, version, stars))
+            print()
+            print("id,appmag,names,x,y,z")
 
             pt = 12
             for st in range(stars):
@@ -60,7 +62,7 @@ elif os.path.isfile(input):
 
                 names = "".join(map(chr, buf))
 
-                print("id: %d - names: '%s' - mag: %f" % (id, names, appmag))
+                print("%d,%f,%s,%f,%f,%f" % (id, appmag, names, x, y, z))
         
     else:
         print("File %s does not have the form 'particles_[id].bin" % filename)
