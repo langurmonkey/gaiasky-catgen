@@ -26,6 +26,7 @@ use na::base::Vector3;
 
 use data::{LargeLongMap, Particle};
 
+/// Column content type identifier.
 #[allow(non_camel_case_types, dead_code)]
 #[derive(Copy, Debug, Clone, Eq, PartialEq, Hash)]
 pub enum ColId {
@@ -165,12 +166,12 @@ impl ColId {
 }
 
 /**
- * This holds additional columns for this loader.
- * The columns are in a large map whose keys are
- * source IDs. The column data is a vector of f64.
- * The index in the vector corresponding to each
- * column can be found in the map indices.
- **/
+  This holds additional columns for this loader.
+  The columns are in a large map whose keys are
+  source IDs. The column data is a vector of f64.
+  The index in the vector corresponding to each
+  column can be found in the map indices.
+ */
 pub struct Additional {
     pub indices: HashMap<String, usize>,
     pub values: LargeLongMap<Vec<f64>>,
@@ -184,8 +185,8 @@ impl Additional {
     }
 
     /**
-     * Loads a new batch of additional columns from the given file(s)
-     **/
+      Loads a new batch of additional columns from the given file(s)
+     */
     pub fn new(file: &&str) -> Option<Self> {
         log::info!("Loading additional columns from {}", file);
         Self::load_dir(file)
@@ -489,9 +490,9 @@ impl Loader {
         Ok(list)
     }
 
-    // Loads a single file, being it csv.gz or csv
-    // The format is hard-coded for now, with csv.gz being in eDR3 format,
-    // and csv being in hipparcos format.
+    /// Loads a single file, being it csv.gz or csv
+    /// The format is hard-coded for now, with csv.gz being in eDR3 format,
+    /// and csv being in hipparcos format.
     pub fn load_file(
         &mut self,
         file: &str,
@@ -566,7 +567,7 @@ impl Loader {
         }
     }
 
-    // Parses a line using self.indices
+    /// Parses a line using self.indices
     fn parse_line(&mut self, line: String) -> Option<Particle> {
         let tokens: Vec<&str> = self.sep.split(&line).collect();
 
@@ -967,9 +968,14 @@ impl Loader {
         }
     }
 
-    // Get side-loaded attributes, or .
-    // If it comes from additional, just take it (already zero point-corrected)
-    // Otherwise, apply zero point
+    /// Get side-loaded attributes, or a default value.
+    /// If the column with the given ID is in the additional list, return it.
+    /// Otherwise, return the given `orelse` default value.
+    ///
+    /// # Arguments
+    /// * `col_id` - The column identifier.
+    /// * `source_id` - The source ID to look up.
+    /// * `orelse` - The default value to return if the given `col_id` for the `source_id` is not found in additional.
     fn get_attribute_or_else(&self, col_id: ColId, source_id: i64, orelse: f64) -> f64 {
         match self.get_additional(col_id, source_id) {
             Some(val) => {
