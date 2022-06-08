@@ -59,6 +59,7 @@ pub enum ColId {
     geodist,
     fidelity,
     phot_dist,
+    empty,
 }
 
 impl ColId {
@@ -90,6 +91,7 @@ impl ColId {
             ColId::geodist => "geodist",
             ColId::fidelity => "fidelity_v1",
             ColId::phot_dist => "phot_dist",
+            ColId::emtpy => "empty",
             _ => "*none*",
         }
     }
@@ -160,7 +162,7 @@ impl ColId {
             "distance_gspphot" => Some(ColId::phot_dist),
             "dist_phot" => Some(ColId::phot_dist),
             "phot_dist" => Some(ColId::phot_dist),
-            "empty" => None,
+            "empty" => Some(ColId::emtpy),
             _ => None,
         }
     }
