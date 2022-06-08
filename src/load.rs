@@ -1044,35 +1044,16 @@ impl Loader {
     }
 
     pub fn report_rejected(&self) {
-        log::info!(
-            "::: TOTAL LOADED/PROCESSED: {}/{}",
-            self.total_loaded,
-            self.total_processed
-        );
-        log::info!(
-            "   - Rejected due to parallax (criteria/negative): {}",
-            self.rejected_plx
-        );
+        log::info!( "::: TOTAL LOADED/PROCESSED: {}/{}", self.total_loaded, self.total_processed);
+        log::info!( "   - Rejected due to parallax (criteria/negative): {}", self.rejected_plx);
         log::info!("            - criteria: {}", self.rejected_plx_crit);
         log::info!("            - negative: {}", self.rejected_plx_neg);
-        log::info!(
-            "   - Rejected due to non-finite magnitude: {}",
-            self.rejected_mag
-        );
+        log::info!( "   - Rejected due to non-finite magnitude: {}", self.rejected_mag);
         log::info!("   - Rejected due to distance: {}", self.rejected_dist);
         log::info!("            - infinite: {}", self.rejected_dist_inf);
         log::info!("            - null/negative: {}", self.rejected_dist_neg);
-        log::info!(
-            "   - Rejected due to geo-distance (not present): {}",
-            self.rejected_geodist
-        );
-        log::info!(
-            "   - Rejected due to fidelity (criteria/): {}",
-            self.rejected_fidelity
-        );
-        log::info!(
-            "   - Rejected due to ruwe (criteria): {}",
-            self.rejected_ruwe
-        );
+        log::info!( "   - Rejected due to geo-distance (not present): {}", self.rejected_geodist);
+        log::info!( "   - Rejected due to fidelity (criteria/): {}", self.rejected_fidelity);
+        log::info!( "   - Rejected due to ruwe (criteria): {}", self.rejected_ruwe);
     }
 }
