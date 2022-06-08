@@ -672,32 +672,28 @@ impl Loader {
             return None;
         }
 
-        // Parallax test, only if there are no geo_distances
-        // and we are not using photometric distances (or phot_dist is invalid).
-        if !has_geodist && !self.use_phot_dist {
+        if !self.accept_magnitude(appmag) {
+            // Stars without magnitude are always rejected.
+            self.rejected_mag += 1;
+            return None;
+        } else if !has_geodist && !self.use_phot_dist {
+            // Parallax test, only if there are no geo_distances
+            // and we are not using photometric distances (or phot_dist is invalid).
             if plx.is_finite() && plx <= 0.0 {
                 // If parallax is negative...
                 if self.allow_negative_plx {
                     // If allow negative, just set to default positive value (25 kpc).
                     plx = 0.04;
                 } else {
-                    // Otherwise, skip.
+                    // Otherwise, reject.
                     self.rejected_plx += 1;
                     self.rejected_plx_neg += 1;
                     return None;
                 }
             } else if !must_load && !self.accept_parallax(appmag, plx, plx_e) {
-                if !appmag.is_finite() {
-                    self.rejected_mag += 1;
-                } else {
-                    self.rejected_plx += 1;
-                    self.rejected_plx_crit += 1;
-                }
-                return None;
-            }
-        } else {
-            if !appmag.is_finite() {
-                self.rejected_mag += 1;
+                // Reject due to parallax criteria.
+                self.rejected_plx += 1;
+                self.rejected_plx_crit += 1;
                 return None;
             }
         }
@@ -907,8 +903,12 @@ impl Loader {
         })
     }
 
+    fn accept_magnitude(&self, appmag: f64) -> bool {
+        appmag.is_finite()
+    }
+
     fn accept_parallax(&self, appmag: f64, plx: f64, plx_e: f64) -> bool {
-        if !appmag.is_finite() || !plx.is_finite() {
+        if !plx.is_finite() {
             return false;
         } else if appmag < 13.1 {
             return plx >= 0.0 && plx_e < plx * self.plx_err_bright && plx_e < self.plx_err_cap;
