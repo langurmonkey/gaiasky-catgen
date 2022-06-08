@@ -1,7 +1,7 @@
 [
   {
     "name": "default",
-    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz,$DATA_LOC/data/ag-e/dr3/dr3-ag-e.csv.gz",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 120000,
