@@ -22,7 +22,7 @@
   },
   {
     "name": "small",
-    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz,$DATA_LOC/data/ag-e/dr3/dr3-ag-e.csv.gz",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 120000,
@@ -40,7 +40,7 @@
   },
   {
     "name": "medium",
-    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz,$DATA_LOC/data/ag-e/dr3/dr3-ag-e.csv.gz",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 120000,
@@ -58,7 +58,7 @@
   },
   {
     "name": "large",
-    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz,$DATA_LOC/data/ag-e/dr3/dr3-ag-e.csv.gz",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 120000,
@@ -79,7 +79,7 @@
   },
   {
     "name": "verylarge",
-    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz,$DATA_LOC/data/ag-e/dr3/dr3-ag-e.csv.gz",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 120000,
@@ -100,7 +100,7 @@
   },
   {
     "name": "extralarge",
-    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz,$DATA_LOC/data/ag-e/dr3/dr3-ag-e.csv.gz",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 120000,
@@ -121,7 +121,7 @@
   },
   {
     "name": "bright",
-    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz,$DATA_LOC/data/ag-e/dr3/dr3-ag-e.csv.gz",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 120000,
@@ -139,7 +139,7 @@
   },
   {
     "name": "ruwe",
-    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz,$DATA_LOC/data/ag-e/dr3/dr3-ag-e.csv.gz",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 120000,
@@ -160,7 +160,7 @@
   },
   {
     "name": "geodist",
-    "additional": "$DR_BASE/geo_distances/geodistances.csv.gz",
+    "additional": "$DR_BASE/geo_distances/geodistances.csv.gz,$DATA_LOC/data/ag-e/dr3/dr3-ag-e.csv.gz",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 150000,
@@ -180,7 +180,7 @@
   },
   {
     "name": "fidelity",
-    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz,$DR_BASE/fidelity/fidelities.csv.gz",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz,$DR_BASE/fidelity/fidelities.csv.gz,$DATA_LOC/data/ag-e/dr3/dr3-ag-e.csv.gz",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 200000,
     "maxpart": 200000,
@@ -201,6 +201,7 @@
   },
   {
     "name": "photdist",
+    "additional": "$DATA_LOC/data/ag-e/dr3/dr3-ag-e.csv.gz",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "photdist": null,
     "distcap": 100000,
