@@ -165,13 +165,11 @@ impl ColId {
     }
 }
 
-/**
-  This holds additional columns for this loader.
-  The columns are in a large map whose keys are
-  source IDs. The column data is a vector of f64.
-  The index in the vector corresponding to each
-  column can be found in the map indices.
- */
+///  This holds additional columns for this loader.
+///  The columns are in a large map whose keys are
+///  source IDs. The column data is a vector of f64.
+///  The index in the vector corresponding to each
+///  column can be found in the map indices.
 pub struct Additional {
     pub indices: HashMap<String, usize>,
     pub values: LargeLongMap<Vec<f64>>,
@@ -184,9 +182,7 @@ impl Additional {
         Additional { indices, values }
     }
 
-    /**
-      Loads a new batch of additional columns from the given file(s)
-     */
+    /// Loads a new batch of additional columns from the given file(s)
     pub fn new(file: &&str) -> Option<Self> {
         log::info!("Loading additional columns from {}", file);
         Self::load_dir(file)
