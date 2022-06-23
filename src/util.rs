@@ -71,13 +71,13 @@ pub fn propermotion_to_cartesian(
     let sin_delta = dec_rad.sin();
 
     /*
-     * vx = (vR cos \delta cos \alpha) - (vTA sin \alpha) - (vTD sin \delta cos \alpha)
-     * vy = (vR cos \delta sin \alpha) + (vTA cos \alpha) - (vTD sin \delta sin \alpha)
-     * vz = vR sin \delta + vTD cos \delta
+     * vx = (vR cos \delta sin \alpha) + (vTA cos \alpha) - (vTD sin \delta sin \alpha)
+     * vy = vR sin \delta + vTD cos \delta
+     * vz = (vR cos \delta cos \alpha) - (vTA sin \alpha) - (vTD sin \delta cos \alpha)
      */
-    let vx = (radvel * cos_delta * cos_alpha) - (vta * sin_alpha) - (vtd * sin_delta * cos_alpha);
-    let vy = (radvel * cos_delta * sin_alpha) + (vta * cos_alpha) - (vtd * sin_delta * sin_alpha);
-    let vz = (radvel * sin_delta) + (vtd * cos_delta);
+    let vx = (radvel * cos_delta * sin_alpha) + (vta * cos_alpha) - (vtd * sin_delta * sin_alpha);
+    let vy = (radvel * sin_delta) + (vtd * cos_delta);
+    let vz = (radvel * cos_delta * cos_alpha) - (vta * sin_alpha) - (vtd * sin_delta * cos_alpha);
 
     let to_u_per_y = constants::KM_TO_U / constants::S_TO_Y;
 
