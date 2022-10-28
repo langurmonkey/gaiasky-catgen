@@ -642,7 +642,7 @@ impl Loader {
         let mut appmag: f64 =
             self.get_attribute_or_else(ColId::gmag, source_id, parse::parse_f64(sappmag));
         if !appmag.is_finite() {
-            if sbp.is_some() && srp.is_some() {
+            if !parse::is_empty(sbp) && !parse::is_empty(srp) {
                 let bp: f64 = parse::parse_f64(sbp);
                 let rp: f64 = parse::parse_f64(srp);
                 appmag = self.gmag_from_xp(bp, rp);
@@ -653,7 +653,7 @@ impl Loader {
         let has_geodist = self.has_additional_col(ColId::geodist);
 
         // Distance: photometric distance is in catalog.
-        let phot_dist = if self.use_phot_dist && sphot_dist.is_some() {
+        let phot_dist = if self.use_phot_dist && !parse::is_empty(sphot_dist) {
             parse::parse_f64(sphot_dist)
         } else {
             -1.0
@@ -761,7 +761,7 @@ impl Loader {
 
         // Name
         let mut name_vec = Vec::new();
-        if snames.is_some() {
+        if !parse::is_empty(snames) {
             let name_tokens: Vec<&str> = snames.unwrap().split("|").collect();
             for name_token in name_tokens {
                 name_vec.push(String::from(name_token));
@@ -856,7 +856,7 @@ impl Loader {
 
         let col_idx: f64;
         let mut teff: f64 = parse::parse_f64(steff);
-        if sbp.is_some() && srp.is_some() {
+        if !parse::is_empty(sbp) && !parse::is_empty(srp) {
             let bp: f64 = parse::parse_f64(sbp);
             let rp: f64 = parse::parse_f64(srp);
             col_idx = bp - rp - ebr;
@@ -864,7 +864,7 @@ impl Loader {
             if !teff.is_finite() {
                 teff = color::xp_to_teff(col_idx);
             }
-        } else if sbv.is_some() {
+        } else if !parse::is_empty(sbv) {
             col_idx = parse::parse_f64(sbv);
             teff = color::bv_to_teff_ballesteros(col_idx);
         } else {

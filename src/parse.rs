@@ -27,3 +27,12 @@ pub fn parse_f64(val_str: Option<&&str>) -> f64 {
         None => f64::NAN,
     }
 }
+
+/// Checks whether the given optional string has an actual value inside.
+/// In essence, returns true if the option is Some and its length is not 0.
+pub fn is_empty(val_str: Option<&&str>) -> bool {
+    match val_str {
+        Some(val) => val.len() == 0,
+        None => true,
+    }
+}
