@@ -16,7 +16,7 @@ use regex::Regex;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::io;
-use std::io::{BufRead, Read};
+use std::io::BufRead;
 use std::path::Path;
 use std::{f32, f64, fs::File};
 
@@ -510,14 +510,14 @@ impl Loader {
         let f = File::open(file).expect("Error: file not found");
         let mmap = unsafe { Mmap::map(&f).expect(&format!("Error mapping file {}", file)) };
 
-        let mut reader: Box<dyn Read>;
+        let reader: Box<dyn io::BufRead>;
         if is_gz {
-            reader = Box::new(GzDecoder::new(&mmap[..]));
+            reader = Box::new(io::BufReader::new(GzDecoder::new(&mmap[..])));
         } else {
             reader = Box::new(&mmap[..]);
         }
 
-        for line in io::BufReader::new(reader.as_mut()).lines() {
+        for line in reader.lines() {
             // Skip header
             if total > 0 {
                 match self.parse_line(line.expect("Error reading line")) {
