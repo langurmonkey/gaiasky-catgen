@@ -1,27 +1,24 @@
 {
-  "key": "<KEY>",
-  "name": "<NAME>",
-  "version": <VERSION>,
-  "type": "catalog-lod",
-  "mingsversion": 30200,
-  "description": "<DESCRIPTION>",
-  "releasenotes": "<NOTES>",
-  "link": "<LINK>",
-  "size": <SIZE_BYTES>,
-  "nobjects": <NOBJECTS>,
-  "files": [
-    "catalog-<KEY>.json",
-    "catalog/<KEY>/metadata.bin",
-    "catalog/<KEY>/particles/"
-  ],
-  "data": [
+    "key": "<KEY>",
+    "name": "<NAME>",
+    "version": <VERSION>,
+    "type": "<TYPE>",
+    "mingsversion": 30301,
+    "description": "<DESCRIPTION>",
+    "releasenotes": "<NOTES>",
+    "link": "<LINK>",
+    "size": <SIZE_BYTES>,
+    "nobjects": <NOBJECTS>,
+    "check": "$data/catalog-<KEY>/dataset.json",
+    "files": [ "$data/catalog-<KEY>" ],
+    "data": [
     {
-      "loader": "gaiasky.data.group.OctreeGroupLoader",
-      "files": [
-        "data/catalog/<KEY>/particles/",
-        "data/catalog/<KEY>/metadata.bin"
-      ],
-      "epoch": <EPOCH>
+        "loader": "gaiasky.data.OctreeLoader",
+        "files": [
+            "$data/catalog-<KEY>/catalog/<KEY>/particles/",
+            "$data/catalog-<KEY>/catalog/<KEY>/metadata.bin"
+        ],
+        "epoch": <EPOCH>
     }
-  ]
+    ]
 }

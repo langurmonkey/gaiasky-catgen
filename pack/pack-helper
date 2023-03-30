@@ -6,8 +6,9 @@ function usage() {
 echo "Usage: $me LOCATION KEY NAME DESCRIPTION RELEASENOTES EPOCH VERSION [LINK]"
 echo
 echo "	LOCATION      Location in the file system. Must contain log, metadata.dat, particles."
-echo "	KEY           The dataset key, which is also its file system name (dr2-small)."
+echo "	KEY           The dataset key in the metadata files (gaia-dr3-small)."
 echo "	NAME          The dataset name (DR2 small)."
+echo "	TYPE          The dataset type ('catalog-lod', 'catalog-gaia', etc.)."
 echo "	DESCRIPTION   The description of the dataset."
 echo "	RELEASENOTES  The release notes."
 echo "	EPOCH         The reference epoch."
@@ -33,17 +34,18 @@ fi
 LOCATION=$1
 KEY=$2
 NAME=$3
-DESCRIPTION=$4
-NOTES=$5
-EPOCH=$6
-VERSION=$7
+TYPE=$4
+DESCRIPTION=$5
+NOTES=$6
+EPOCH=$7
+VERSION=$8
 
 # Link is optional
-if [ "$#" -eq 7 ]; then
+if [ "$#" -eq 8 ]; then
   # Default link to the repository.
   LINK="https:\/\/gaia.ari.uni-heidelberg.de\/gaiasky\/files\/repository"
 else
-  LINK=$8
+  LINK=$9
   LINK=$(echo $LINK | sed -e 's#/#\\/#g')
 fi
 
@@ -58,12 +60,14 @@ case "$KEY" in
 		;;
 esac
 
-CATALOG_FOLDER=$LOCATION/catalog
-CATALOG_FILE=$LOCATION/dataset.json
-CATALOG=$CATALOG_FOLDER/$KEY
+CATALOG_BASE=$LOCATION/catalog-$KEY
+CATALOG_FOLDER=$CATALOG_BASE/catalog
+CATALOG_FILE=$CATALOG_BASE/dataset.json
+CATALOG_DATA=$CATALOG_FOLDER/$KEY
 
 echo "CATALOG_FOLDER: $CATALOG_FOLDER"
 echo "CATALOG_FILE: $CATALOG_FILE"
+echo "CATALOG_DATA: $CATALOG_DATA"
 
 # PARSE DATA AND CHECK VALUES
 
@@ -94,13 +98,14 @@ echo "VERSION:      $VERSION"
 echo "LINK:         $LINK"
 
 # CREATE AND MOVE CATALOG
-mkdir -p $CATALOG
-mv $LOCATION/log $LOCATION/metadata.bin $LOCATION/particles $CATALOG
+mkdir -p $CATALOG_DATA
+mv $LOCATION/log $LOCATION/metadata.bin $LOCATION/particles $CATALOG_DATA
 
 # PREPARE JSON DESCRIPTOR FILE
 cp $SCRIPT_DIR/catalog-template.json $CATALOG_FILE
 sed -i 's/<NAME>/'"$NAME"'/g' $CATALOG_FILE
 sed -i 's/<KEY>/'"$KEY"'/g' $CATALOG_FILE
+sed -i 's/<TYPE>/'"$TYPE"'/g' $CATALOG_FILE
 sed -i 's/<VERSION>/'"$VERSION"'/g' $CATALOG_FILE
 sed -i 's/<EPOCH>/'"$EPOCH"'/g' $CATALOG_FILE
 sed -i 's/<DESCRIPTION>/'"$DESCRIPTION"'/g' $CATALOG_FILE
@@ -112,7 +117,7 @@ sed -i 's/<NOBJECTS>/'"$NOBJECTS"'/g' $CATALOG_FILE
 # TAR
 TAR_FILE=catalog-$KEY.tar.gz
 cd $LOCATION
-tar -czvf $TAR_FILE catalog catalog-$KEY.json
+tar -czvf $TAR_FILE catalog-$KEY
 
 set -- $(md5sum "$TAR_FILE") && echo $1 > md5
 set -- $(sha256sum "$TAR_FILE") && echo $1 > sha256

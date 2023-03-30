@@ -8,7 +8,7 @@ Here is how to use it:
 ```bash
 Usage: pack KEY DIR
 
-	KEY     The catalog key, as a single word (i.e. 'default').
+	KEY     The catalog simple key, as a single word (i.e. 'default').
 	DIR     Directory containing the generated catalog.
 
 Example:

@@ -34,6 +34,9 @@ CATALOG_KEY=$(jq -r ".[] | select(.name==\"$KEY\").metadata.key" $METADATA_FILE)
 # Name
 NAME=$(jq -r ".[] | select(.name==\"$KEY\").metadata.name" $METADATA_FILE)
 
+# Type
+TYPE=$(jq -r ".[] | select(.name==\"$KEY\").metadata.type" $METADATA_FILE)
+
 # Description
 DESC=$(jq -r ".[] | select(.name==\"$KEY\").metadata.description" $METADATA_FILE)
 # escape forward slashes and line breaks
@@ -64,5 +67,5 @@ if [[ "$NAME" == "" || "$DESC" == "" ]]; then
 fi
 
 # Run
-CMD="$SCRIPT_DIR/pack-helper $DIR $CATALOG_KEY '$NAME' '$DESC' '$RN' $EPOCH $VERS $LINK"
+CMD="$SCRIPT_DIR/pack-helper $DIR $CATALOG_KEY '$NAME' '$TYPE' '$DESC' '$RN' $EPOCH $VERS $LINK"
 eval $CMD
