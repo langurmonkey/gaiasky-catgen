@@ -15,7 +15,7 @@
       "key": "gaia-dr3-default",
       "name": "Gaia DR3 default",
       "type" : "catalog-lod",
-      "description": "Star catalog based on Gaia DR3, with a good balance between good distances and number of stars. Contains all stars with up to 20%/1.5% bright/faint parallax relative error.",
+      "description": "Star catalog based on Gaia DR3, with a good balance between good distances and number of stars. Contains all stars with up to 20%/1.5% bright/faint parallax relative error, and all Hipparcos stars.",
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 1
@@ -34,7 +34,7 @@
       "key": "gaia-dr3-small",
       "name": "Gaia DR3 small",
       "type" : "catalog-lod",
-      "description": "Star catalog based on Gaia DR3 with a small number of stars. Contains all stars with up to 10%/0.5% bright/faint parallax relative error.",
+      "description": "Star catalog based on Gaia DR3 with a small number of stars. Contains all stars with up to 10%/0.5% bright/faint parallax relative error, and all Hipparcos stars.",
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 1
@@ -53,7 +53,7 @@
       "key": "gaia-dr3-medium",
       "name": "Gaia DR3 medium",
       "type" : "catalog-lod",
-      "description": "Star catalog based on Gaia DR3 with a moderate number of stars. Contains all stars with up to 30%/5% bright/faint parallax relative error.",
+      "description": "Star catalog based on Gaia DR3 with a moderate number of stars. Contains all stars with up to 30%/5% bright/faint parallax relative error, and all Hipparcos stars.",
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 1
@@ -75,7 +75,7 @@
       "key": "gaia-dr3-large",
       "name": "Gaia DR3 large",
       "type" : "catalog-lod",
-      "description": "Star catalog based on Gaia DR3 with a large number of stars. Contains all stars with up to 50%/12.5% bright/faint parallax relative error.",
+      "description": "Star catalog based on Gaia DR3 with a large number of stars. Contains all stars with up to 50%/12.5% bright/faint parallax relative error, and all Hipparcos stars.",
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 1
@@ -97,7 +97,7 @@
       "key": "gaia-dr3-verylarge",
       "name": "Gaia DR3 very large",
       "type" : "catalog-lod",
-      "description": "Star catalog based on Gaia DR3 with a very large number of stars. Contains all stars with up to 50% parallax relative error.",
+      "description": "Star catalog based on Gaia DR3 with a very large number of stars. Contains all stars with up to 50% parallax relative error, and all Hipparcos stars.",
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 1
@@ -119,7 +119,7 @@
       "key": "gaia-dr3-extralarge",
       "name": "Gaia DR3 extra large",
       "type" : "catalog-lod",
-      "description": "Star catalog based on Gaia DR3 with an extremely large number of stars. Contains all stars with up to 95% parallax relative error.",
+      "description": "Star catalog based on Gaia DR3 with an extremely large number of stars. Contains all stars with up to 95% parallax relative error, and all Hipparcos stars.",
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 1
@@ -138,7 +138,7 @@
       "key": "gaia-dr3-bright",
       "name": "Gaia DR3 bright",
       "type" : "catalog-lod",
-      "description": "Star catalog based on Gaia DR3 with the brightest stars in the catalog. Contains all stars with up to 90%/1% bright/faint parallax relative error.",
+      "description": "Star catalog based on Gaia DR3 with the brightest stars in the catalog. Contains all stars with up to 90%/1% bright/faint parallax relative error, and all Hipparcos stars.",
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 1
@@ -159,7 +159,7 @@
       "key": "gaia-dr3-ruwe",
       "name": "Gaia DR3 RUWE",
       "type" : "catalog-lod",
-      "description": "Star catalog based on Gaia DR3. Contains the stars for which the RUWE (re-normalized unit weight error) is <= 1.4.",
+      "description": "Star catalog based on Gaia DR3. Contains the stars for which the RUWE (re-normalized unit weight error) is <= 1.4, and all Hipparcos stars.",
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 1,
@@ -180,7 +180,7 @@
       "key": "gaia-dr3-geodist",
       "name": "Gaia DR3 bayesian distances",
       "type" : "catalog-lod",
-      "description": "Star catalog based on Gaia DR3. Contains all stars with bayesian distances as determined by Bailer-Jones et. al.",
+      "description": "Star catalog based on Gaia DR3. Contains all stars with bayesian distances as determined by Bailer-Jones et. al., and all Hipparcos stars",
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains all DR3 and all Hipparcos stars with 3D positions.\\n- The cross-match table used is in the archive.\\n- Distances are from Bayler-Jones et.al.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 1,
@@ -204,7 +204,7 @@
       "name": "Gaia DR3 fidelity",
       "type" : "catalog-lod",
       "type" : "catalog-lod",
-      "description": "Star catalog based on Gaia DR3. Contains all stars for which the fidelity value is > 0.5.",
+      "description": "Star catalog based on Gaia DR3. Contains all stars for which the fidelity value is > 0.5, and all Hipparcos stars.",
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 1
@@ -226,7 +226,7 @@
       "name": "Gaia DR3 photometric distances",
       "type" : "catalog-lod",
       "type" : "catalog-lod",
-      "description": "Star catalog based on Gaia DR3. Contains all stars with photometric distances from GSP-Phot Aeneas best library using BP/RP spectra.",
+      "description": "Star catalog based on Gaia DR3. Contains all stars with photometric distances from GSP-Phot Aeneas best library using BP/RP spectra, and all Hipparcos stars.",
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are from the distance_gspphot column in the archive.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 1
@@ -245,7 +245,7 @@
       "key": "gaia-dr3-tiny",
       "name": "Gaia DR3 tiny",
       "type" : "catalog-gaia",
-      "description": "Star catalog based on Gaia DR3 with a tiny number of stars. Contains all stars with up to 1%/0.01% bright/faint parallax relative error.",
+      "description": "Star catalog based on Gaia DR3 with a tiny number of stars. Contains all stars with up to 1%/0.01% bright/faint parallax relative error, and all Hipparcos stars.",
       "releasenotes": "- Initial version of this dataset.",
       "epoch": 2016.0,
       "version": 1
@@ -256,15 +256,15 @@
     "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz,$DATA_LOC/data/ag-e/dr3/dr3-ag-e.csv.gz",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
-    "maxpart": 1800000,
-    "plxerrbright": 0.001,
-    "plxerrfaint": 0.00005,
+    "maxpart": 2200000,
+    "plxerrbright": 0.008,
+    "plxerrfaint": 0.0001,
     "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
     "metadata": {
       "key": "gaia-dr3-weeny",
       "name": "Gaia DR3 weeny",
       "type" : "catalog-gaia",
-      "description": "Star catalog based on Gaia DR3 with only the very best stars in terms of parallax relative error. Contains all stars with up to 0.1%/0.005% bright/faint parallax relative error.",
+      "description": "Star catalog based on Gaia DR3 with only the very best stars in terms of parallax relative error. Contains all stars with up to 0.8%/0.01% bright/faint parallax relative error, and all Hipparcos stars.",
       "releasenotes": "- Initial version of this dataset.",
       "epoch": 2016.0,
       "version": 1
