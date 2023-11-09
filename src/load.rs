@@ -781,15 +781,16 @@ impl Loader {
         // Proper motions
         let mualphastar: f64 = parse::parse_f64(spmra);
         let mudelta: f64 = parse::parse_f64(spmdec);
-        let mut radvel: f64 = parse::parse_f64(srv);
-        if radvel.is_nan() {
-            radvel = 0.0;
+        let radvel: f64 = parse::parse_f64(srv);
+        let mut rv_val: f64 = radvel;
+        if rv_val.is_nan() {
+            rv_val = 0.0;
         }
 
         let pm = util::propermotion_to_cartesian(
             mualphastar,
             mudelta,
-            radvel,
+            rv_val,
             ra.to_radians(),
             dec.to_radians(),
             dist_pc,
