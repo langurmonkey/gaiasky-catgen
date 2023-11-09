@@ -203,7 +203,6 @@
       "key": "gaia-dr3-fidelity",
       "name": "Gaia DR3 fidelity",
       "type" : "catalog-lod",
-      "type" : "catalog-lod",
       "description": "Star catalog based on Gaia DR3. Contains all stars for which the fidelity value is > 0.5, and all Hipparcos stars.",
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
@@ -224,7 +223,6 @@
     "metadata": {
       "key": "gaia-dr3-photdist",
       "name": "Gaia DR3 photometric distances",
-      "type" : "catalog-lod",
       "type" : "catalog-lod",
       "description": "Star catalog based on Gaia DR3. Contains all stars with photometric distances from GSP-Phot Aeneas best library using BP/RP spectra, and all Hipparcos stars.",
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are from the distance_gspphot column in the archive.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
