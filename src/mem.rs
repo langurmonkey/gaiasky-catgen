@@ -1,10 +1,13 @@
-use crate::procinfo::pid;
+use procfs::process::Process;
 
 pub fn log_mem() {
-    let mem = pid::statm_self().expect("Error getting memory stats");
+    let me = Process::myself().unwrap();
+    let mem = me.stat().unwrap();
+    let page_size = procfs::page_size();
+
     log::info!(
-        "MEM: total virt = {:.3} MB, resident (non-swapped) = {:.3} MB",
-        mem.size as f64 / 1000.0,
-        mem.resident as f64 / 1000.0
+        "MEM: total pages = {:.3}, resident (non-swapped) = {:.3} MB",
+        mem.rss,
+        mem.rss as f64 * page_size as f64 / 1000.0
     );
 }

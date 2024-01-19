@@ -7,17 +7,17 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-flate2 = "1.0.19"
-glob = "0.3.0"
+flate2 = "*"
+glob = "*"
 nalgebra = "*"
 argparse = "*"
 memmap ="*"
 fast-float = "*"
 log = "*"
 log4rs = "*"
-regex = "1"
-procinfo = "0.4"
-base_custom = "^0.2"
+regex = "*"
+procfs = "*"
+base_custom = "*"
 
 [profile.release]
 lto = true
