@@ -420,6 +420,8 @@ fn main() {
                         star.col = gaia_star.col;
                         // Size
                         star.size = size;
+                        // Teff
+                        star.teff = gaia_star.teff;
 
                         main_list.push(star);
                     } else {
