@@ -265,7 +265,7 @@
       "description": "Star catalog based on Gaia DR3 with only the very best stars in terms of parallax relative error. Contains all stars with up to 0.8%/0.01% bright/faint parallax relative error, and all Hipparcos stars.",
       "releasenotes": "- Initial version of this dataset.",
       "epoch": 2016.0,
-      "version": 1
+      "version": 3
     }
   },
   {
