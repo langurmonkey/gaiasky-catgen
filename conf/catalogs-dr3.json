@@ -231,11 +231,30 @@
     }
   },
   {
+    "name": "extrasmall",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz,$DATA_LOC/data/ag-e/dr3/dr3-ag-e.csv.gz",
+    "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+    "distcap": 100000,
+    "maxpart": 5000000,
+    "plxerrbright": 0.02,
+    "plxerrfaint": 0.00015,
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
+    "metadata": {
+      "key": "gaia-dr3-extrasmall",
+      "name": "Gaia DR3 extra small",
+      "type" : "catalog-gaia",
+      "description": "Star catalog based on Gaia DR3 with a tiny number of stars. Contains all stars with up to 2%/0.015% bright/faint parallax relative error, and all Hipparcos stars.",
+      "releasenotes": "- Initial version of this dataset.",
+      "epoch": 2016.0,
+      "version": 1
+    }
+  },
+  {
     "name": "tiny",
     "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz,$DATA_LOC/data/ag-e/dr3/dr3-ag-e.csv.gz",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
-    "maxpart": 1500000,
+    "maxpart": 2200000,
     "plxerrbright": 0.01,
     "plxerrfaint": 0.0001,
     "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
