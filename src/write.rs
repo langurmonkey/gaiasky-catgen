@@ -124,8 +124,8 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
 
         // Version marker
         f.write_all(&(-1_i32).to_be_bytes()).expect("Error writing");
-        // Version = 2
-        f.write_all(&(2_i32).to_be_bytes()).expect("Error writing");
+        // Version = 3
+        f.write_all(&(3_i32).to_be_bytes()).expect("Error writing");
 
         // Size
         f.write_all(&(node.objects.borrow().len() as i32).to_be_bytes())
@@ -160,9 +160,13 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
                 f.write_all(&(sb.col).to_be_bytes()).expect("Error writing");
                 f.write_all(&(sb.size).to_be_bytes())
                     .expect("Error writing");
+                // In version 3 we have t_eff.
+                f.write_all(&(sb.teff).to_be_bytes())
+                    .expect("Error writing");
 
+                // Version 3 phases out the HIP number, we reconstruct it from the names.
                 // 32-bit int
-                f.write_all(&(sb.hip).to_be_bytes()).expect("Error writing");
+                //f.write_all(&(sb.hip).to_be_bytes()).expect("Error writing");
 
                 // 64-bit int
                 f.write_all(&(sb.id).to_be_bytes()).expect("Error writing");
