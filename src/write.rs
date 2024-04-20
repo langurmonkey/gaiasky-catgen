@@ -221,10 +221,8 @@ pub fn write_particles_mmap(octree: &Octree, list: Vec<Particle>, output_dir: &s
             if list.len() > *star_idx {
                 // 3 * f64
                 size += 8 * 3;
-                // 10 * f32
-                size += 4 * 10;
-                // 1 * i32 hip
-                size += 4 * 1;
+                // 11 * f32
+                size += 4 * 11;
                 // 1 * i64 source_id
                 size += 8 * 1;
                 // 1 * i32 name_len
@@ -280,9 +278,9 @@ pub fn write_particles_mmap(octree: &Octree, list: Vec<Particle>, output_dir: &s
             .expect("Error writing");
         i += 4;
 
-        // Version = 2
+        // Version = 3
         (&mut mmap[i..i + 4])
-            .write_all(&(2_i32).to_be_bytes())
+            .write_all(&(3_i32).to_be_bytes())
             .expect("Error writing");
         i += 4;
 
@@ -354,10 +352,8 @@ pub fn write_particles_mmap(octree: &Octree, list: Vec<Particle>, output_dir: &s
                     .write_all(&(sb.size).to_be_bytes())
                     .expect("Error writing");
                 i += 4;
-
-                // 32-bit int
                 (&mut mmap[i..i + 4])
-                    .write_all(&(sb.hip).to_be_bytes())
+                    .write_all(&(sb.teff).to_be_bytes())
                     .expect("Error writing");
                 i += 4;
 
