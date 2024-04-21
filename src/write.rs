@@ -93,10 +93,7 @@ pub fn write_metadata(octree: &Octree, output_dir: &str) {
 }
 
 fn convert(bits: &[u8]) -> u8 {
-    bits.iter()
-        .fold(0, |result, &bit| {
-            (result << 1) ^ bit
-        })
+    bits.iter().fold(0, |result, &bit| (result << 1) ^ bit)
 }
 
 #[allow(dead_code)]
@@ -154,12 +151,17 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
                 f.write_all(&(sb.pmx).to_be_bytes()).expect("Error writing");
                 f.write_all(&(sb.pmy).to_be_bytes()).expect("Error writing");
                 f.write_all(&(sb.pmz).to_be_bytes()).expect("Error writing");
-                f.write_all(&(sb.mualpha).to_be_bytes()).expect("Error writing");
-                f.write_all(&(sb.mudelta).to_be_bytes()).expect("Error writing");
-                f.write_all(&(sb.appmag).to_be_bytes()).expect("Error writing");
-                f.write_all(&(sb.absmag).to_be_bytes()).expect("Error writing");
+                f.write_all(&(sb.mualpha).to_be_bytes())
+                    .expect("Error writing");
+                f.write_all(&(sb.mudelta).to_be_bytes())
+                    .expect("Error writing");
+                f.write_all(&(sb.appmag).to_be_bytes())
+                    .expect("Error writing");
+                f.write_all(&(sb.absmag).to_be_bytes())
+                    .expect("Error writing");
                 f.write_all(&(sb.col).to_be_bytes()).expect("Error writing");
-                f.write_all(&(sb.size).to_be_bytes()).expect("Error writing");
+                f.write_all(&(sb.size).to_be_bytes())
+                    .expect("Error writing");
 
                 // Bit mask with additional floats (1 byte)
                 // 0 - radvel
@@ -172,15 +174,18 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
                     bits[1] = 1;
                 }
 
-                f.write_all(&(convert(&bits)).to_be_bytes()).expect("Error writing");
+                f.write_all(&(convert(&bits)).to_be_bytes())
+                    .expect("Error writing");
 
                 if bits[0] == 1_u8 {
                     // Radvel.
-                    f.write_all(&(sb.radvel).to_be_bytes()).expect("Error writing");
+                    f.write_all(&(sb.radvel).to_be_bytes())
+                        .expect("Error writing");
                 }
                 if bits[1] == 1_u8 {
                     // In version 3 we have t_eff.
-                    f.write_all(&(sb.teff).to_be_bytes()).expect("Error writing");
+                    f.write_all(&(sb.teff).to_be_bytes())
+                        .expect("Error writing");
                 }
 
                 // 64-bit int
