@@ -3,7 +3,7 @@
     "name": "<NAME>",
     "version": <VERSION>,
     "type": "<TYPE>",
-    "mingsversion": 3050000,
+    "mingsversion": 3060100,
     "description": "<DESCRIPTION>",
     "releasenotes": "<NOTES>",
     "link": "<LINK>",
