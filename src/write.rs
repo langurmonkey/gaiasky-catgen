@@ -92,6 +92,13 @@ pub fn write_metadata(octree: &Octree, output_dir: &str) {
     )
 }
 
+fn convert(bits: &[u8]) -> u8 {
+    bits.iter()
+        .fold(0, |result, &bit| {
+            (result << 1) ^ bit
+        })
+}
+
 #[allow(dead_code)]
 pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
     let mut file_num = 0;
@@ -122,12 +129,12 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
             .open(file_path)
             .expect("Error: file not found");
 
-        // Version marker
+        // Version marker (32-bit integer)
         f.write_all(&(-1_i32).to_be_bytes()).expect("Error writing");
-        // Version = 3
+        // Version = 3 (32-bit integer)
         f.write_all(&(3_i32).to_be_bytes()).expect("Error writing");
 
-        // Size
+        // Size (32-bit integer)
         f.write_all(&(node.objects.borrow().len() as i32).to_be_bytes())
             .expect("Error writing");
 
@@ -147,26 +154,34 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
                 f.write_all(&(sb.pmx).to_be_bytes()).expect("Error writing");
                 f.write_all(&(sb.pmy).to_be_bytes()).expect("Error writing");
                 f.write_all(&(sb.pmz).to_be_bytes()).expect("Error writing");
-                f.write_all(&(sb.mualpha).to_be_bytes())
-                    .expect("Error writing");
-                f.write_all(&(sb.mudelta).to_be_bytes())
-                    .expect("Error writing");
-                f.write_all(&(sb.radvel).to_be_bytes())
-                    .expect("Error writing");
-                f.write_all(&(sb.appmag).to_be_bytes())
-                    .expect("Error writing");
-                f.write_all(&(sb.absmag).to_be_bytes())
-                    .expect("Error writing");
+                f.write_all(&(sb.mualpha).to_be_bytes()).expect("Error writing");
+                f.write_all(&(sb.mudelta).to_be_bytes()).expect("Error writing");
+                f.write_all(&(sb.appmag).to_be_bytes()).expect("Error writing");
+                f.write_all(&(sb.absmag).to_be_bytes()).expect("Error writing");
                 f.write_all(&(sb.col).to_be_bytes()).expect("Error writing");
-                f.write_all(&(sb.size).to_be_bytes())
-                    .expect("Error writing");
-                // In version 3 we have t_eff.
-                f.write_all(&(sb.teff).to_be_bytes())
-                    .expect("Error writing");
+                f.write_all(&(sb.size).to_be_bytes()).expect("Error writing");
 
-                // Version 3 phases out the HIP number, we reconstruct it from the names.
-                // 32-bit int
-                //f.write_all(&(sb.hip).to_be_bytes()).expect("Error writing");
+                // Bit mask with additional floats (1 byte)
+                // 0 - radvel
+                // 1 - teff
+                let mut bits: Vec<u8> = vec![0, 0, 0, 0, 0, 0, 0, 0];
+                if sb.radvel.is_finite() {
+                    bits[0] = 1;
+                }
+                if sb.teff.is_finite() {
+                    bits[1] = 1;
+                }
+
+                f.write_all(&(convert(&bits)).to_be_bytes()).expect("Error writing");
+
+                if bits[0] == 1_u8 {
+                    // Radvel.
+                    f.write_all(&(sb.radvel).to_be_bytes()).expect("Error writing");
+                }
+                if bits[1] == 1_u8 {
+                    // In version 3 we have t_eff.
+                    f.write_all(&(sb.teff).to_be_bytes()).expect("Error writing");
+                }
 
                 // 64-bit int
                 f.write_all(&(sb.id).to_be_bytes()).expect("Error writing");
@@ -180,7 +195,7 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
                 names_concat.pop();
 
                 // Names length
-                f.write_all(&(names_concat.len() as i32).to_be_bytes())
+                f.write_all(&(names_concat.len() as i16).to_be_bytes())
                     .expect("Error writing");
                 // Characters
                 let mut buf: [u16; 1] = [0; 1];
@@ -215,22 +230,36 @@ pub fn write_particles_mmap(octree: &Octree, list: Vec<Particle>, output_dir: &s
 
         // COMPUTE FILE SIZE
         // header 3 * i32
-        let mut size = 32 * 3;
+        let mut size = 4 * 3;
         // particles
         for star_idx in node.objects.borrow().iter() {
             if list.len() > *star_idx {
+                let sb = list
+                    .get(*star_idx)
+                    .expect(&format!("Star not found: {}", *star_idx));
+
                 // 3 * f64
                 size += 8 * 3;
-                // 11 * f32
-                size += 4 * 11;
+                // 9 * f32
+                size += 4 * 9;
+                // byte mask (1 byte)
+                size += 1;
+
+                let mut num_float_extra = 0;
+                if sb.radvel.is_finite() {
+                    num_float_extra += 1;
+                }
+                if sb.teff.is_finite() {
+                    num_float_extra += 1;
+                }
+                // Extra floats * f32
+                size += 4 * num_float_extra;
+
                 // 1 * i64 source_id
                 size += 8 * 1;
                 // 1 * i32 name_len
                 size += 4 * 1;
 
-                let sb = list
-                    .get(*star_idx)
-                    .expect(&format!("Star not found: {}", *star_idx));
                 let mut name_size = 0;
                 for name in sb.names.iter() {
                     name_size += name.len() + 1;
@@ -333,10 +362,6 @@ pub fn write_particles_mmap(octree: &Octree, list: Vec<Particle>, output_dir: &s
                     .expect("Error writing");
                 i += 4;
                 (&mut mmap[i..i + 4])
-                    .write_all(&(sb.radvel).to_be_bytes())
-                    .expect("Error writing");
-                i += 4;
-                (&mut mmap[i..i + 4])
                     .write_all(&(sb.appmag).to_be_bytes())
                     .expect("Error writing");
                 i += 4;
@@ -352,10 +377,37 @@ pub fn write_particles_mmap(octree: &Octree, list: Vec<Particle>, output_dir: &s
                     .write_all(&(sb.size).to_be_bytes())
                     .expect("Error writing");
                 i += 4;
-                (&mut mmap[i..i + 4])
-                    .write_all(&(sb.teff).to_be_bytes())
+
+                // Bit mask with additional floats (1 byte)
+                // 0 - radvel
+                // 1 - teff
+                let mut bits: Vec<u8> = vec![0, 0, 0, 0, 0, 0, 0, 0];
+                if sb.radvel.is_finite() {
+                    bits[0] = 1;
+                }
+                if sb.teff.is_finite() {
+                    bits[1] = 1;
+                }
+
+                (&mut mmap[i..i + 1])
+                    .write_all(&(convert(&bits)).to_be_bytes())
                     .expect("Error writing");
-                i += 4;
+                i += 1;
+
+                if bits[0] == 1_u8 {
+                    // Radvel.
+                    (&mut mmap[i..i + 4])
+                        .write_all(&(sb.radvel).to_be_bytes())
+                        .expect("Error writing");
+                    i += 4;
+                }
+                if bits[1] == 1_u8 {
+                    // In version 3 we have t_eff.
+                    (&mut mmap[i..i + 4])
+                        .write_all(&(sb.teff).to_be_bytes())
+                        .expect("Error writing");
+                    i += 4;
+                }
 
                 // 64-bit int
                 (&mut mmap[i..i + 8])
