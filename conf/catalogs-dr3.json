@@ -19,7 +19,7 @@
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 3,
-      "mingsversion": 3060100,
+      "mingsversion": 3060100
     }
   },
   {
@@ -39,7 +39,7 @@
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 3,
-      "mingsversion": 3060100,
+      "mingsversion": 3060100
     }
   },
   {
@@ -59,7 +59,7 @@
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 3,
-      "mingsversion": 3060100,
+      "mingsversion": 3060100
     }
   },
   {
@@ -82,7 +82,7 @@
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 3,
-      "mingsversion": 3060100,
+      "mingsversion": 3060100
     }
   },
   {
@@ -105,7 +105,7 @@
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 3,
-      "mingsversion": 3060100,
+      "mingsversion": 3060100
     }
   },
   {
@@ -128,7 +128,7 @@
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 3,
-      "mingsversion": 3060100,
+      "mingsversion": 3060100
     }
   },
   {
@@ -148,7 +148,7 @@
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Parallaxes are using the corrected terms.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 3,
-      "mingsversion": 3060100,
+      "mingsversion": 3060100
     }
   },
   {
@@ -216,7 +216,7 @@
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are derived from parallaxes (d=1000/plx).\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 3,
-      "mingsversion": 3060100,
+      "mingsversion": 3060100
     }
   },
   {
@@ -238,7 +238,7 @@
       "releasenotes": "- Fix Cartesian proper motion axis orientations.\\n- Contains a selection of DR3 and all Hipparcos stars.\\n- The cross-match table used is in the archive.\\n- Distances are from the distance_gspphot column in the archive.\\n- Extinction and reddening corrections are applied to magnitudes and colors.",
       "epoch": 2016.0,
       "version": 3,
-      "mingsversion": 3060100,
+      "mingsversion": 3060100
     }
   },
   {
@@ -258,7 +258,7 @@
       "releasenotes": "- Initial version of this dataset.",
       "epoch": 2016.0,
       "version": 3,
-      "mingsversion": 3060100,
+      "mingsversion": 3060100
     }
   },
   {
@@ -297,7 +297,7 @@
       "releasenotes": "- Initial version of this dataset.",
       "epoch": 2016.0,
       "version": 1,
-      "mingsversion": 3060100,
+      "mingsversion": 3060100
     }
   }
 ]
