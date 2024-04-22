@@ -92,10 +92,6 @@ pub fn write_metadata(octree: &Octree, output_dir: &str) {
     )
 }
 
-fn convert(bits: &[u8]) -> u8 {
-    bits.iter().fold(0, |result, &bit| (result << 1) ^ bit)
-}
-
 #[allow(dead_code)]
 pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
     let mut file_num = 0;
