@@ -6,10 +6,12 @@ const B: f64 = 1.7;
 const C: f64 = 0.62;
 const T0: f64 = 4600.0;
 
+// Ballesteros 2012 (EPL 97, 34008) conversion between T_eff and B-V.
 pub fn bv_to_teff_ballesteros(bv: f64) -> f64 {
     T0 * (1.0 / (A * bv + B) + 1.0 / (A * bv + C))
 }
 
+// XP to T_eff conversion by Jordi et al.
 pub fn xp_to_teff(xp: f64) -> f64 {
     if xp <= 1.5 {
         f64::powf(
@@ -21,6 +23,9 @@ pub fn xp_to_teff(xp: f64) -> f64 {
     }
 }
 
+// Converts effective temperature in Kelvin (1000-40000) to RGB.
+//
+// See https://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/ -- T_eff to RGB.
 pub fn teff_to_rgb(teff: f64) -> (f32, f32, f32) {
     let mut r: f64;
     let mut g: f64;
