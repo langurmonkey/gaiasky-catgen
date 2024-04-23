@@ -856,24 +856,35 @@ impl Loader {
             _ => 0.0,
         };
 
+        // T_eff and color.
+        // If color is present and is XP or B-V, convert to T_eff and then to RGB.
+        // If not, use T_eff to determine color.
         let col_idx: f64;
         let mut teff: f64 = parse::parse_f64(steff);
+        let teff_color;
         if !parse::is_empty(sbp) && !parse::is_empty(srp) {
+            // XP -> T_eff
             let bp: f64 = parse::parse_f64(sbp);
             let rp: f64 = parse::parse_f64(srp);
             col_idx = bp - rp - ebr;
-
-            if !teff.is_finite() {
-                teff = color::xp_to_teff(col_idx);
-            }
+            teff_color = color::xp_to_teff(col_idx);
         } else if !parse::is_empty(sbv) {
+            // B-V -> T_eff
             col_idx = parse::parse_f64(sbv);
-            teff = color::bv_to_teff_ballesteros(col_idx);
+            teff_color = color::bv_to_teff_ballesteros(col_idx);
         } else {
+            // Default color index.
             col_idx = 0.656;
-            teff = color::bv_to_teff_ballesteros(col_idx);
+            teff_color = color::bv_to_teff_ballesteros(col_idx);
         }
-        let (col_r, col_g, col_b) = color::teff_to_rgb(teff);
+
+        // If we do not have T_eff from the catalog, use the one computed from the color index.
+        if !teff.is_finite() {
+            teff = teff_color;
+        }
+
+        // Find RGB from T_eff.
+        let (col_r, col_g, col_b) = color::teff_to_rgb(teff_color);
         let color_packed: f32 = color::col_to_f32(col_r as f32, col_g as f32, col_b as f32, 1.0);
 
         // Update counts per mag
