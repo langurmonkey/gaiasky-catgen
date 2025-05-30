@@ -299,5 +299,24 @@
       "version": 1,
       "mingsversion": 3060100
     }
+  },
+  {
+    "name": "minuscule",
+    "additional": "$DR_BASE/parallax_correction/parallax_corr.csv.gz,$DATA_LOC/data/ag-e/dr3/dr3-ag-e.csv.gz",
+    "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+    "distcap": 100000,
+    "maxpart": 2200000,
+    "plxerrbright": 0.004,
+    "plxerrfaint": 0.00002,
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
+    "metadata": {
+      "key": "gaia-dr3-minuscule",
+      "name": "Gaia DR3 minuscule",
+      "type" : "catalog-gaia",
+      "description": "Star catalog based on Gaia DR3 with only the very best stars in terms of parallax relative error. Contains all stars with up to 0.4%/0.002% bright/faint parallax relative error, and all Hipparcos stars.",
+      "releasenotes": "- Initial version of this dataset.",
+      "epoch": 2016.0,
+      "version": 3
+    }
   }
 ]
