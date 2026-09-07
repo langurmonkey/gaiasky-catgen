@@ -1,5 +1,4 @@
 use crate::math;
-use std::mem;
 
 const A: f64 = 0.92;
 const B: f64 = 1.7;
@@ -85,7 +84,7 @@ pub fn i32_to_f32_color(value: u32) -> f32 {
 }
 pub fn i32_bits_to_f32(value: u32) -> f32 {
     let bytes = value.to_ne_bytes();
-    unsafe { mem::transmute::<[u8; 4], f32>(bytes) }
+    f32::from_ne_bytes(bytes)
 }
 
 /**
