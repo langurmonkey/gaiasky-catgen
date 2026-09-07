@@ -36,8 +36,6 @@ pub struct Octree {
     // private data with all octants in the octree
     // the id of each octant is the index in this list.
     pub nodes: RefCell<Vec<Octant>>,
-    // Root node index.
-    pub root: Option<OctantId>,
 }
 
 impl Octree {
@@ -64,7 +62,6 @@ impl Octree {
             base: BaseCustom::<char>::new("01234567".chars().collect()),
             nodes_idx: RefCell::new(HashMap::new()),
             nodes: RefCell::new(Vec::new()),
-            root: None,
         }
     }
 
