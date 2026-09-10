@@ -36,6 +36,7 @@ pub enum ColId {
     ra,
     dec,
     plx,
+    plx_bias,
     ra_err,
     dec_err,
     plx_err,
@@ -71,6 +72,7 @@ impl ColId {
             ColId::ra => "ra",
             ColId::dec => "dec",
             ColId::plx => "pllx",
+            ColId::plx_bias => "tentative_parallax_bias",
             ColId::ra_err => "ra_err",
             ColId::dec_err => "dec_err",
             ColId::plx_err => "plx_err",
@@ -108,6 +110,10 @@ impl ColId {
             "plx" => Some(ColId::plx),
             "pllx" => Some(ColId::plx),
             "parallax" => Some(ColId::plx),
+            "parallax_bias" => Some(ColId::plx_bias),
+            "plx_bias" => Some(ColId::plx_bias),
+            "pllx_bias" => Some(ColId::plx_bias),
+            "tentative_parallax_bias" => Some(ColId::plx_bias),
             "ra_error" => Some(ColId::ra_err),
             "ra_err" => Some(ColId::ra_err),
             "ra_e" => Some(ColId::ra_err),
@@ -578,6 +584,7 @@ impl Loader {
             tokens.get(self.get_index(&ColId::ra)),
             tokens.get(self.get_index(&ColId::dec)),
             tokens.get(self.get_index(&ColId::plx)),
+            tokens.get(self.get_index(&ColId::plx_bias)),
             tokens.get(self.get_index(&ColId::phot_dist)),
             tokens.get(self.get_index(&ColId::plx_err)),
             tokens.get(self.get_index(&ColId::pmra)),
@@ -609,6 +616,7 @@ impl Loader {
         sra: Option<&&str>,
         sdec: Option<&&str>,
         splx: Option<&&str>,
+        splx_bias: Option<&&str>,
         sphot_dist: Option<&&str>,
         splx_e: Option<&&str>,
         spmra: Option<&&str>,
@@ -631,12 +639,18 @@ impl Loader {
 
         // Parallax:
         // If it comes from additional, just take it (already zero point-corrected)
-        // Otherwise, apply zero point
+        // Otherwise, apply zero point correction, either from CLI arguments or
+        //  from table itself.
+        let plx_bias = match splx_bias {
+            Some(val) => parse::parse_f64(Some(val)),
+            None => 0.0, // Default value if splx_bias is None.
+        };
         let mut plx: f64 = self.get_attribute_or_else(
             ColId::plx,
             source_id,
-            parse::parse_f64(splx) - self.plx_zeropoint,
+            parse::parse_f64(splx) - self.plx_zeropoint - plx_bias,
         );
+        // Parallax error.
         let plx_e: f64 = parse::parse_f64(splx_e);
 
         // Gmag: additional, else column, else use bp and rp
