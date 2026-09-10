@@ -277,6 +277,7 @@ pub struct Config {
     pub plx_err_bright: f64,
     pub plx_zeropoint: f64,
     pub mag_corrections: u8,
+    // Whether to allow negative parallaxes (set to default value of 0.04 arcsec), or to discard them.
     pub allow_negative_plx: bool,
     // Put the centre of the octree at the reference system origin (0 0 0).
     pub centre_origin: bool,
