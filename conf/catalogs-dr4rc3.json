@@ -6,17 +6,21 @@
     "maxpart": 2200000,
     "plxerrbright": 0.004,
     "plxerrfaint": 0.00002,
-    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
     "metadata": {
       "key": "gaia-dr4-best",
       "name": "Gaia DR4 best",
       "type": "catalog-gaia",
-      "description": "Star catalog based on Gaia DR4 with only the very best stars in terms of parallax relative error. Contains all stars with up to 0.4%/0.002% bright/faint parallax relative error, and all Hipparcos stars.",
+      "description": "Star catalog based on Gaia DR4 with only the very best stars in terms of parallax relative error. Contains all stars with up to 0.4%/0.002% bright/faint parallax relative error, and all Hipparcos stars. The stars in this catalog are all loaded into graphics memory, this is not a LOD (level-of-detail) catalog.",
       "releasenotes": [
         "Initial version of this dataset."
       ],
       "creator": "Toni Sagristà, tsagrista@ari.uni-heidelberg.de",
-      "link": "https://gaiasky.space/resources/datasets/#gaia-dr4-best",
+      "links": [
+        "https://www.cosmos.esa.int/web/gaia/data-release-4",
+        "https://gaia.ari.uni-heidelberg.de",
+        "https://gaiasky.space/resources/datasets/#gaia-dr4-best"
+      ],
       "credits": [
         "ESA/Gaia/DPAC",
         "Gaia Sky development team"
@@ -36,17 +40,21 @@
     "postprocess": null,
     "childcount": 25,
     "parentcount": 1000,
-    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr3/xmatch.csv",
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
     "metadata": {
       "key": "gaia-dr4-default",
       "name": "Gaia DR4 default",
       "type": "catalog-lod",
-      "description": "Star catalog based on Gaia DR4, with a good balance between good distances and number of stars. Contains all stars with up to 20%/1.5% bright/faint parallax relative error, and all Hipparcos stars.",
+      "description": "Star catalog based on Gaia DR4, with a good balance between good distances and number of stars. Contains all stars with up to 20%/1.5% bright/faint parallax relative error, and all Hipparcos stars. This is a LOD (level-of-detail) catalog, so the stars are not loaded all at once, but they are streamed in and out of memory depending on the camera parameters.",
       "releasenotes": [
         "Initial version of this dataset."
       ],
       "creator": "Toni Sagristà, tsagrista@ari.uni-heidelberg.de",
-      "link": "https://gaiasky.space/resources/datasets/#gaia-dr4-default",
+      "links": [
+        "https://www.cosmos.esa.int/web/gaia/data-release-4",
+        "https://gaia.ari.uni-heidelberg.de",
+        "https://gaiasky.space/resources/datasets/#gaia-dr4-default"
+      ],
       "credits": [
         "ESA/Gaia/DPAC",
         "Gaia Sky development team"
