@@ -133,6 +133,7 @@ impl ColId {
             "pllx_error" => Some(ColId::plx_err),
             "pllx_err" => Some(ColId::plx_err),
             "pllx_e" => Some(ColId::plx_err),
+            "parallax_error" => Some(ColId::plx_err),
             "pmra" => Some(ColId::pmra),
             "pmdec" => Some(ColId::pmdec),
             "pmde" => Some(ColId::pmdec),
