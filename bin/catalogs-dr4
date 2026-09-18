@@ -21,7 +21,7 @@ INPUT="$DR_LOC/csv"
 OUTPUT="$DR_LOC/out"
 
 # Definition file
-CATDEF="$GSDIR/conf/catalogs-dr4.json"
+CATDEF="$GSDIR/conf/catalogs-dr4rc3.json"
 
 # Column names (see ColId)
 # COLS="sourceid,ra,dec,pllx,ra_err,dec_err,pllx_err,pmra,pmdec,radvel,gmag,bpmag,rpmag,ruwe,ref_epoch,radvel_err,empty,empty,dist_phot,teff"
