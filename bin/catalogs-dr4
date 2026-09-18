@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+# Generates DR4 (rc3) catalogs
+
+# Get script path
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  GSDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$GSDIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+GSDIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
+
+# Locations
+LOGS_LOC="$GSDIR/log/dr4"
+DATA_LOC="$HOME/gaiadata"
+DR_BASE="$DATA_LOC/dr4"
+DR_LOC="$DR_BASE/rc3"
+CATALOG_NAME="dr4"
+INPUT="$DR_LOC/csv"
+OUTPUT="$DR_LOC/out"
+
+# Definition file
+CATDEF="$GSDIR/conf/catalogs-dr4.json"
+
+# Column names (see ColId)
+# COLS="sourceid,ra,dec,pllx,ra_err,dec_err,pllx_err,pmra,pmdec,radvel,gmag,bpmag,rpmag,ruwe,ref_epoch,radvel_err,empty,empty,dist_phot,teff"
+COLS="source_id,designation,ra,dec,parallax,ra_error,dec_error,parallax_error,pmra,pmdec,radial_velocity,phot_g_mean_mag,phot_bp_mean_mag,phot_rp_mean_mag,ruwe,ref_epoch,radial_velocity_error,ag,ebpminrp,distance_gspphot,teff,logg,mh,tentative_parallax_bias"
+
+source bin/catalogs-gen.sh

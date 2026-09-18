@@ -9,8 +9,11 @@ use std::path::Path;
 use data::Particle;
 use lod::Octree;
 
+/// Data file version
+const VERSION: i32 = 4;
+
 pub fn write_metadata(octree: &Octree, output_dir: &str) {
-    // Compute nubmer of undeleted nodes
+    // Compute number of undeleted nodes
     let mut num_nodes: i32 = 0;
     for node in octree.nodes.borrow().iter() {
         num_nodes = if node.deleted.get() {
@@ -124,8 +127,9 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
 
         // Version marker (32-bit integer)
         f.write_all(&(-1_i32).to_be_bytes()).expect("Error writing");
-        // Version = 3 (32-bit integer)
-        f.write_all(&(3_i32).to_be_bytes()).expect("Error writing");
+        // Data file version
+        f.write_all(&(VERSION).to_be_bytes())
+            .expect("Error writing");
 
         // Size (32-bit integer)
         f.write_all(&(node.objects.borrow().len() as i32).to_be_bytes())
@@ -162,6 +166,11 @@ pub fn write_particles(octree: &Octree, list: Vec<Particle>, output_dir: &str) {
                     .expect("Error writing");
                 f.write_all(&(sb.teff).to_be_bytes())
                     .expect("Error writing");
+                if VERSION > 3_i32 {
+                    f.write_all(&(sb.logg).to_be_bytes())
+                        .expect("Error writing");
+                    f.write_all(&(sb.mh).to_be_bytes()).expect("Error writing");
+                }
 
                 // 64-bit int
                 f.write_all(&(sb.id).to_be_bytes()).expect("Error writing");
@@ -220,8 +229,14 @@ pub fn write_particles_mmap(octree: &Octree, list: Vec<Particle>, output_dir: &s
 
                 // 3 * f64
                 size += 8 * 3;
-                // 9 * f32
-                size += 4 * 11;
+                // How many floats?
+                if VERSION > 3_i32 {
+                    // Version 4: 13 * f32
+                    size += 4 * 13;
+                } else {
+                    // Version 3: 11 * f32
+                    size += 4 * 11;
+                }
 
                 // 1 * i64 source_id
                 size += 8 * 1;
@@ -275,9 +290,9 @@ pub fn write_particles_mmap(octree: &Octree, list: Vec<Particle>, output_dir: &s
             .expect("Error writing");
         i += 4;
 
-        // Version = 3
+        // Data file version
         (&mut mmap[i..i + 4])
-            .write_all(&(3_i32).to_be_bytes())
+            .write_all(&(VERSION).to_be_bytes())
             .expect("Error writing");
         i += 4;
 
@@ -353,6 +368,16 @@ pub fn write_particles_mmap(octree: &Octree, list: Vec<Particle>, output_dir: &s
                     .write_all(&(sb.teff).to_be_bytes())
                     .expect("Error writing");
                 i += 4;
+                if VERSION > 3_i32 {
+                    (&mut mmap[i..i + 4])
+                        .write_all(&(sb.logg).to_be_bytes())
+                        .expect("Error writing");
+                    i += 4;
+                    (&mut mmap[i..i + 4])
+                        .write_all(&(sb.mh).to_be_bytes())
+                        .expect("Error writing");
+                    i += 4;
+                }
 
                 // 64-bit int
                 (&mut mmap[i..i + 8])

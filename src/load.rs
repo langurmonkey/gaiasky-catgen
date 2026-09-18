@@ -53,6 +53,8 @@ pub enum ColId {
     col_idx,
     ref_epoch,
     teff,
+    logg,
+    mh,
     radius,
     ag,
     ebp_min_rp,
@@ -88,6 +90,7 @@ impl ColId {
             ColId::ref_epoch => "ref_epoch",
             ColId::ruwe => "ruwe",
             ColId::teff => "teff",
+            ColId::logg => "logg",
             ColId::ag => "ag",
             ColId::ebp_min_rp => "ebp_min_rp",
             ColId::geodist => "geodist",
@@ -104,6 +107,7 @@ impl ColId {
             "hip" => Some(ColId::hip),
             "names" => Some(ColId::names),
             "name" => Some(ColId::names),
+            "designation" => Some(ColId::names),
             "ra" => Some(ColId::ra),
             "dec" => Some(ColId::dec),
             "de" => Some(ColId::dec),
@@ -134,7 +138,9 @@ impl ColId {
             "pmde" => Some(ColId::pmdec),
             "radvel" => Some(ColId::radvel),
             "rv" => Some(ColId::radvel),
+            "radial_velocity" => Some(ColId::radvel),
             "radvel_err" => Some(ColId::radvel_err),
+            "radial_velocity_error" => Some(ColId::radvel_err),
             "radvel_e" => Some(ColId::radvel_err),
             "rv_err" => Some(ColId::radvel_err),
             "rv_e" => Some(ColId::radvel_err),
@@ -153,14 +159,22 @@ impl ColId {
             "b_v" => Some(ColId::col_idx),
             "b-v" => Some(ColId::col_idx),
             "ref_epoch" => Some(ColId::ref_epoch),
+            "epoch" => Some(ColId::ref_epoch),
             "teff" => Some(ColId::teff),
             "t_eff" => Some(ColId::teff),
             "T_eff" => Some(ColId::teff),
             "teff_gspphot" => Some(ColId::teff),
+            "logg" => Some(ColId::logg),
+            "log_g" => Some(ColId::logg),
+            "mh" => Some(ColId::mh),
+            "m_h" => Some(ColId::mh),
+            "metallicity" => Some(ColId::mh),
+            "stellar_metallicity" => Some(ColId::mh),
             "ruwe" => Some(ColId::ruwe),
             "ag" => Some(ColId::ag),
             "ag_gspphot" => Some(ColId::ag),
             "ebp_min_rp" => Some(ColId::ebp_min_rp),
+            "ebpminrp" => Some(ColId::ebp_min_rp),
             "ebpminrp_gspphot" => Some(ColId::ebp_min_rp),
             "geodist" => Some(ColId::geodist),
             "fidelity" => Some(ColId::fidelity),
@@ -598,6 +612,8 @@ impl Loader {
             tokens.get(self.get_index(&ColId::ag)),
             tokens.get(self.get_index(&ColId::ebp_min_rp)),
             tokens.get(self.get_index(&ColId::teff)),
+            tokens.get(self.get_index(&ColId::logg)),
+            tokens.get(self.get_index(&ColId::mh)),
         )
     }
 
@@ -630,6 +646,8 @@ impl Loader {
         sag: Option<&&str>,
         sebp_min_rp: Option<&&str>,
         steff: Option<&&str>,
+        slogg: Option<&&str>,
+        smh: Option<&&str>,
     ) -> Option<Particle> {
         self.total_processed += 1;
         // Source ID
@@ -738,17 +756,9 @@ impl Loader {
         // Distance
         let dist_pc: f64;
         dist_pc = if self.use_phot_dist {
-            if phot_dist > 0.0 {
-                phot_dist
-            } else {
-                -1.0
-            }
+            if phot_dist > 0.0 { phot_dist } else { -1.0 }
         } else if has_geodist {
-            if geodist_pc > 0.0 {
-                geodist_pc
-            } else {
-                -1.0
-            }
+            if geodist_pc > 0.0 { geodist_pc } else { -1.0 }
         } else {
             1000.0 / plx
         };
@@ -897,6 +907,11 @@ impl Loader {
             teff = teff_color;
         }
 
+        // Log_G
+        let log_g: f64 = parse::parse_f64(slogg);
+        // Metallicity
+        let mh: f64 = parse::parse_f64(smh);
+
         // Find RGB from T_eff.
         let (col_r, col_g, col_b) = color::teff_to_rgb(teff_color);
         let color_packed: f32 = color::col_to_f32(col_r as f32, col_g as f32, col_b as f32, 1.0);
@@ -923,6 +938,8 @@ impl Loader {
             absmag: absmag as f32,
             col: color_packed,
             teff: teff as f32,
+            logg: log_g as f32,
+            mh: mh as f32,
             size,
             hip,
             id: source_id,
