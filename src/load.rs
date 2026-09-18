@@ -26,6 +26,18 @@ use na::base::Vector3;
 
 use data::{LargeLongMap, Particle};
 
+/// Bright/faint magnitude limit for processing
+const BRIGHT_GMAG_LIMIT: f64 = 13.1;
+/// Per-magnitude decay factor for the magnitude-dependent base SNR criterion
+/// (see accept_parallax_snr_base):
+///   snr_min(Gmag) = plx_snr_base * DECAY^(Gmag - BRIGHT_GMAG_LIMIT)
+/// The threshold equals plx_snr_base at Gmag = BRIGHT_GMAG_LIMIT, grows
+/// stricter for brighter stars and relaxes for fainter ones, following
+/// Gaia's parallax error growth with magnitude.
+const PLX_SNR_DECAY: f64 = 1.0 / 3.0;
+/// Minimum value for the SNR base value. Applies at faint magnitudes.
+const PLX_SNR_FLOOR: f64 = 20.0;
+
 /// Column content type identifier.
 #[allow(non_camel_case_types, dead_code)]
 #[derive(Copy, Debug, Clone, Eq, PartialEq, Hash)]
@@ -357,6 +369,13 @@ pub struct Loader {
     pub plx_err_faint: f64,
     // plx_error criteria for bright stars
     pub plx_err_bright: f64,
+    // Parallax SNR criterion for faint stars
+    pub plx_snr_faint: f64,
+    // Parallax SNR criterion for bright stars
+    pub plx_snr_bright: f64,
+    // Base parallax SNR at BRIGHT_GMAG_LIMIT for the magnitude-dependent
+    // criterion: snr_min(Gmag) = plx_snr_base * DECAY^(Gmag - BRIGHT_GMAG_LIMIT)
+    pub plx_snr_base: f64,
     // Cap on the parallax error (stars with larger plx_err are discarded)
     pub plx_err_cap: f64,
     // Whether to use photometric distances when available, and ignore the parallax thresholds
@@ -405,6 +424,9 @@ impl Loader {
         distpc_cap: f64,
         plx_err_faint: f64,
         plx_err_bright: f64,
+        plx_snr_faint: f64,
+        plx_snr_bright: f64,
+        plx_snr_base: f64,
         plx_err_cap: f64,
         use_phot_dist: bool,
         mag_corrections: u8,
@@ -446,6 +468,9 @@ impl Loader {
             distpc_cap,
             plx_err_faint,
             plx_err_bright,
+            plx_snr_faint,
+            plx_snr_bright,
+            plx_snr_base,
             plx_err_cap,
             use_phot_dist,
             mag_corrections,
@@ -953,10 +978,51 @@ impl Loader {
         appmag.is_finite()
     }
 
-    fn accept_parallax(&self, appmag: f64, plx: f64, plx_e: f64) -> bool {
+    /// Uses SNR thresholds if set (> 0.0), otherwise falls back to the
+    /// relative-error thresholds (legacy --plxerrfaint/--plxerrbright).
+    fn accept_parallax(&self, gmag: f64, plx: f64, plx_e: f64) -> bool {
+        if self.plx_snr_base > 0.0 {
+            self.accept_parallax_snr_base(gmag, plx, plx_e)
+        } else if self.plx_snr_faint > 0.0 || self.plx_snr_bright > 0.0 {
+            self.accept_parallax_snr(gmag, plx, plx_e)
+        } else {
+            self.accept_parallax_err(gmag, plx, plx_e)
+        }
+    }
+
+    /// Accept a star if its parallax signal-to-noise ratio (plx / plx_e)
+    /// exceeds the threshold for its brightness class (bright: Gmag < BRIGHT_GMAG_LIMIT).
+    fn accept_parallax_snr(&self, gmag: f64, plx: f64, plx_e: f64) -> bool {
+        if !plx.is_finite() || !plx_e.is_finite() || plx < 0.0 {
+            return false;
+        }
+        let min_snr = if gmag < BRIGHT_GMAG_LIMIT {
+            self.plx_snr_bright
+        } else {
+            self.plx_snr_faint
+        };
+        plx_e > 0.0 && plx / plx_e >= min_snr
+    }
+
+    /// Accept a star if its parallax signal-to-noise ratio (plx / plx_e)
+    /// exceeds a magnitude-dependent threshold:
+    ///     snr_min(Gmag) = plx_snr_base * PLX_SNR_DECAY^(Gmag - BRIGHT_GMAG_LIMIT)
+    /// The threshold equals plx_snr_base at Gmag = BRIGHT_GMAG_LIMIT, grows
+    /// stricter for brighter stars and relaxes for fainter ones, following
+    /// Gaia's parallax error growth with magnitude.
+    fn accept_parallax_snr_base(&self, gmag: f64, plx: f64, plx_e: f64) -> bool {
+        if !plx.is_finite() || !plx_e.is_finite() || plx < 0.0 {
+            return false;
+        }
+        let min_snr =
+            (self.plx_snr_base * PLX_SNR_DECAY.powf(gmag - BRIGHT_GMAG_LIMIT)).max(PLX_SNR_FLOOR);
+        plx_e > 0.0 && plx / plx_e >= min_snr
+    }
+
+    fn accept_parallax_err(&self, gmag: f64, plx: f64, plx_e: f64) -> bool {
         if !plx.is_finite() {
             return false;
-        } else if appmag < 13.1 {
+        } else if gmag < BRIGHT_GMAG_LIMIT {
             return plx >= 0.0 && plx_e < plx * self.plx_err_bright && plx_e < self.plx_err_cap;
         } else {
             return plx >= 0.0 && plx_e < plx * self.plx_err_faint && plx_e < self.plx_err_cap;

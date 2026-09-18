@@ -51,6 +51,9 @@ fn main() {
         photdist: false,
         plx_err_faint: 10.0,
         plx_err_bright: 10.0,
+        plx_snr_faint: 0.0,
+        plx_snr_bright: 0.0,
+        plx_snr_base: 0.0,
         plx_zeropoint: 0.0,
         mag_corrections: 2,
         allow_negative_plx: false,
@@ -101,6 +104,21 @@ fn main() {
             &["--plxerrbright"],
             Store,
             "Parallax error threshold for bright stars (gmag<13.1), where filter [plx_err/plx < plxerrbright] is enforced.",
+        );
+        ap.refer(&mut args.plx_snr_faint).add_option(
+            &["--plxsnrfaint"],
+            Store,
+            "Parallax minimum SNR for faint stars (gmag>=13.1), where filter [plx/plx_err >= plxsnrfaint] is enforced. If present, SNR has precedence over the error thresholds.",
+        );
+        ap.refer(&mut args.plx_snr_bright).add_option(
+            &["--plxsnrbright"],
+            Store,
+            "Parallax minimum SNR for bright stars (gmag<13.1), where filter [plx/plx_err >= plxsnrbright] is enforced. If present, SNR has precedence over the error thresholds.",
+        );
+        ap.refer(&mut args.plx_snr_base).add_option(
+            &["--plxsnrbase"],
+            Store,
+            "Base parallax minimum SNR at gmag=13.1 for the magnitude-dependent criterion [plx/plx_err >= plxsnrbase * (1/3)^(gmag-13.1)]. If present, it has precedence over the fixed faint/bright SNR thresholds.",
         );
         ap.refer(&mut args.plx_zeropoint).add_option(
             &["--plxzeropoint"],
@@ -165,7 +183,7 @@ fn main() {
         ap.refer(&mut args.ruwe_cap).add_option(
             &["--ruwe"],
             Store,
-            "RUWE threshold value. Filters out all stars with RUWE greater than this value. If present, --plxerrfaint and --plxerrbright are ignored.",
+            "RUWE threshold value. Filters out all stars with RUWE greater than this value. If present, --plxerrfaint/bright and --plxsnrfaint/bright are ignored.",
         );
         ap.refer(&mut args.columns).add_option(
             &["--columns"],
@@ -261,6 +279,9 @@ fn main() {
             1e9,
             1000.0,
             1000.0,
+            0.0,
+            0.0,
+            0.0,
             1000.0,
             false,
             args.mag_corrections,
@@ -306,7 +327,7 @@ fn main() {
         // GAIA - Load Gaia DRx catalog, the columns come from CLI arguments
         //
         let mut loader_gaia = load::Loader::new(
-            Regex::new(r"\s+|,").unwrap(),
+            Regex::new(r"\s*,\s*").unwrap(),
             args.file_num_cap,
             args.star_num_cap,
             args.plx_zeropoint,
@@ -314,6 +335,9 @@ fn main() {
             args.distpc_cap,
             args.plx_err_faint,
             args.plx_err_bright,
+            args.plx_snr_faint,
+            args.plx_snr_bright,
+            args.plx_snr_base,
             1.0,
             args.photdist,
             args.mag_corrections,

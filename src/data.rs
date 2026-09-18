@@ -279,6 +279,13 @@ pub struct Config {
     pub plx_err_faint: f64,
     // parallax error threshold for bright stars (gmag < 13.1), where plx_err/plx < plx_err_bright.
     pub plx_err_bright: f64,
+    // minimum parallax signal to noise ratio for faint stars, plx/plx_err >= snr
+    pub plx_snr_faint: f64,
+    // minimum parallax signal to noise ratio for bright stars, plx/plx_err >= snr
+    pub plx_snr_bright: f64,
+    // base parallax SNR at BRIGHT_GMAG_LIMIT for the magnitude-dependent
+    // criterion: snr_min(gmag) = plx_snr_base * DECAY^(gmag - BRIGHT_GMAG_LIMIT)
+    pub plx_snr_base: f64,
     pub plx_zeropoint: f64,
     pub mag_corrections: u8,
     // Whether to allow negative parallaxes (set to default value of 0.04 arcsec), or to discard them.
@@ -309,6 +316,9 @@ impl fmt::Debug for Config {
             .field("distpc_cap", &self.distpc_cap)
             .field("plx_err_faint", &self.plx_err_faint)
             .field("plx_err_bright", &self.plx_err_bright)
+            .field("plx_snr_faint", &self.plx_snr_faint)
+            .field("plx_snr_bright", &self.plx_snr_bright)
+            .field("plx_snr_base", &self.plx_snr_base)
             .field("plx_zeropoint", &self.plx_zeropoint)
             .field("mag_corrections", &self.mag_corrections)
             .field("allow_negative_plx", &self.allow_negative_plx)
