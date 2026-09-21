@@ -10,7 +10,7 @@ use data::Particle;
 use lod::Octree;
 
 /// Data file version
-const VERSION: i32 = 4;
+const VERSION: i32 = 3;
 
 pub fn write_metadata(octree: &Octree, output_dir: &str) {
     // Compute number of undeleted nodes

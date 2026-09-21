@@ -934,9 +934,19 @@ impl Loader {
         }
 
         // Log_G
-        let log_g: f64 = parse::parse_f64(slogg);
+        let log_g: f64;
+        if !parse::is_empty(slogg) {
+            log_g = parse::parse_f64(slogg);
+        } else {
+            log_g = f64::NAN;
+        }
         // Metallicity
-        let mh: f64 = parse::parse_f64(smh);
+        let mh: f64;
+        if !parse::is_empty(smh) {
+            mh = parse::parse_f64(smh);
+        } else {
+            mh = f64::NAN;
+        }
 
         // Find RGB from T_eff.
         let (col_r, col_g, col_b) = color::teff_to_rgb(teff_color);
