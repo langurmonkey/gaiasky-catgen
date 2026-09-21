@@ -1156,9 +1156,10 @@ impl Loader {
 
     pub fn report_rejected(&self) {
         log::info!(
-            "::: TOTAL LOADED/PROCESSED: {}/{}",
+            "::: TOTAL LOADED/PROCESSED: {}/{} ({}%)",
             self.total_loaded,
-            self.total_processed
+            self.total_processed,
+            100.0 * self.total_loaded as f64 / self.total_processed as f64
         );
         log::info!(
             "   - Rejected due to parallax (criteria/negative): {}",
