@@ -4,14 +4,15 @@
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 2200000,
-    "plxsnrbright": 300.0,
-    "plxsnrfaint": 3000.0,
+    "plxerrbright": 0.004,
+    "plxerrfaint": 0.00002,
     "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
     "metadata": {
       "key": "gaia-dr4-best",
       "name": "Gaia DR4 best",
       "type": "catalog-gaia",
       "description": "Star catalog based on Gaia DR4 with only the very best stars in terms of parallax signal-to-noise ratio (SNR). Contains all stars with SNR better than 250 for bright stars, and 5000 for faint stars, and all Hipparcos stars. The stars in this catalog are all loaded into graphics memory, this is not a LOD (level-of-detail) catalog.",
+      "replaces": "gaia-dr3-best",
       "releasenotes": [
         "Initial version of this dataset."
       ],
@@ -35,8 +36,8 @@
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 120000,
-    "plxsnrbright": 5.0,
-    "plxsnrfaint": 66.0,
+    "plxerrbright": 0.2,
+    "plxerrfaint": 0.015,
     "postprocess": null,
     "childcount": 25,
     "parentcount": 1000,
@@ -46,6 +47,7 @@
       "name": "Gaia DR4 default",
       "type": "catalog-lod",
       "description": "Star catalog based on Gaia DR4 with only the very best stars in terms of parallax signal-to-noise ratio (SNR). Contains all stars with SNR better than 5 for bright stars, and 66 for faint stars, and all Hipparcos stars. This is a LOD (level-of-detail) catalog, so the stars are not loaded all at once, but they are streamed in and out of memory depending on the camera parameters.",
+      "replaces": "gaia-dr3-default",
       "releasenotes": [
         "Initial version of this dataset."
       ],
