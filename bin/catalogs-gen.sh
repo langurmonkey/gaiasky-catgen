@@ -75,7 +75,7 @@ for CURRENT_CATALOG in "${TORUN[@]}"; do
         jpad=$(printf "%03d" $j)
 
         if [ "$NAME" == "$CURRENT_CATALOG" ]; then
-            DSNAME="$jpad-$(date +'%Y%m%d')-$CATALOG_NAME-$NAME"
+            DSNAME="$jpad-$(date +'%Y%m%d-%H%M%S')-$CATALOG_NAME-$NAME"
             echo $DSNAME
             CMD="nohup $GSDIR/target/release/gaiasky-catgen -i $INPUT -o $OUTPUT/$DSNAME/"
             NATTR=$(jq ".[$j] | length" $CATDEF)
