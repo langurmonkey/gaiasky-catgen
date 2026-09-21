@@ -26,7 +26,8 @@ marked.
 
 | Attribute       | Required | Type            | Description |
 |-----------------|----------|-----------------|-------------|
-| `key`           | yes      | string          | Dataset key (e.g. `gaia-dr3-small`). |
+| `KEY`           | yes      | string          | Single-word lookup key used to find the entry in the metadata file (e.g. `best`). **Not** the dataset key. |
+| `key` (metadata) | yes      | string          | Dataset key (e.g. `gaia-dr3-small`). This is the value used for the dataset key, folder names, and archive names — not the single-word lookup key passed to `pack`. |
 | `name`          | yes      | string          | Dataset name. |
 | `type`          | yes      | string          | Dataset type (`catalog-lod`, `catalog-gaia`, etc.). |
 | `description`   | yes      | string          | Dataset description. |

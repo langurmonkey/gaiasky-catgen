@@ -51,9 +51,9 @@ if [ ! -f "$META_JSON" ]; then
 	exit 1
 fi
 
-case "$KEY" in
+case "$DSKEY" in
 	*\ *)
-		echo "ERROR: dataset key can not contain spaces: $KEY"
+		echo "ERROR: dataset key can not contain spaces: $DSKEY"
 		exit 1
 		;;
 esac
@@ -78,6 +78,14 @@ function get_meta_arr() {
 	jq -r --arg a "$1" 'if (.[$a] | type) == "array" then .[$a] elif (.[$a] | type) == "string" then [.[$a]] else [] end' $META_JSON
 }
 
+# The dataset key comes from the metadata itself (e.g. 'gaia-dr4-best'),
+# not from the single-word lookup name (e.g. 'best').
+DSKEY=$(get_meta key)
+if [ -z "$DSKEY" ]; then
+  echo "ERROR: metadata has no 'key' attribute!"
+  exit 1
+fi
+
 NAME=$(get_meta name)
 TYPE=$(get_meta type)
 DESCRIPTION=$(get_meta description)
@@ -98,10 +106,10 @@ if [ -z "$NAME" ] || [ -z "$DESCRIPTION" ]; then
   exit 1
 fi
 
-CATALOG_BASE=$LOCATION/catalog-$KEY
+CATALOG_BASE=$LOCATION/catalog-$DSKEY
 CATALOG_FOLDER=$CATALOG_BASE/catalog
 CATALOG_FILE=$CATALOG_BASE/dataset.json
-CATALOG_DATA=$CATALOG_FOLDER/$KEY
+CATALOG_DATA=$CATALOG_FOLDER/$DSKEY
 
 echo "CATALOG_FOLDER: $CATALOG_FOLDER"
 echo "CATALOG_FILE:   $CATALOG_FILE"
@@ -164,10 +172,10 @@ function subst() {
 }
 
 # Bare KEY substitution first (used in unquoted file paths in the template),
-# then the quoted one.
-sed -i "s|<KEY>|$KEY|g" $CATALOG_FILE
+# then the quoted one. Uses the dataset key from the metadata.
+sed -i "s|<KEY>|$DSKEY|g" $CATALOG_FILE
 subst NAME "$NAME"
-subst KEY "$KEY"
+subst KEY "$DSKEY"
 subst TYPE "$TYPE"
 subst DESCRIPTION "$DESCRIPTION"
 subst NOTES "$NOTES"
@@ -224,9 +232,9 @@ if [ $? -ne 0 ]; then
 fi
 
 # TAR
-TAR_FILE=catalog-$KEY.tar.gz
+TAR_FILE=catalog-$DSKEY.tar.gz
 cd $LOCATION
-tar -czvf $TAR_FILE catalog-$KEY
+tar -czvf $TAR_FILE catalog-$DSKEY
 
 set -- $(md5sum "$TAR_FILE") && echo $1 > md5
 set -- $(sha256sum "$TAR_FILE") && echo $1 > sha256
