@@ -4,8 +4,8 @@
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 2200000,
-    "plxerrbright": 0.004,
-    "plxerrfaint": 0.00002,
+    "plxerrbright": 0.003,
+    "plxerrfaint": 0.00001,
     "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
     "metadata": {
       "key": "gaia-dr4-best",
