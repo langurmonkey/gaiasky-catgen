@@ -4,68 +4,58 @@ me=`basename "$0"`
 
 
 function usage() {
-echo "Usage: $me KEY DIR"
+echo "Usage: $me KEY DIR [METADATA_FILE]"
 echo
-echo "	KEY     The catalog key, as a single word (i.e. 'default')."
-echo "	DIR     Directory containing the generated catalog."
+echo -e "\tKEY             The catalog key, as a single word (i.e. 'default')."
+echo -e "\tDIR             Directory containing the generated catalog."
+echo -e "\tMETADATA_FILE   Optional, path to the catalog metadata JSON file."
+echo -e "\t                Defaults to conf/catalogs-dr3.json."
 echo
 echo "Example:"
 echo "$me default ./000-20220531-dr3-default"
+echo "$me best ./000-20260918-dr4-best $GSC_DIR/conf/catalogs-dr4rc3.json"
 }
 
 SCRIPT_FILE=$(readlink -f "$0")
 SCRIPT_DIR=$(dirname $SCRIPT_FILE)
 GSC_DIR=$(dirname $SCRIPT_DIR)
-METADATA_FILE="$GSC_DIR/conf/catalogs-dr3.json"
+METADATA_FILE="$GSC_DIR/conf/catalogs-dr4rc3.json"
 
-if [ "$#" -ne 2 ]; then
+if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
 	usage
 	exit 1
+fi
+
+# Optional metadata file argument (needed for DR4RC3 and other new catalogs)
+if [ "$#" -eq 3 ]; then
+  METADATA_FILE=$3
+fi
+
+if [ ! -f "$METADATA_FILE" ]; then
+  echo "ERROR: metadata file not found: $METADATA_FILE"
+  exit 1
 fi
 
 KEY=$1
 DIR=$2
 
-# Fetch metadata from metadata file.
+# Extract the full metadata object for this catalog into a JSON file.
+# The metadata object is passed along to pack-helper, which is responsible
+# for filling in the dataset.json descriptor. This supports both the old
+# attributes (link, string releasenotes) and the new ones (links, array
+# releasenotes, replaces, creator, credits).
+META_JSON=$(mktemp /tmp/pack-meta-XXXXXX.json)
+jq --arg key "$KEY" '[.[] | select(.name==$key).metadata][0]' $METADATA_FILE > $META_JSON
 
-# Catalog key
-CATALOG_KEY=$(jq -r ".[] | select(.name==\"$KEY\").metadata.key" $METADATA_FILE)
-
-# Name
-NAME=$(jq -r ".[] | select(.name==\"$KEY\").metadata.name" $METADATA_FILE)
-
-# Type
-TYPE=$(jq -r ".[] | select(.name==\"$KEY\").metadata.type" $METADATA_FILE)
-
-# Description
-DESC=$(jq -r ".[] | select(.name==\"$KEY\").metadata.description" $METADATA_FILE)
-# escape forward slashes and line breaks
-DESC=$(echo $DESC | sed -e 's#/#\\/#g')
-DESC=$(echo $DESC | sed -e 's#\\n#\\\\n#g')
-
-# Release notes
-RN=$(jq -r ".[] | select(.name==\"$KEY\").metadata.releasenotes" $METADATA_FILE)
-# escape forward slashes and line breaks
-RN=$(echo $RN | sed -e 's#/#\\/#g')
-RN=$(echo $RN | sed -e 's#\\n#\\\\n#g')
-
-# Epoch
-EPOCH=$(jq -r ".[] | select(.name==\"$KEY\").metadata.epoch" $METADATA_FILE)
-
-# Version
-VERS=$(jq -r ".[] | select(.name==\"$KEY\").metadata.version" $METADATA_FILE)
-
-# Link
-LINK=$(jq -r ".[] | select(.name==\"$KEY\").metadata.link" $METADATA_FILE)
-if [[ "$LINK" == "null" ]]; then
-  LINK=""
-fi
-
-if [[ "$NAME" == "" || "$DESC" == "" ]]; then
-  echo "Could not retrieve metadata!"
+if ! jq -e '.name and .description' $META_JSON > /dev/null 2>&1; then
+  echo "Could not retrieve metadata for key '$KEY' in $METADATA_FILE!"
+  rm -f $META_JSON
   exit 1
 fi
 
 # Run
-CMD="$SCRIPT_DIR/pack-helper $DIR $CATALOG_KEY '$NAME' '$TYPE' '$DESC' '$RN' $EPOCH $VERS $LINK"
+CMD="$SCRIPT_DIR/pack-helper $DIR $KEY $META_JSON"
 eval $CMD
+RC=$?
+rm -f $META_JSON
+exit $RC

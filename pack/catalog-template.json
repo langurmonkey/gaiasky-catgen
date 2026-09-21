@@ -1,24 +1,30 @@
 {
-    "key": "<KEY>",
-    "name": "<NAME>",
-    "version": <VERSION>,
-    "type": "<TYPE>",
-    "mingsversion": 3060100,
-    "description": "<DESCRIPTION>",
-    "releasenotes": "<NOTES>",
-    "link": "<LINK>",
-    "size": <SIZE_BYTES>,
-    "nobjects": <NOBJECTS>,
-    "check": "$data/catalog-<KEY>/dataset.json",
-    "files": [ "$data/catalog-<KEY>" ],
-    "data": [
+  "key": "<KEY>",
+  "name": "<NAME>",
+  "version": <VERSION>,
+  "type": "<TYPE>",
+  "mingsversion": 3060100,
+  "description": "<DESCRIPTION>",
+  "replaces": "<REPLACES>",
+  "releasenotes": "<NOTES>",
+  "creator": "<CREATOR>",
+  "credits": ["<CREDITS>"],
+  "link": "<LINK>",
+  "links": ["<LINKS>"],
+  "size": <SIZE_BYTES>,
+  "nObjects": <NOBJECTS>,
+  "check": "$data/catalog-<KEY>/dataset.json",
+  "files": [
+    "$data/catalog-<KEY>"
+  ],
+  "data": [
     {
-        "loader": "gaiasky.data.OctreeLoader",
-        "files": [
-            "$data/catalog-<KEY>/catalog/<KEY>/particles/",
-            "$data/catalog-<KEY>/catalog/<KEY>/metadata.bin"
-        ],
-        "epoch": <EPOCH>
+      "loader": "gaiasky.data.OctreeLoader",
+      "files": [
+        "$data/catalog-<KEY>/catalog/<KEY>/particles/",
+        "$data/catalog-<KEY>/catalog/<KEY>/metadata.bin"
+      ],
+      "epoch": <EPOCH>
     }
-    ]
+  ]
 }
