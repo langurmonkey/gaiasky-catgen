@@ -167,5 +167,39 @@
       "version": 1,
       "mingsversion": 3080001
     }
+  },
+  {
+    "name": "ruwe",
+    "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+    "distcap": 100000,
+    "maxpart": 120000,
+    "ruwe": 1.2,
+    "postprocess": null,
+    "childcount": 200,
+    "parentcount": 5000,
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
+    "metadata": {
+      "key": "gaia-dr4-ruwe",
+      "name": "Gaia DR4 RUWE",
+      "type": "catalog-lod",
+      "description": "Star catalog based on Gaia Data Release 4 (DR4). It contains Gaia DR4 stars for which the RUWE (re-normalized unit weight error) is <= 1.2, as well as all stars from the Hipparcos catalog. RUWE is a diagnostic of the quality of the astrometric solution; lower values generally indicate that the Gaia astrometric measurements are well described by the adopted single-star model. The RUWE selection provides a catalog of stars with comparatively well-behaved astrometric solutions.",
+      "replaces": "gaia-dr3-ruwe",
+      "releasenotes": [
+        "Initial version of this dataset."
+      ],
+      "creator": "Toni Sagristà, tsagrista@ari.uni-heidelberg.de",
+      "links": [
+        "https://www.cosmos.esa.int/web/gaia/data-release-4",
+        "https://gaia.ari.uni-heidelberg.de",
+        "https://gaiasky.space/resources/datasets/#gaia-dr4-default"
+      ],
+      "credits": [
+        "ESA/Gaia/DPAC",
+        "Gaia Sky development team"
+      ],
+      "epoch": 2017.5,
+      "version": 1,
+      "mingsversion": 3080001
+    }
   }
 ]
