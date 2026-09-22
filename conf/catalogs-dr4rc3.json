@@ -99,7 +99,7 @@
     }
   },
   {
-    "name": "default",
+    "name": "14M",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 120000,
@@ -110,11 +110,46 @@
     "parentcount": 1000,
     "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
     "metadata": {
-      "key": "gaia-dr4-default",
-      "name": "Gaia DR4 default",
+      "key": "gaia-dr4-14M-lod",
+      "name": "Gaia DR4 14M (LOD)",
       "type": "catalog-lod",
-      "description": "The standard Gaia DR4 star catalog for Gaia Sky, designed to provide a useful balance between the number of visible stars, data quality, memory usage, and performance. The catalog selects stars according to the signal-to-noise ratio (SNR) of their parallax measurements. In simple terms, the parallax signal is the measured apparent shift of a star caused by Earth's motion around the Sun, while the signal-to-noise ratio compares the size of that measured signal with its uncertainty. A higher SNR therefore indicates a more significant and reliable parallax measurement. This catalog contains all stars with a parallax SNR better than 5 for bright stars and better than 66 for faint stars, as well as all stars from the Hipparcos catalog. The boundary between the bright- and faint-star selections is at magnitude 13.1. Unlike the 1M and 2M datasets, this is a LOD (level-of-detail) catalog. Gaia Sky does not load the complete catalog into graphics memory at once. Instead, the catalog is divided into spatial sections and stars are streamed from disk as they are needed, based on the current view and level of detail. This approach allows Gaia Sky to display a large number of stars while keeping memory requirements under control. As the user navigates through space, Gaia Sky loads the relevant portions of the catalog and can discard portions that are no longer needed. This makes the default catalog suitable for general-purpose use in Gaia Sky, providing a large stellar dataset without requiring the entire catalog to reside in graphics memory simultaneously. This dataset replaces the Gaia DR3 'default' catalog.",
+      "description": "A large selection of approximately 14.67 million stars from Gaia Data Release 4 (DR4), selected according to the relative precision of their parallax measurements. This dataset provides substantially more stars than the 1M and 2M catalogs while using a level-of-detail (LOD) system to avoid keeping the entire catalog in graphics memory at the same time. Parallax is the apparent shift in a star's position caused by Earth's orbit around the Sun and is one of the main methods used by Gaia to determine stellar distances. The relative parallax error expresses the uncertainty in the parallax measurement relative to the measured value; smaller values correspond to more precise distance measurements. The catalog contains all Gaia DR4 stars with relative parallax errors of at most 20% for bright stars and 1% for faint stars. The boundary between the bright- and faint-star selections is at magnitude 13.1. All Hipparcos stars are also included. The resulting selection contains approximately 14.67 million stars. Because this is a LOD (level-of-detail) catalog, Gaia Sky does not load all of these stars into graphics memory at once. Instead, the catalog is divided into spatial sections and the required portions are streamed from disk as they are needed. This allows Gaia Sky to work with a considerably larger catalog while keeping graphics-memory usage manageable. As the camera moves through the dataset or the viewing distance changes, Gaia Sky can load and unload the appropriate portions of the catalog automatically. This makes the 14M LOD dataset particularly useful when a larger number of (especially faint) stars is desired without requiring enough graphics memory to hold the complete catalog simultaneously, while keeping the disk space requirements contained. This dataset replaces the Gaia DR3 'default' catalog.",
       "replaces": "gaia-dr3-default",
+      "releasenotes": [
+        "Initial version of this dataset."
+      ],
+      "creator": "Toni Sagristà, tsagrista@ari.uni-heidelberg.de",
+      "links": [
+        "https://www.cosmos.esa.int/web/gaia/data-release-4",
+        "https://gaia.ari.uni-heidelberg.de",
+        "https://gaiasky.space/resources/datasets/#gaia-dr4-default"
+      ],
+      "credits": [
+        "ESA/Gaia/DPAC",
+        "Gaia Sky development team"
+      ],
+      "epoch": 2017.5,
+      "version": 1,
+      "mingsversion": 3080001
+    }
+  },
+  {
+    "name": "bright",
+    "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+    "distcap": 100000,
+    "maxpart": 150000,
+    "plxerrbright": 0.9,
+    "plxerrfaint": 0.007,
+    "postprocess": null,
+    "childcount": 25,
+    "parentcount": 1000,
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
+    "metadata": {
+      "key": "gaia-dr4-bright",
+      "name": "Gaia DR4 bright",
+      "type": "catalog-lod",
+      "description": "A bright-star selection from Gaia Data Release 4 (DR4), designed to provide a relatively dense representation of the brighter stellar population while using a level-of-detail (LOD) system to keep graphics-memory usage manageable. The selection is based on the relative precision of Gaia's parallax measurements. Parallax is the apparent shift in a star's position caused by Earth's orbit around the Sun and is one of the main methods used by Gaia to determine stellar distances. The relative parallax error expresses the uncertainty in the parallax measurement relative to the measured value; smaller values correspond to more precise distance measurements. The catalog contains Gaia DR4 stars with relative parallax errors of at most 90% for bright stars and 0.7% for faint stars. The boundary between the bright- and faint-star selections is at magnitude 13.1. All Hipparcos stars are also included. Because this is a LOD (level-of-detail) catalog, Gaia Sky does not load the complete catalog into graphics memory at once. Instead, the catalog is divided into spatial sections and the required portions are streamed from disk as they are needed. This allows Gaia Sky to display a large number of stars while keeping graphics-memory usage manageable. As the camera moves through the dataset or the viewing distance changes, Gaia Sky can load and unload the appropriate portions of the catalog automatically. This dataset replaces the Gaia DR3 'bright' catalog.",
+      "replaces": "gaia-dr3-bright",
       "releasenotes": [
         "Initial version of this dataset."
       ],
