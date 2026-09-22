@@ -21,7 +21,7 @@ echo -e "\tmingsversion    (optional) minimum Gaia Sky version. Defaults to 3060
 echo -e "\treleasenotes    (optional) release notes. String or array of strings."
 echo -e "\tlink            (optional, legacy) single catalog link."
 echo -e "\tlinks           (optional) array of catalog links. Takes precedence over 'link'."
-echo -e "\treplaces        (optional) key of the dataset this one replaces."
+echo -e "\treplaces        (optional) key(s) with the datasets this one replaces. String or array."
 echo -e "\tcreator         (optional) dataset creator."
 echo -e "\tcredits         (optional) array of credits."
 echo
