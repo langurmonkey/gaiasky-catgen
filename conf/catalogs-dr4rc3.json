@@ -67,7 +67,7 @@
     }
   },
   {
-    "name": "4M",
+    "name": "4M-lod",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 300000,
@@ -75,8 +75,8 @@
     "plxerrfaint": 0.00008,
     "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
     "metadata": {
-      "key": "gaia-dr4-4M",
-      "name": "Gaia DR4 4M",
+      "key": "gaia-dr4-4M-lod",
+      "name": "Gaia DR4 4M (LOD)",
       "type": "catalog-gaia",
       "description": "Star catalog with a selection of Gaia DR4 stars based on parallax relative error, containing ~4.29 million stars. Contains all stars with up to 1.0%/0.008% bright/faint parallax relative error, and all Hipparcos stars. The cut between bright and faint stars is at 13.1 mag. This is a LOD (level-of-detail) catalog: stars are streamed from disk as they are needed.",
       "replaces": "gaia-dr3-tiny",
