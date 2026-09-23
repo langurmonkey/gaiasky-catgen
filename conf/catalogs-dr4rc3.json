@@ -173,7 +173,7 @@
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 120000,
-    "ruwe": 1.2,
+    "ruwe": 1.0,
     "postprocess": null,
     "childcount": 200,
     "parentcount": 5000,
@@ -182,7 +182,7 @@
       "key": "gaia-dr4-ruwe",
       "name": "Gaia DR4 RUWE",
       "type": "catalog-lod",
-      "description": "Star catalog based on Gaia Data Release 4 (DR4). It contains Gaia DR4 stars for which the RUWE (re-normalized unit weight error) is <= 1.2, as well as all stars from the Hipparcos catalog. RUWE is a diagnostic of the quality of the astrometric solution; lower values generally indicate that the Gaia astrometric measurements are well described by the adopted single-star model. The RUWE selection provides a catalog of stars with comparatively well-behaved astrometric solutions.",
+      "description": "A selection of approximately 19 million stars from Gaia Data Release 4 (DR4) with exceptionally well-behaved astrometric solutions. The catalog contains Gaia DR4 stars with a RUWE (re-normalized unit weight error) of at most 1.0, together with all stars from the Hipparcos catalog. RUWE is a normalized goodness-of-fit statistic for Gaia's astrometric solution, comparing the observed scatter of the astrometric measurements with that expected from their uncertainties while accounting for dependencies on magnitude and colour. Lower RUWE values indicate a closer agreement between the observations and the adopted astrometric model. Unlike the parallax-precision selections, this catalog is not selected directly on the uncertainty of the parallax measurement, but on the overall quality of the astrometric solution. The resulting catalog is intended to provide a selection of stars with particularly well-behaved Gaia astrometry.",
       "replaces": "gaia-dr3-ruwe",
       "releasenotes": [
         "Initial version of this dataset."
