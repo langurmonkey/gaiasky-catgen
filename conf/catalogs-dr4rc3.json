@@ -201,5 +201,39 @@
       "version": 1,
       "mingsversion": 3080001
     }
+  },
+  {
+    "name": "photdist",
+    "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
+    "photdist": null,
+    "distcap": 100000,
+    "maxpart": 150000,
+    "postprocess": null,
+    "childcount": 300,
+    "parentcount": 3000,
+    "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
+    "metadata": {
+      "key": "gaia-dr4-photdist",
+      "name": "Gaia DR4 photometric distances",
+      "type": "catalog-lod",
+      "description": "Star catalog based on Gaia Data Release 4 (DR4). Contains stars with photometric distances from the GSP-Phot Aeneas best library, derived from Gaia BP/RP spectra. Unlike geometric distances derived from Gaia parallaxes, these distances are inferred from the observed spectral energy distribution by estimating the stellar properties and intrinsic luminosity and comparing them with the observed flux. Photometric distances can therefore provide useful distance estimates for stars whose parallaxes are too uncertain for a reliable geometric distance, particularly at large distances. All stars from the Hipparcos catalog are also included.",
+      "replaces": "gaia-dr3-photdist",
+      "releasenotes": [
+        "Initial version of this dataset."
+      ],
+      "creator": "Toni Sagristà, tsagrista@ari.uni-heidelberg.de",
+      "links": [
+        "https://www.cosmos.esa.int/web/gaia/data-release-4",
+        "https://gaia.ari.uni-heidelberg.de",
+        "https://gaiasky.space/resources/datasets/#gaia-dr4-default"
+      ],
+      "credits": [
+        "ESA/Gaia/DPAC",
+        "Gaia Sky development team"
+      ],
+      "epoch": 2017.5,
+      "version": 1,
+      "mingsversion": 3080001
+    }
   }
 ]
