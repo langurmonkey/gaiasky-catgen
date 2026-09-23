@@ -1,6 +1,6 @@
 [package]
 name = "gaiasky-catgen"
-version = "0.2.0"
+version = "0.4.0"
 authors = ["langurmonkey <tsagrista@ari.uni-heidelberg.de>"]
 edition = "2024"
 
