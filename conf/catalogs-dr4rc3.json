@@ -8,7 +8,7 @@
     "plxerrfaint": 0.00001,
     "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
     "metadata": {
-      "key": "gaia-dr4-1M",
+      "key": "gaia-dr4-plx-1M",
       "name": "Gaia DR4 1M",
       "type": "catalog-gaia",
       "description": "A compact selection of the highest-quality stars from Gaia Data Release 4 (DR4), containing approximately 1.3 million stars. This dataset is designed for users who want a compact catalog containing stars with particularly precise distance measurements while retaining broad coverage of the stellar population. The selection is based on the relative error of the stars' parallaxes. Parallax is the apparent shift in a star's position caused by Earth's movement around the Sun, and it can be used to determine the star's distance. A smaller relative parallax error therefore means that the derived distance is more precise relative to the distance itself. The catalog includes all Gaia DR4 stars whose relative parallax error is at most 0.3% for bright stars and 0.001% for faint stars. The distinction between bright and faint stars is made at magnitude 13.1. In addition to these Gaia-selected stars, all stars from the Hipparcos catalog are included. The resulting catalog contains approximately 1.3 million stars. Unlike the larger LOD (level-of-detail) datasets, all stars in this catalog are loaded into graphics memory at once. This means that the complete catalog is kept available to the graphics card rather than being streamed from disk according to the current view. This can provide consistent access to the entire dataset, but it also requires more graphics memory than a LOD catalog. This is the default star dataset for Gaia Sky, and replaces the Gaia DR3 'best' catalog.",
@@ -40,7 +40,7 @@
     "plxerrfaint": 0.00002,
     "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
     "metadata": {
-      "key": "gaia-dr4-2M",
+      "key": "gaia-dr4-plx-2M",
       "name": "Gaia DR4 2M",
       "type": "catalog-gaia",
       "description": "A selection of high-quality stars from Gaia Data Release 4 (DR4), containing approximately 1.94 million stars. It is intended for users who want more stars than the Gaia DR4 1M dataset while still retaining a strict quality selection based on parallax precision. Parallax is the apparent movement of a star against more distant background stars as Earth moves around the Sun. Gaia uses this effect to measure stellar distances, and the relative parallax error describes how large the uncertainty in that measurement is compared with the measured parallax itself. Lower values indicate more precise distance measurements. This catalog includes all Gaia DR4 stars with a relative parallax error of at most 0.4% for bright stars and 0.002% for faint stars. The boundary between the bright- and faint-star selections is at magnitude 13.1. All stars from the Hipparcos catalog are also included, regardless of whether they meet the Gaia parallax-error selection. All stars in this dataset are loaded into graphics memory when the dataset is used in Gaia Sky. It is therefore not a LOD (level-of-detail) catalog: the stars are not progressively streamed from disk depending on the user's current view. This makes the dataset straightforward to use and provides access to the complete selection at once, but it requires enough graphics memory to hold the entire catalog. This dataset replaces the Gaia DR3 'weeny' and 'tiny' catalogs.",
@@ -75,7 +75,7 @@
     "plxerrfaint": 0.00008,
     "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
     "metadata": {
-      "key": "gaia-dr4-lod-4M",
+      "key": "gaia-dr4-lod-plx-4M",
       "name": "Gaia DR4 4M (LOD)",
       "type": "catalog-lod",
       "description": "A selection of approximately 4.29 million stars from Gaia Data Release 4 (DR4), selected according to the relative precision of their parallax measurements. This dataset provides substantially more stars than the 1M and 2M catalogs while using a level-of-detail (LOD) system to avoid keeping the entire catalog in graphics memory at the same time. Parallax is the apparent shift in a star's position caused by Earth's orbit around the Sun and is one of the main methods used by Gaia to determine stellar distances. The relative parallax error expresses the uncertainty in the parallax measurement relative to the measured value; smaller values correspond to more precise distance measurements. The catalog contains all Gaia DR4 stars with relative parallax errors of at most 1.0% for bright stars and 0.008% for faint stars. The boundary between the bright- and faint-star selections is at magnitude 13.1. All Hipparcos stars are also included. The resulting selection contains approximately 4.29 million stars. Because this is a LOD (level-of-detail) catalog, Gaia Sky does not load all of these stars into graphics memory at once. Instead, the catalog is divided into spatial sections and the required portions are streamed from disk as they are needed. This allows Gaia Sky to work with a considerably larger catalog while keeping graphics-memory usage manageable. As the camera moves through the dataset or the viewing distance changes, Gaia Sky can load and unload the appropriate portions of the catalog automatically. This makes the 4M LOD dataset particularly useful when a larger number of stars is desired without requiring enough graphics memory to hold the complete catalog simultaneously. This dataset replaces the Gaia DR3 'small' catalog.",
@@ -112,7 +112,7 @@
     "parentcount": 1000,
     "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
     "metadata": {
-      "key": "gaia-dr4-lod-14M",
+      "key": "gaia-dr4-lod-plx-14M",
       "name": "Gaia DR4 14M (LOD)",
       "type": "catalog-lod",
       "description": "A large selection of approximately 14.67 million stars from Gaia Data Release 4 (DR4), selected according to the relative precision of their parallax measurements. This dataset provides substantially more stars than the 1M and 2M catalogs while using a level-of-detail (LOD) system to avoid keeping the entire catalog in graphics memory at the same time. Parallax is the apparent shift in a star's position caused by Earth's orbit around the Sun and is one of the main methods used by Gaia to determine stellar distances. The relative parallax error expresses the uncertainty in the parallax measurement relative to the measured value; smaller values correspond to more precise distance measurements. The catalog contains all Gaia DR4 stars with relative parallax errors of at most 20% for bright stars and 1% for faint stars. The boundary between the bright- and faint-star selections is at magnitude 13.1. All Hipparcos stars are also included. The resulting selection contains approximately 14.67 million stars. Because this is a LOD (level-of-detail) catalog, Gaia Sky does not load all of these stars into graphics memory at once. Instead, the catalog is divided into spatial sections and the required portions are streamed from disk as they are needed. This allows Gaia Sky to work with a considerably larger catalog while keeping graphics-memory usage manageable. As the camera moves through the dataset or the viewing distance changes, Gaia Sky can load and unload the appropriate portions of the catalog automatically. This makes the 14M LOD dataset particularly useful when a larger number of stars, particularly at fainter magnitudes, is desired without requiring enough graphics memory to hold the complete catalog simultaneously, while keeping the disk space requirements contained. This dataset replaces the Gaia DR3 'default' catalog.",
@@ -149,7 +149,7 @@
     "parentcount": 5000,
     "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
     "metadata": {
-      "key": "gaia-dr4-lod-856M",
+      "key": "gaia-dr4-lod-plx-856M",
       "name": "Gaia DR4 856M (LOD)",
       "type": "catalog-lod",
       "description": "A very large selection of approximately 856 million stars from Gaia Data Release 4 (DR4). The catalog contains Gaia DR4 stars with relative parallax errors of at most 95% for all stars. This very permissive threshold provides a highly inclusive stellar sample, including many stars whose parallaxes have substantial relative uncertainties and therefore do not provide precise geometric distances. This dataset provides substantially more stars than the other parallax relative error-based catalogs while using a level-of-detail (LOD) system to avoid keeping the entire catalog in graphics memory at the same time. Parallax is the apparent shift in a star's position caused by Earth's orbit around the Sun and is one of the main methods used by Gaia to determine stellar distances. The relative parallax error expresses the uncertainty in the parallax measurement relative to the measured value; smaller values correspond to more precise distance measurements. All Hipparcos stars are also included. Because this is a LOD (level-of-detail) catalog, Gaia Sky does not load all of these stars into graphics memory at once. Instead, the catalog is divided into spatial sections and the required portions are streamed from disk as they are needed. This allows Gaia Sky to work with a considerably larger catalog while keeping graphics-memory usage manageable. As the camera moves through the dataset or the viewing distance changes, Gaia Sky can load and unload the appropriate portions of the catalog automatically. This makes the 856M LOD dataset particularly useful when a very large number of stars is desired without requiring enough graphics memory to hold the complete catalog simultaneously. This dataset replaces the Gaia DR3 'verylarge' and 'extralarge' catalogs.",
@@ -176,7 +176,7 @@
     }
   },
   {
-    "name": "lod-bright-11M",
+    "name": "lod-bright",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 150000,
@@ -187,8 +187,8 @@
     "parentcount": 1000,
     "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
     "metadata": {
-      "key": "gaia-dr4-lod-bright-11M",
-      "name": "Gaia DR4 11M Bright (LOD)",
+      "key": "gaia-dr4-lod-bright",
+      "name": "Gaia DR4 Bright, 11M (LOD)",
       "type": "catalog-lod",
       "description": "A bright-star selection of approximately 11 million stars from Gaia Data Release 4 (DR4), designed to provide a relatively dense representation of the brighter stellar population while using a level-of-detail (LOD) system to keep graphics-memory usage manageable. The selection is based on the relative precision of Gaia's parallax measurements. Parallax is the apparent shift in a star's position caused by Earth's orbit around the Sun and is one of the main methods used by Gaia to determine stellar distances. The relative parallax error expresses the uncertainty in the parallax measurement relative to the measured value; smaller values correspond to more precise distance measurements. The catalog contains Gaia DR4 stars with relative parallax errors of at most 90% for bright stars and 0.7% for faint stars. The boundary between the bright- and faint-star selections is at magnitude 13.1. All Hipparcos stars are also included. Because this is a LOD (level-of-detail) catalog, Gaia Sky does not load the complete catalog into graphics memory at once. Instead, the catalog is divided into spatial sections and the required portions are streamed from disk as they are needed. This allows Gaia Sky to display a large number of stars while keeping graphics-memory usage manageable. As the camera moves through the dataset or the viewing distance changes, Gaia Sky can load and unload the appropriate portions of the catalog automatically. This dataset replaces the Gaia DR3 'bright' catalog.",
       "replaces": [
@@ -213,7 +213,7 @@
     }
   },
   {
-    "name": "lod-ruwe-1.13B",
+    "name": "lod-ruwe",
     "hip": "$DATA_LOC/data/catalog/hipparcos/hipparcos.csv",
     "distcap": 100000,
     "maxpart": 120000,
@@ -223,8 +223,8 @@
     "parentcount": 5000,
     "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
     "metadata": {
-      "key": "gaia-dr4-lod-ruwe-1.13B",
-      "name": "Gaia DR4 1.13B-RUWE (LOD)",
+      "key": "gaia-dr4-lod-ruwe",
+      "name": "Gaia DR4 RUWE, 1.13B (LOD)",
       "type": "catalog-lod",
       "description": "A selection of approximately 1.13 billion stars from Gaia Data Release 4 (DR4) satisfying a RUWE quality criterion. The catalog contains Gaia DR4 stars with a RUWE (re-normalized unit weight error) of at most 1.4, together with all stars from the Hipparcos catalog. RUWE is a normalized goodness-of-fit statistic for Gaia's astrometric solution, comparing the observed scatter of the astrometric measurements with that expected from their uncertainties while accounting for dependencies on magnitude and colour. Lower RUWE values indicate a closer agreement between the observations and the adopted astrometric model. Unlike the parallax-precision selections, this catalog is not selected directly on the uncertainty of the parallax measurement, but on the overall quality of the astrometric solution. The resulting catalog is intended to provide a selection of stars with particularly well-behaved Gaia astrometry.",
       "replaces": [
@@ -260,11 +260,11 @@
     "xmatchfile": "$DATA_LOC/data/hip-gaia-xmatch/dr4/xmatch.csv",
     "metadata": {
       "key": "gaia-dr4-lod-photdist",
-      "name": "Gaia DR4 Photometric Distances (LOD)",
+      "name": "Gaia DR4 Photometric Distances, 992M (LOD)",
       "type": "catalog-lod",
-      "description": "Star catalog based on Gaia Data Release 4 (DR4). Contains stars with photometric distances from the GSP-Phot Aeneas best library, derived from Gaia BP/RP spectra. Unlike geometric distances derived from Gaia parallaxes, these distances are inferred from the observed spectral energy distribution by estimating stellar properties and intrinsic luminosity and comparing them with the observed flux. Photometric distances provide an alternative distance estimate, particularly useful for stars whose parallaxes have large relative uncertainties. All stars from the Hipparcos catalog are also included.",
+      "description": "Star catalog based on Gaia Data Release 4 (DR4). Contains 992 million stars with photometric distances from the GSP-Phot Aeneas best library, derived from Gaia BP/RP spectra. Unlike geometric distances derived from Gaia parallaxes, these distances are inferred from the observed spectral energy distribution by estimating stellar properties and intrinsic luminosity and comparing them with the observed flux. Photometric distances provide an alternative distance estimate, particularly useful for stars whose parallaxes have large relative uncertainties. All stars from the Hipparcos catalog are also included.",
       "replaces": [
-        "gaia-dr3-ruwe"
+        "gaia-dr3-photdist"
       ],
       "releasenotes": [
         "Initial version of this dataset."
