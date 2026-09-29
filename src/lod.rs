@@ -101,6 +101,14 @@ impl Octree {
                 if octant_id_op.is_none() {
                     // Out of bounds!
                     // Discarded due to being outside the root
+                    log::warn!(
+                        "Star outside root box, skipping: {} [{}, {}, {}]",
+                        star.id,
+                        x,
+                        y,
+                        z
+                    );
+                    cat_idx += 1;
                     continue;
                 }
 
@@ -563,18 +571,33 @@ impl Octree {
             let mut gt = Vec3::empty();
             gt.x = f64::max(f64::abs(min.x), f64::abs(max.x));
             gt.y = f64::max(f64::abs(min.y), f64::abs(max.y));
-            gt.y = f64::max(f64::abs(min.z), f64::abs(max.z));
+            gt.z = f64::max(f64::abs(min.z), f64::abs(max.z));
 
             // Set min and max so that they are equal and with different sign.
             // The centre will fall close to the origin (0 0 0).
             min.x = -gt.x;
             min.y = -gt.y;
             min.z = -gt.z;
-            max = gt + 4.0;
+            max = gt;
         }
         // The bounding box
         let bx = BoundingBox::from(&min, &max);
         let size = f64::max(f64::max(bx.dim.z, bx.dim.y), bx.dim.x);
+        // The root octant is a cube of side `size` centred on the box centre,
+        // so pad every dimension up to `size` (plus a small epsilon to absorb
+        // floating-point rounding in the octant descent). This guarantees that all
+        // particles are strictly inside the root.
+        const EPSILON: f64 = 1.0e-9;
+        let pad_x = (size - bx.dim.x) / 2.0 + size * EPSILON;
+        let pad_y = (size - bx.dim.y) / 2.0 + size * EPSILON;
+        let pad_z = (size - bx.dim.z) / 2.0 + size * EPSILON;
+        min.x -= pad_x;
+        min.y -= pad_y;
+        min.z -= pad_z;
+        max.x += pad_x;
+        max.y += pad_y;
+        max.z += pad_z;
+        let bx = BoundingBox::from(&min, &max);
         let half_size = size / 2.0;
 
         let root = Octant {
