@@ -9,7 +9,7 @@ echo
 echo -e "\tKEY             The catalog key, as a single word (i.e. 'default')."
 echo -e "\tDIR             Directory containing the generated catalog."
 echo -e "\tMETADATA_FILE   Optional, path to the catalog metadata JSON file."
-echo -e "\t                Defaults to conf/catalogs-dr3.json."
+echo -e "\t                Defaults to conf/catalogs-dr4rc3.json."
 echo
 echo "Example:"
 echo "$me default ./000-20220531-dr3-default"
