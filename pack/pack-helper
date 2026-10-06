@@ -5,8 +5,10 @@ me=`basename "$0"`
 function usage() {
 echo "Usage: $me LOCATION KEY METADATA_JSON"
 echo
-echo -e "\tLOCATION        Location in the file system. Must contain log, metadata.dat, particles."
-echo -e "\tKEY             The dataset key in the metadata files (gaia-dr3-small)."
+echo -e "\tLOCATION        Location in the file system. Must contain log, metadata.bin, particles."
+echo -e "\tKEY             The catalog lookup name as a single word (i.e. 'best', '2M')."
+echo -e "\t                Only used for reporting; the dataset key is taken from the"
+echo -e "\t                metadata's 'key' attribute (e.g. 'gaia-dr4-plx-2M')."
 echo -e "\tMETADATA_JSON   JSON file with the metadata object for this catalog."
 echo -e "\t                See conf/catalogs-*.json, the 'metadata' object of the catalog."
 echo
@@ -21,7 +23,7 @@ echo -e "\tmingsversion    (optional) minimum Gaia Sky version. Defaults to 3060
 echo -e "\treleasenotes    (optional) release notes. String or array of strings."
 echo -e "\tlink            (optional, legacy) single catalog link."
 echo -e "\tlinks           (optional) array of catalog links. Takes precedence over 'link'."
-echo -e "\treplaces        (optional) key(s) with the datasets this one replaces. String or array."
+echo -e "\treplaces        (optional) key(s) of the datasets this one replaces. String or array."
 echo -e "\tcreator         (optional) dataset creator."
 echo -e "\tcredits         (optional) array of credits."
 echo
@@ -51,40 +53,35 @@ if [ ! -f "$META_JSON" ]; then
 	exit 1
 fi
 
-case "$DSKEY" in
-	*\ *)
-		echo "ERROR: dataset key can not contain spaces: $DSKEY"
-		exit 1
-		;;
-esac
-
-# Helper to extract a scalar attribute from the metadata JSON.
+# Helper to extract a scalar (string or number) attribute from the metadata JSON.
+# Missing or non-scalar attributes yield an empty string.
 # Usage: get_meta <attribute>
 function get_meta() {
-	jq -r --arg a "$1" '.[$a] // ""' $META_JSON
+	jq -r --arg a "$1" 'if (.[$a] | type) == "string" or (.[$a] | type) == "number" then .[$a] else "" end' $META_JSON
 }
 
-# Helper to extract an attribute that may be a string or an array of strings.
-# Arrays are converted to a single string with items separated by newlines.
-# Usage: get_meta_str <attribute>
-function get_meta_str() {
-	jq -r --arg a "$1" 'if (.[$a] | type) == "array" then (.[$a] | join("\n")) else (.[$a] // "") end' $META_JSON
+# Helper to extract an attribute preserving its JSON type (string or array of
+# strings). Missing or otherwise-typed attributes yield the JSON null, which is
+# removed from the final descriptor. Output is always a single compact line.
+# Usage: get_json <attribute>
+function get_json() {
+	jq -c --arg a "$1" 'if (.[$a] | type) == "string" or (.[$a] | type) == "array" then .[$a] else null end' $META_JSON
 }
 
-# Helper to extract an array attribute. Strings are wrapped in a single-item
-# array; missing attributes yield an empty array.
-# Usage: get_meta_arr <attribute>
-function get_meta_arr() {
-	jq -r --arg a "$1" 'if (.[$a] | type) == "array" then .[$a] elif (.[$a] | type) == "string" then [.[$a]] else [] end' $META_JSON
-}
-
-# The dataset key comes from the metadata itself (e.g. 'gaia-dr4-best'),
-# not from the single-word lookup name (e.g. 'best').
+# The dataset key comes from the metadata itself (e.g. 'gaia-dr4-plx-2M'),
+# not from the single-word lookup name (e.g. '2M').
 DSKEY=$(get_meta key)
 if [ -z "$DSKEY" ]; then
   echo "ERROR: metadata has no 'key' attribute!"
   exit 1
 fi
+
+case "$DSKEY" in
+*\ *)
+	echo "ERROR: dataset key can not contain spaces: $DSKEY"
+	exit 1
+	;;
+esac
 
 NAME=$(get_meta name)
 TYPE=$(get_meta type)
@@ -92,14 +89,18 @@ DESCRIPTION=$(get_meta description)
 EPOCH=$(get_meta epoch)
 VERSION=$(get_meta version)
 MINGSSVERSION=$(get_meta mingsversion)
-CREATOR=$(get_meta creator)
-NOTES=$(get_meta_str releasenotes)
-REPLACES=$(get_meta replaces)
-CREATOR=$(get_meta creator)
-# links: array of strings. Accepts a single string (legacy 'link') too.
-LINKS_JSON=$(jq -c 'if (.links | type) == "array" then .links elif (.links | type) == "string" then [.links] elif (.link | type) == "string" then [.link] else [] end' $META_JSON)
-# Single link: first element of 'links' if present, else legacy 'link'.
+
+# Attributes that may be a string (legacy) or an array: keep the type as-is.
+NOTES_JSON=$(get_json releasenotes)
+REPLACES_JSON=$(get_json replaces)
+CREDITS_JSON=$(get_json credits)
+
+# links: array of strings, with backwards compatibility with the legacy 'link'.
+# 'links' takes precedence; if only 'link' is present it becomes a 1-element
+# array. Conversely, 'link' mirrors the first element of 'links'.
+LINKS_JSON=$(jq -c 'if (.links | type) == "array" then .links elif (.links | type) == "string" then [.links] elif (.link | type) == "string" then [.link] else null end' $META_JSON)
 LINK=$(jq -r 'if (.links | type) == "array" and (.links | length) > 0 then .links[0] elif (.links | type) == "string" then .links elif (.link | type) == "string" then .link else "" end' $META_JSON)
+CREATOR=$(get_meta creator)
 
 if [ -z "$NAME" ] || [ -z "$DESCRIPTION" ]; then
   echo "ERROR: could not retrieve metadata (name and description are required)!"
@@ -142,10 +143,10 @@ echo "NOBJECTS:       $NOBJECTS"
 echo "EPOCH:          $EPOCH"
 echo "VERSION:        $VERSION"
 echo "LINK:           $LINK"
-echo "LINKS:          $LINKS_JSON"
-echo "REPLACES:       $REPLACES"
+echo "LINKS:          ${LINKS_JSON:-null}"
+echo "REPLACES:       ${REPLACES_JSON:-null}"
 echo "CREATOR:        $CREATOR"
-echo "CREDITS:        $(printf '%s' "$CREDITS_JSON" | jq -c . 2>/dev/null)"
+echo "CREDITS:        ${CREDITS_JSON:-null}"
 
 # CREATE AND MOVE CATALOG
 mkdir -p $CATALOG_DATA
@@ -154,34 +155,34 @@ mv $LOCATION/log $LOCATION/metadata.bin $LOCATION/particles $CATALOG_DATA
 # PREPARE JSON DESCRIPTOR FILE
 cp $SCRIPT_DIR/catalog-template.json $CATALOG_FILE
 
-# Substitute a placeholder with the given value, JSON-encoding it if it is
-# not already valid JSON (numbers, arrays, objects are inserted verbatim).
-# Usage: subst <placeholder> <value>
-function subst() {
+# Substitute a quoted placeholder with a compact, single-line JSON value
+# (string or array), inserted verbatim. The value is escaped for the sed
+# replacement so that '&', '\' and the '|' delimiter are taken literally.
+# Usage: set_json <placeholder> <json-value>
+function set_json() {
   local PH=$1
   local VAL=$2
-  # JSON-encode the value so that strings are escaped correctly.
-  # Empty values are substituted with an empty JSON string and removed later.
-  local ENCODED
+  local ESCAPED
   if [ -z "$VAL" ]; then
-    ENCODED='""'
-  else
-    ENCODED=$(printf '%s' "$VAL" | jq -R .)
+    VAL='null'
   fi
-  sed -i "s|\"<$PH>\"|$ENCODED|g" $CATALOG_FILE
+  ESCAPED=$(printf '%s' "$VAL" | sed -e 's/[\\&|]/\\&/g')
+  sed -i "s|\"<$PH>\"|$ESCAPED|g" $CATALOG_FILE
 }
 
-# Bare KEY substitution first (used in unquoted file paths in the template),
-# then the quoted one. Uses the dataset key from the metadata.
+# Bare KEY substitution (unquoted placeholders in the file paths), then the
+# quoted one. Both use the dataset key from the metadata.
 sed -i "s|<KEY>|$DSKEY|g" $CATALOG_FILE
-subst NAME "$NAME"
-subst KEY "$DSKEY"
-subst TYPE "$TYPE"
-subst DESCRIPTION "$DESCRIPTION"
-subst NOTES "$NOTES"
-subst LINK "$LINK"
-subst REPLACES "$REPLACES"
-subst CREATOR "$CREATOR"
+
+set_json NAME "\"$NAME\""
+set_json TYPE "\"$TYPE\""
+set_json DESCRIPTION "\"$DESCRIPTION\""
+set_json CREATOR "\"$CREATOR\""
+set_json NOTES "$NOTES_JSON"
+set_json REPLACES "$REPLACES_JSON"
+set_json LINKS "$LINKS_JSON"
+set_json CREDITS "$CREDITS_JSON"
+set_json LINK "\"$LINK\""
 
 # Numeric fields: substitute without quotes.
 function subst_num() {
@@ -194,35 +195,14 @@ subst_num EPOCH "$EPOCH"
 subst_num SIZE_BYTES "$SIZE_BYTES"
 subst_num NOBJECTS "$NOBJECTS"
 
-# Array-valued attributes: insert verbatim as JSON arrays (compact).
-if [ -n "$LINKS_JSON" ] && [ "$LINKS_JSON" != "[]" ]; then
-  sed -i "s|\[\"<LINKS>\"\]|$LINKS_JSON|g" $CATALOG_FILE
-fi
-CREDITS_JSON=$(get_meta_arr credits | jq -c . 2>/dev/null)
-if [ -n "$CREDITS_JSON" ] && [ "$CREDITS_JSON" != "[]" ]; then
-  sed -i "s|\[\"<CREDITS>\"\]|$CREDITS_JSON|g" $CATALOG_FILE
-fi
-
-# Remove unsubstituted placeholders (attributes not present in the metadata).
-sed -i -e '/"<LINKS>"/d' -e '/"<CREDITS>"/d' $CATALOG_FILE
-
 # mingsversion: use metadata value if present, otherwise keep the template default.
-MINGSS=$(get_meta mingsversion)
-if [ -n "$MINGSS" ]; then
-  sed -i 's/"mingsversion": 3060100/"mingsversion": '"$MINGSS"'/' $CATALOG_FILE
+if [ -n "$MINGSSVERSION" ]; then
+  sed -i 's/"mingsversion": 3060100/"mingsversion": '"$MINGSSVERSION"'/' $CATALOG_FILE
 fi
 
-subst_num SIZE_BYTES "$SIZE_BYTES"
-subst_num NOBJECTS "$NOBJECTS"
-
-# Remove empty optional attributes so that they do not appear as empty
-# strings or empty arrays in the final descriptor.
-jq 'if .replaces == "" then del(.replaces) else . end
-  | if .creator == "" then del(.creator) else . end
-  | if .link == "" then del(.link) else . end
-  | if (.links | type) == "array" and (.links | length) == 0 then del(.links) else . end
-  | if (.credits | type) == "array" and (.credits | length) == 0 then del(.credits) else . end
-  | if .releasenotes == "" then del(.releasenotes) else . end' $CATALOG_FILE > $CATALOG_FILE.tmp && mv $CATALOG_FILE.tmp $CATALOG_FILE
+# Remove optional attributes that are missing (null), empty strings or empty
+# arrays, so they do not appear in the final descriptor.
+jq 'with_entries(select(.value != null and .value != "" and ((.value | type) != "array" or (.value | length) > 0)))' $CATALOG_FILE > $CATALOG_FILE.tmp && mv $CATALOG_FILE.tmp $CATALOG_FILE
 
 # Validate the generated descriptor.
 jq -e . $CATALOG_FILE > /dev/null 2>&1

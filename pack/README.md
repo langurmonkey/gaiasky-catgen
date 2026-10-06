@@ -37,7 +37,7 @@ marked.
 | `releasenotes`  | no       | string or array | Release notes. A string (old) or an array of strings (new). |
 | `link`          | no       | string          | Single catalog link (**legacy**, still supported). |
 | `links`         | no       | array of strings | Catalog links. Takes precedence over `link`. If only `link` is present, it is used as a single-element `links` array. |
-| `replaces`      | no       | string          | Key of the dataset this one replaces (e.g. `gaia-dr3-best`). |
+| `replaces`      | no       | string or array | Key of the dataset(s) this one replaces (e.g. `gaia-dr3-best`, or an array like `["gaia-dr3-weeny", "gaia-dr3-tiny"]`). The type given in the metadata is preserved in the generated `dataset.json`. |
 | `creator`       | no       | string          | Dataset creator. |
 | `credits`       | no       | array of strings | Credits. |
 
